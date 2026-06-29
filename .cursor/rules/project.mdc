@@ -1,0 +1,179 @@
+---
+description: Project rules for SLAY CITY
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# SLAY CITY — Cursor Rules
+
+### API Architecture
+
+The API should be organized around Supabase client queries and Supabase Edge Functions.
+
+Read operations:
+
+```txt
+getProfile
+getDistricts
+getLocations
+getMissions
+getMissionDetails
+getVocabularyItems
+getUserProgress
+getUserStats
+getWardrobeItems
+getOwnedWardrobeItems
+getParentProgressSummary
+```
+
+User actions:
+
+```txt
+createProfile
+startMission
+submitMissionAnswer
+completeMission
+purchaseWardrobeItem
+equipWardrobeItem
+```
+
+Admin actions:
+
+```txt
+createDistrict
+updateDistrict
+createLocation
+updateLocation
+createMission
+updateMission
+createVocabularyItem
+createMissionTask
+publishMission
+unpublishMission
+generateMissionContent
+approveGeneratedContent
+```
+
+API rules:
+
+* All API responses must be typed.
+* All important actions must be validated server-side.
+* The client must not directly modify XP, coins, streaks, or unlocked locations.
+* OpenAI API calls must happen only inside secure backend functions.
+* Admin APIs must be role-protected.
+
+### Database Architecture
+
+The database should be built with PostgreSQL in Supabase.
+
+Main tables:
+
+```txt
+profiles
+districts
+locations
+missions
+vocabulary_items
+mission_tasks
+user_progress
+user_stats
+wardrobe_items
+user_wardrobe_items
+achievements
+user_achievements
+ai_content_drafts
+```
+
+Table purposes:
+
+```txt
+profiles
+Stores child profile data.
+
+districts
+Stores city districts.
+
+locations
+Stores map locations inside districts.
+
+missions
+Stores learning missions connected to locations.
+
+vocabulary_items
+Stores English words, translations, images, audio, and examples.
+
+mission_tasks
+Stores task steps such as vocabulary, matching, listening, and quizzes.
+
+user_progress
+Stores completed missions and unlocked progress.
+
+user_stats
+Stores XP, coins, level, current streak, and longest streak.
+
+wardrobe_items
+Stores available Slay accessories.
+
+user_wardrobe_items
+Stores purchased or unlocked accessories.
+
+achievements
+Stores achievement definitions.
+
+user_achievements
+Stores achievements unlocked by a user.
+
+ai_content_drafts
+Stores AI-generated content before review and publishing.
+```
+
+Database rules:
+
+* Learning content must be stored in the database.
+* User progress must be stored per child profile.
+* Reward-related data must be updated only through backend functions.
+* All user-related tables must be protected with Row Level Security.
+* Admin content should support draft and published states.
+
+### Main Engineering Rule
+
+The main engineering rule is to protect the core product loop:
+
+```txt
+Map → Mission → Reward → Unlock → Return Tomorrow
+```
+
+Every feature, component, database table, API function, and design decision must support this loop.
+
+If a feature does not improve learning, engagement, retention, progress visibility, or parent trust, it should not be included in the MVP.
+
+### Technical & Architecture
+
+SLAY CITY should be built as a Progressive Web Application with a simple and scalable architecture.
+
+Recommended stack:
+
+```txt
+Frontend: Next.js, React, TypeScript, Tailwind CSS
+Backend: Supabase
+Database: PostgreSQL
+Authentication: Supabase Auth
+Storage: Supabase Storage
+Server logic: Supabase Edge Functions
+AI: OpenAI API
+Hosting: Vercel + Supabase Cloud
+```
+
+High-level architecture:
+
+```txt
+Next.js PWA
+   ↓
+Supabase Auth / Database / Storage / Edge Functions
+   ↓
+OpenAI API for AI-assisted content generation
+```
+
+The frontend is responsible for the user interface and user experience. The backend is responsible for authentication, data storage, progress tracking, reward validation, role permissions, and AI API calls.
+
+AI must not be called directly from the browser. All OpenAI requests must go through secure backend functions.
