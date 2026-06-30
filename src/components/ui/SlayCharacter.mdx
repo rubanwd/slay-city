@@ -1,0 +1,58 @@
+{/* SlayCharacter.mdx */}
+import { Meta, Primary, Controls, Stories, Canvas } from "@storybook/blocks";
+import * as SlayCharacterStories from "./SlayCharacter.stories";
+
+<Meta of={SlayCharacterStories} />
+
+# SlayCharacter
+
+The SLAY CITY mascot — a lime-green snake in a black hoodie with pink headphones. Implemented as an inline SVG so it scales perfectly at any resolution with no network request.
+
+## Usage
+
+```tsx
+import { SlayCharacter } from "@/components/ui";
+
+// Static — splash screen, wardrobe header
+<SlayCharacter size="xl" />
+
+// Animated — reward screen, loading state
+<SlayCharacter size="lg" wiggle />
+
+// Container-driven — fills a parent card
+<div className="w-48">
+  <SlayCharacter size="full" />
+</div>
+```
+
+## Sizes
+
+| Size | Pixels | Use case |
+|------|--------|----------|
+| `xs` | 64 px  | Thumbnail / nav avatar |
+| `sm` | 96 px  | Small cards, list items |
+| `md` | 144 px | Standard card header |
+| `lg` | 200 px | Wardrobe display |
+| `xl` | 280 px | Splash / onboarding hero |
+| `full` | 100% | Container-driven (1:1 aspect ratio maintained) |
+
+<Canvas of={SlayCharacterStories.Sizes} />
+
+## Wiggle animation
+
+The `wiggle` prop plays a continuous ±4° rotate + 5 px bob on a 1.6 s loop. Use it for reward screens and idle states to keep the character feeling alive.
+
+<Canvas of={SlayCharacterStories.Wiggling} />
+
+## In wardrobe card
+
+<Canvas of={SlayCharacterStories.InWardrobeCard} />
+
+## All stories
+
+<Stories />
+
+## Accessibility
+
+- `role="img"` and `aria-label` on the `<svg>` element.
+- All decorative inner elements are `aria-hidden`.

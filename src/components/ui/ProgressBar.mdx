@@ -1,0 +1,56 @@
+{/* ProgressBar.mdx */}
+import { Meta, Primary, Controls, Stories, Canvas } from "@storybook/blocks";
+import * as ProgressBarStories from "./ProgressBar.stories";
+
+<Meta of={ProgressBarStories} />
+
+# ProgressBar
+
+Displays XP, level, or streak progress. Animates on mount and on value changes using a 600 ms ease-out CSS transition.
+
+## Usage
+
+```tsx
+import { ProgressBar } from "@/components/ui";
+
+<ProgressBar
+  value={45}
+  label="XP"
+  labelRight="450 / 1000 XP"
+/>
+```
+
+## Variants
+
+| Variant | Colour | Use case |
+|---------|--------|----------|
+| `green` | Lime Green | XP, primary progress |
+| `pink`  | Neon Pink  | Health, lives, energy |
+| `cyan`  | Cyan       | Streak, time-based progress |
+
+<Canvas of={ProgressBarStories.Variants} />
+
+## Labels
+
+Both `label` (left, uppercase) and `labelRight` (right, small) are optional. The label row only renders when at least one is provided.
+
+<Canvas of={ProgressBarStories.WithLabels} />
+
+## Live update
+
+The fill transitions smoothly whenever `value` changes. Try the interactive story:
+
+<Canvas of={ProgressBarStories.LiveUpdate} />
+
+## Props
+
+<Controls />
+
+## All stories
+
+<Stories />
+
+## Accessibility
+
+- Uses `role="progressbar"` with `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+- Value is always clamped to `[0, 100]` internally.

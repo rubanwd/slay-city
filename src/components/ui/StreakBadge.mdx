@@ -1,0 +1,51 @@
+{/* StreakBadge.mdx */}
+import { Meta, Primary, Controls, Stories, Canvas } from "@storybook/blocks";
+import * as StreakBadgeStories from "./StreakBadge.stories";
+
+<Meta of={StreakBadgeStories} />
+
+# StreakBadge
+
+Displays the player's current login streak with a fire emoji and a purple → cyan gradient. The number animates with an ease-out count-up whenever `count` changes.
+
+## Usage
+
+```tsx
+import { StreakBadge } from "@/components/ui";
+
+// In the app header:
+<StreakBadge count={7} size="sm" />
+
+// On a dedicated streak screen:
+<StreakBadge count={7} size="lg" />
+```
+
+## Sizes
+
+Place the `sm` variant in headers alongside the logo. Use `md` for dashboards. Reserve `lg` for dedicated reward / streak celebration screens.
+
+<Canvas of={StreakBadgeStories.Sizes} />
+
+## Tooltip
+
+Hovering or focusing the badge reveals an explanatory tooltip. Override the default copy via the `tooltip` prop for localisation.
+
+## Live counter
+
+The count-up animation fires on every `count` change — no manual trigger needed.
+
+<Canvas of={StreakBadgeStories.LiveCounter} />
+
+## In context
+
+<Canvas of={StreakBadgeStories.InContext} />
+
+## Props
+
+<Controls />
+
+## Accessibility
+
+- The badge is a `<button>` so it receives keyboard focus.
+- `aria-label` reads the streak count aloud (`"7 day streak"`).
+- Tooltip has `role="tooltip"` and is linked via `aria-describedby`.

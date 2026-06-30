@@ -1,0 +1,63 @@
+{/* RewardModal.mdx */}
+import { Meta, Primary, Controls, Stories, Canvas } from "@storybook/blocks";
+import * as RewardModalStories from "./RewardModal.stories";
+
+<Meta of={RewardModalStories} />
+
+# RewardModal
+
+Full-screen overlay displayed after a mission is completed, a new zone is unlocked, or a wardrobe item is earned. Manages focus trap, scroll lock, and Escape-to-close automatically.
+
+## Usage
+
+```tsx
+import { RewardModal } from "@/components/ui";
+
+const [open, setOpen] = useState(false);
+
+<RewardModal
+  open={open}
+  onClose={() => setOpen(false)}
+  title="AMAZING!"
+  image={<img src="/rewards/party.png" alt="" />}
+  description="You completed the Café mission!"
+  rewards={<RewardChips coins={50} xp={100} />}
+/>
+```
+
+## Slots
+
+| Prop | Required | Description |
+|------|----------|-------------|
+| `open` | ✓ | Controls visibility |
+| `onClose` | ✓ | Called on Escape, backdrop click, and ✕ button |
+| `title` | ✓ | Large display headline — supports JSX for coloured words |
+| `image` | — | 144×144 rounded image frame |
+| `description` | — | Supporting copy below the title |
+| `rewards` | — | Row of reward chips (coins, XP, etc.) |
+| `action` | — | Replaces the default "Continue" button |
+
+## Mission complete
+
+<Canvas of={RewardModalStories.MissionComplete} />
+
+## New zone unlocked
+
+<Canvas of={RewardModalStories.NewZoneUnlocked} />
+
+## Interactive
+
+Open and close the modal to verify the entrance animation:
+
+<Canvas of={RewardModalStories.Interactive} />
+
+## All stories
+
+<Stories />
+
+## Accessibility
+
+- Rendered via `createPortal` so it always sits above the app layer.
+- Focus is trapped inside the panel; Tab cycles through all focusable elements.
+- Previous focus is restored on close.
+- `role="dialog"`, `aria-modal="true"`, close button has `aria-label`.

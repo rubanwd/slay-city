@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import ProgressBar from "./ProgressBar";
 
@@ -9,7 +9,6 @@ const meta: Meta<typeof ProgressBar> = {
     layout: "centered",
     backgrounds: { default: "dark", values: [{ name: "dark", value: "#111111" }] },
   },
-  tags: ["autodocs"],
   argTypes: {
     value: { control: { type: "range", min: 0, max: 100, step: 1 } },
     variant: { control: "select", options: ["green", "pink", "cyan"] },
@@ -29,7 +28,7 @@ export const WithLabels: Story = {
   render: () => (
     <div className="flex flex-col gap-6 w-80">
       <ProgressBar value={45} label="XP" labelRight="450 / 1000 XP" />
-      <ProgressBar value={72} variant="pink" label="Level" labelRight="Lvl 12 → 13" />
+      <ProgressBar value={72} variant="pink" label="Level" labelRight="Lvl 12 в†’ 13" />
       <ProgressBar value={30} variant="cyan" label="Streak" labelRight="3 / 10 days" />
     </div>
   ),
@@ -77,7 +76,7 @@ export const LiveUpdate: Story = {
             onClick={() => setXp((v) => Math.max(0, v - 10))}
             className="flex-1 py-2 rounded-xl bg-white/10 text-white text-small font-bold hover:bg-white/20"
           >
-            −10 XP
+            в€’10 XP
           </button>
           <button
             onClick={() => setXp((v) => Math.min(100, v + 10))}
@@ -90,3 +89,4 @@ export const LiveUpdate: Story = {
     );
   },
 };
+

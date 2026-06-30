@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import StreakBadge from "./StreakBadge";
 
@@ -9,7 +9,6 @@ const meta: Meta<typeof StreakBadge> = {
     layout: "centered",
     backgrounds: { default: "dark", values: [{ name: "dark", value: "#111111" }] },
   },
-  tags: ["autodocs"],
   argTypes: {
     count: { control: { type: "number", min: 0 } },
     size: { control: "select", options: ["sm", "md", "lg"] },
@@ -53,7 +52,7 @@ export const LiveCounter: Story = {
             onClick={() => setDays((d) => Math.max(0, d - 1))}
             className="px-4 py-2 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20"
           >
-            − day
+            в€’ day
           </button>
           <button
             onClick={() => setDays((d) => d + 1)}
@@ -76,7 +75,8 @@ export const InContext: Story = {
         <StreakBadge count={7} size="sm" />
       </div>
       <div className="h-px bg-white/10" />
-      <p className="text-small text-white/50">As seen in the app header — small variant alongside the logo.</p>
+      <p className="text-small text-white/50">As seen in the app header вЂ” small variant alongside the logo.</p>
     </div>
   ),
 };
+

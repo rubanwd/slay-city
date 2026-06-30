@@ -1,0 +1,57 @@
+{/* SlayCard.mdx */}
+import { Meta, Primary, Controls, Stories, Canvas } from "@storybook/blocks";
+import * as SlayCardStories from "./SlayCard.stories";
+
+<Meta of={SlayCardStories} />
+
+# SlayCard
+
+The universal container for missions, stats, wardrobe items, and any grouped content. Uses a compound component API (`SlayCard.Header`, `.Content`, `.Footer`) so each slot is independently composable.
+
+## Usage
+
+```tsx
+import { SlayCard } from "@/components/ui";
+
+<SlayCard variant="pink" hoverable>
+  <SlayCard.Header divided>
+    <span className="text-h3 font-bold text-white">Word Quest</span>
+    <span className="text-label text-white/40">2 / 5</span>
+  </SlayCard.Header>
+  <SlayCard.Content>
+    <p className="text-body text-white/70">What is the English word?</p>
+  </SlayCard.Content>
+  <SlayCard.Footer divided>
+    <SlayButton variant="green" size="sm" className="w-full">Continue →</SlayButton>
+  </SlayCard.Footer>
+</SlayCard>
+```
+
+## Variants
+
+Each variant applies a matching neon border and box-shadow glow. Use **ghost** for neutral containers (stat blocks, list rows) where colour context comes from the content.
+
+<Canvas of={SlayCardStories.Variants} />
+
+## Hoverable
+
+Add `hoverable` to any card that the user can tap to navigate or select. Provides `scale(1.02)` + intensified glow on hover/focus.
+
+<Canvas of={SlayCardStories.Hoverable} />
+
+## Compound slots
+
+| Slot | Prop | Description |
+|------|------|-------------|
+| Header | `divided` | Adds a `border-b` separator below |
+| Content | — | Flex-1, `min-w-0` to prevent overflow |
+| Footer | `divided` | Adds a `border-t` separator above |
+
+## All stories
+
+<Stories />
+
+## Accessibility
+
+- The card root is a `<div>` — wrap in a `<button>` or `<a>` at the call site when the whole card is interactive.
+- `overflow-hidden` clips content; use `flush` to remove padding for full-bleed media.

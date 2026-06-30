@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+﻿import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import SlayButton from "./SlayButton";
 
 const meta: Meta<typeof SlayButton> = {
@@ -8,7 +8,6 @@ const meta: Meta<typeof SlayButton> = {
     layout: "centered",
     backgrounds: { default: "dark", values: [{ name: "dark", value: "#111111" }] },
   },
-  tags: ["autodocs"],
   argTypes: {
     variant: { control: "select", options: ["pink", "green", "ghost"] },
     size: { control: "select", options: ["sm", "md", "lg"] },
@@ -28,11 +27,11 @@ const meta: Meta<typeof SlayButton> = {
 export default meta;
 type Story = StoryObj<typeof SlayButton>;
 
-// ── Playground ────────────────────────────────────────────────────────────────
+// в”Ђв”Ђ Playground в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const Playground: Story = {};
 
-// ── Variants ──────────────────────────────────────────────────────────────────
+// в”Ђв”Ђ Variants в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const Variants: Story = {
   render: () => (
@@ -44,7 +43,7 @@ export const Variants: Story = {
   ),
 };
 
-// ── Sizes ─────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђ Sizes в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const Sizes: Story = {
   render: () => (
@@ -56,13 +55,13 @@ export const Sizes: Story = {
   ),
 };
 
-// ── States ────────────────────────────────────────────────────────────────────
+// в”Ђв”Ђ States в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const States: Story = {
   render: () => (
     <div className="flex flex-col gap-4 items-center">
       <SlayButton>Default</SlayButton>
-      <SlayButton loading>Loading…</SlayButton>
+      <SlayButton loading>LoadingвЂ¦</SlayButton>
       <SlayButton disabled>Disabled</SlayButton>
     </div>
   ),
@@ -71,32 +70,32 @@ export const States: Story = {
 export const LoadingVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-4 items-center">
-      <SlayButton variant="pink" loading>Saving…</SlayButton>
-      <SlayButton variant="green" loading>Processing…</SlayButton>
-      <SlayButton variant="ghost" loading>Loading…</SlayButton>
+      <SlayButton variant="pink" loading>SavingвЂ¦</SlayButton>
+      <SlayButton variant="green" loading>ProcessingвЂ¦</SlayButton>
+      <SlayButton variant="ghost" loading>LoadingвЂ¦</SlayButton>
     </div>
   ),
 };
 
-// ── With icons ────────────────────────────────────────────────────────────────
+// в”Ђв”Ђ With icons в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const WithIcons: Story = {
   render: () => (
     <div className="flex flex-col gap-4 items-center">
-      <SlayButton variant="pink" iconLeft={<span>▶</span>}>
+      <SlayButton variant="pink" iconLeft={<span>в–¶</span>}>
         Start Mission
       </SlayButton>
-      <SlayButton variant="green" iconRight={<span>→</span>}>
+      <SlayButton variant="green" iconRight={<span>в†’</span>}>
         Continue
       </SlayButton>
-      <SlayButton variant="ghost" iconLeft={<span>🛍️</span>}>
+      <SlayButton variant="ghost" iconLeft={<span>рџ›ЌпёЏ</span>}>
         Open Wardrobe
       </SlayButton>
     </div>
   ),
 };
 
-// ── Full width (as used inside AppContainer) ──────────────────────────────────
+// в”Ђв”Ђ Full width (as used inside AppContainer) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const FullWidth: Story = {
   render: () => (
@@ -106,3 +105,4 @@ export const FullWidth: Story = {
     </div>
   ),
 };
+

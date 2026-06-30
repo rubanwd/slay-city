@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+﻿import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import SlayCard from "./SlayCard";
 import SlayButton from "./SlayButton";
 
@@ -9,7 +9,6 @@ const meta: Meta<typeof SlayCard> = {
     layout: "centered",
     backgrounds: { default: "dark", values: [{ name: "dark", value: "#111111" }] },
   },
-  tags: ["autodocs"],
   argTypes: {
     variant: { control: "select", options: ["pink", "green", "cyan", "purple", "ghost"] },
     hoverable: { control: "boolean" },
@@ -32,7 +31,7 @@ const meta: Meta<typeof SlayCard> = {
 export default meta;
 type Story = StoryObj<typeof SlayCard>;
 
-// ── Playground ────────────────────────────────────────────────────────────────
+// в”Ђв”Ђ Playground в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const Playground: Story = {
   render: (args) => (
@@ -45,13 +44,13 @@ export const Playground: Story = {
         <p className="text-body text-white/70">What is the English word for this item?</p>
       </SlayCard.Content>
       <SlayCard.Footer divided>
-        <SlayButton size="sm" variant="green" className="w-full">Continue →</SlayButton>
+        <SlayButton size="sm" variant="green" className="w-full">Continue в†’</SlayButton>
       </SlayCard.Footer>
     </SlayCard>
   ),
 };
 
-// ── All variants ──────────────────────────────────────────────────────────────
+// в”Ђв”Ђ All variants в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const Variants: Story = {
   render: () => (
@@ -70,7 +69,7 @@ export const Variants: Story = {
   ),
 };
 
-// ── Hoverable ─────────────────────────────────────────────────────────────────
+// в”Ђв”Ђ Hoverable в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const Hoverable: Story = {
   render: () => (
@@ -97,7 +96,7 @@ export const Hoverable: Story = {
   ),
 };
 
-// ── Stat card (as seen in Parent Dashboard) ───────────────────────────────────
+// в”Ђв”Ђ Stat card (as seen in Parent Dashboard) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const StatCard: Story = {
   render: () => (
@@ -114,7 +113,7 @@ export const StatCard: Story = {
   ),
 };
 
-// ── Mission row card ──────────────────────────────────────────────────────────
+// в”Ђв”Ђ Mission row card в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const MissionRow: Story = {
   render: () => (
@@ -126,7 +125,7 @@ export const MissionRow: Story = {
       ].map((item) => (
         <SlayCard key={item.name} variant="ghost" className="flex-row items-center gap-3 py-3">
           <span className={`text-lg ${item.color}`}>
-            {item.status === "completed" ? "✓" : "🔒"}
+            {item.status === "completed" ? "вњ“" : "рџ”’"}
           </span>
           <SlayCard.Content>
             <p className="text-body-strong text-white">{item.name}</p>
@@ -138,31 +137,31 @@ export const MissionRow: Story = {
   ),
 };
 
-// ── Reward card (full-bleed header) ──────────────────────────────────────────
+// в”Ђв”Ђ Reward card (full-bleed header) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const RewardCard: Story = {
   render: () => (
     <SlayCard variant="cyan" className="w-80">
       <SlayCard.Header divided>
         <span className="text-label text-cyan tracking-widest">Active Mission</span>
-        <span className="text-label text-white/30">CAFÉ</span>
+        <span className="text-label text-white/30">CAFГ‰</span>
       </SlayCard.Header>
       <SlayCard.Content>
         <p className="text-h2 font-extrabold text-white mb-1">What do you say?</p>
         <p className="text-body text-white/60">
-          You walk into the café. The barista looks at you.
+          You walk into the cafГ©. The barista looks at you.
         </p>
       </SlayCard.Content>
       <SlayCard.Footer divided>
         <SlayButton variant="pink" size="sm" className="w-full">
-          Start Mission →
+          Start Mission в†’
         </SlayButton>
       </SlayCard.Footer>
     </SlayCard>
   ),
 };
 
-// ── Mobile overflow check ─────────────────────────────────────────────────────
+// в”Ђв”Ђ Mobile overflow check в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 export const LongContent: Story = {
   render: () => (
@@ -180,3 +179,4 @@ export const LongContent: Story = {
     </SlayCard>
   ),
 };
+

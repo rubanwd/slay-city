@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import RewardModal from "./RewardModal";
 import SlayButton from "./SlayButton";
@@ -10,14 +10,13 @@ const meta: Meta<typeof RewardModal> = {
     layout: "fullscreen",
     backgrounds: { default: "dark", values: [{ name: "dark", value: "#111111" }] },
   },
-  tags: ["autodocs"],
   args: { open: true, onClose: () => {} },
 };
 
 export default meta;
 type Story = StoryObj<typeof RewardModal>;
 
-/* ── helpers ──────────────────────────────────────────────────────────────── */
+/* в”Ђв”Ђ helpers в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
 
 const EmojiImage = ({ emoji }: { emoji: string }) => (
   <span className="text-7xl select-none">{emoji}</span>
@@ -41,19 +40,19 @@ const RewardChip = ({
   </div>
 );
 
-/* ── stories ──────────────────────────────────────────────────────────────── */
+/* в”Ђв”Ђ stories в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
 
 export const MissionComplete: Story = {
   render: (args) => (
     <RewardModal
       {...args}
       title="AMAZING!"
-      image={<EmojiImage emoji="🎉" />}
-      description="You completed the Café mission! Keep going to unlock Central Park."
+      image={<EmojiImage emoji="рџЋ‰" />}
+      description="You completed the CafГ© mission! Keep going to unlock Central Park."
       rewards={
         <>
-          <RewardChip icon="🪙" value="+50" label="Coins" />
-          <RewardChip icon="⭐" value="+100" label="XP" />
+          <RewardChip icon="рџЄ™" value="+50" label="Coins" />
+          <RewardChip icon="в­ђ" value="+100" label="XP" />
         </>
       }
     />
@@ -72,17 +71,17 @@ export const NewZoneUnlocked: Story = {
           unlocked!
         </>
       }
-      image={<EmojiImage emoji="🏙️" />}
+      image={<EmojiImage emoji="рџЏ™пёЏ" />}
       description="A brand-new zone is waiting. Explore it to discover new words and missions."
       rewards={
         <>
-          <RewardChip icon="🗺️" value="1" label="Zone" />
-          <RewardChip icon="⭐" value="+200" label="XP" />
+          <RewardChip icon="рџ—єпёЏ" value="1" label="Zone" />
+          <RewardChip icon="в­ђ" value="+200" label="XP" />
         </>
       }
       action={
         <SlayButton variant="green" className="w-full" size="lg">
-          Explore Now →
+          Explore Now в†’
         </SlayButton>
       }
     />
@@ -94,9 +93,9 @@ export const WardrobeItem: Story = {
     <RewardModal
       {...args}
       title="Item Unlocked!"
-      image={<EmojiImage emoji="🕶️" />}
+      image={<EmojiImage emoji="рџ•¶пёЏ" />}
       description="Cool Shades are now in your wardrobe. Equip them to flex on the city."
-      rewards={<RewardChip icon="🛍️" value="Cool Shades" label="Epic" />}
+      rewards={<RewardChip icon="рџ›ЌпёЏ" value="Cool Shades" label="Epic" />}
       action={
         <div className="flex flex-col gap-2 w-full">
           <SlayButton variant="pink" className="w-full">Equip Now</SlayButton>
@@ -122,13 +121,13 @@ export const Interactive: Story = {
           open={open}
           onClose={() => setOpen(false)}
           title="AMAZING!"
-          image={<EmojiImage emoji="🎉" />}
+          image={<EmojiImage emoji="рџЋ‰" />}
           description="You completed today's mission! Come back tomorrow to keep your streak alive."
           rewards={
             <>
-              <RewardChip icon="🪙" value="+50" label="Coins" />
-              <RewardChip icon="⭐" value="+100" label="XP" />
-              <RewardChip icon="🔥" value="7" label="Streak" />
+              <RewardChip icon="рџЄ™" value="+50" label="Coins" />
+              <RewardChip icon="в­ђ" value="+100" label="XP" />
+              <RewardChip icon="рџ”Ґ" value="7" label="Streak" />
             </>
           }
         />
@@ -146,3 +145,4 @@ export const MinimalNoImage: Story = {
     />
   ),
 };
+

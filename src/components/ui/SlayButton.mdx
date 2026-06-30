@@ -1,0 +1,51 @@
+{/* SlayButton.mdx */}
+import { Meta, Primary, Controls, Stories, Canvas } from "@storybook/blocks";
+import * as SlayButtonStories from "./SlayButton.stories";
+
+<Meta of={SlayButtonStories} />
+
+# SlayButton
+
+The primary interactive element across SLAY CITY. Supports neon pink, lime green, and ghost variants in three sizes with a built-in loading state.
+
+## Usage
+
+```tsx
+import { SlayButton } from "@/components/ui";
+
+<SlayButton variant="pink" size="md" onClick={handlePress}>
+  Get Started
+</SlayButton>
+```
+
+## Variants
+
+Use **pink** for the primary CTA on every screen. Use **green** for positive confirmations (continue, claim). Use **ghost** for secondary or destructive actions.
+
+<Canvas of={SlayButtonStories.Variants} />
+
+## Sizes
+
+| Size | Height | Use case |
+|------|--------|----------|
+| `sm` | 40 px  | Inline actions, card footers |
+| `md` | 52 px  | Standard full-width CTAs |
+| `lg` | 64 px  | Splash / onboarding hero buttons |
+
+<Canvas of={SlayButtonStories.Sizes} />
+
+## States
+
+Always provide visual feedback for loading operations. Disabled buttons are automatically `aria-disabled` and block pointer events.
+
+<Canvas of={SlayButtonStories.States} />
+
+## All stories
+
+<Stories />
+
+## Accessibility
+
+- Uses a native `<button>` element — keyboard and screen-reader accessible without any extra wiring.
+- `focus-visible` ring colour matches the variant (pink ring for pink variant, etc.) so it's always visible against the dark background.
+- `aria-busy` is set to `true` during loading; `aria-disabled` is set when `disabled` or `loading`.
