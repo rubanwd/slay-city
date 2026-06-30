@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { AppContainer, Section } from "@/components/layout";
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -21,31 +22,33 @@ export default function WelcomeScreen() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black flex items-center justify-center">
-        <span className="text-neon-pink text-2xl font-bold animate-pulse">SLAY CITY</span>
-      </main>
+      <AppContainer className="items-center justify-center">
+        <span className="text-neon-pink text-2xl font-black animate-pulse">SLAY CITY</span>
+      </AppContainer>
     );
   }
 
   return (
-    <main className="min-h-screen bg-black flex flex-col items-center justify-center gap-8 px-6">
-      <h1 className="text-6xl font-bold text-white tracking-tight">
-        SLAY <span className="text-neon-pink">CITY</span>
-      </h1>
-      <p className="text-gray-400 text-center max-w-xs">
-        222Explore the city, complete missions, and level up your English!
-      </p>
-      <div className="flex flex-col gap-3 w-full max-w-xs">
-        <Link
-          href="/onboarding"
-          className="w-full py-4 rounded-2xl bg-neon-pink text-white font-bold text-center text-lg hover:opacity-90 transition-opacity"
-        >
-          Get Started
-        </Link>
-        <button className="w-full py-4 rounded-2xl border border-white/20 text-white font-bold text-lg hover:bg-white/10 transition-colors">
-          Sign In
-        </button>
-      </div>
-    </main>
+    <AppContainer className="justify-center">
+      <Section py="none" className="items-center gap-6">
+        <h1 className="text-h1 font-black text-white tracking-tight text-center">
+          SLAY <span className="text-neon-pink">CITY</span>
+        </h1>
+        <p className="text-body text-white/50 text-center">
+          Explore the city, complete missions, and level up your English!
+        </p>
+        <div className="flex flex-col gap-3 w-full pt-2">
+          <Link
+            href="/onboarding"
+            className="text-btn w-full py-4 rounded-2xl bg-neon-pink text-white text-center hover:opacity-90 transition-opacity"
+          >
+            Get Started
+          </Link>
+          <button className="text-btn w-full py-4 rounded-2xl border border-white/20 text-white hover:bg-white/10 transition-colors">
+            Sign In
+          </button>
+        </div>
+      </Section>
+    </AppContainer>
   );
 }
