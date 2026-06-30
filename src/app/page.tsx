@@ -33,7 +33,7 @@ export default function WelcomeScreen() {
         SLAY <span className="text-neon-pink">CITY</span>
       </h1>
       <p className="text-gray-400 text-center max-w-xs">
-        Explore the city, complete missions, and level up your English!
+        222Explore the city, complete missions, and level up your English!
       </p>
       <div className="flex flex-col gap-3 w-full max-w-xs">
         <Link
