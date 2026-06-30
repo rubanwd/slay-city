@@ -1,0 +1,161 @@
+/* ─── SLAY CITY Typography ─────────────────────────────────────────────────
+   Font: Nunito — rounded, bold, energetic. Matches every heading and UI label
+   in the Figma design.
+   Scale: fluid via clamp() so sizes feel right from 320 px to 768 px without
+   breakpoints. Larger sizes cap at a comfortable desktop maximum.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap");
+
+:root {
+  /* Font family */
+  --font-primary: "Nunito", system-ui, sans-serif;
+
+  /* Weight tokens */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+  --fw-black: 900;
+
+  /* Fluid type scale
+     clamp(min, preferred-viewport-unit, max)
+     preferred = value that tracks viewport width linearly between min and max  */
+  --fs-display: clamp(2.5rem, 10vw, 4rem);    /* "AMAZING!" reward screen        */
+  --fs-h1:      clamp(1.75rem, 7vw, 2.5rem);  /* Page titles, "Word Quest"       */
+  --fs-h2:      clamp(1.25rem, 5vw, 1.75rem); /* Section titles, "City Map ..."  */
+  --fs-h3:      clamp(1rem, 4vw, 1.25rem);    /* Card titles, item names         */
+  --fs-body:    clamp(0.875rem, 3.5vw, 1rem); /* Body copy, list items           */
+  --fs-small:   clamp(0.75rem, 3vw, 0.875rem);/* Captions, stat labels           */
+  --fs-label:   clamp(0.625rem, 2.5vw, 0.75rem); /* "COMPLETED", "VOCABULARY…"  */
+
+  /* Line heights */
+  --lh-tight:   1.1;  /* Display, H1 — tightly stacked headers */
+  --lh-snug:    1.25; /* H2, H3 */
+  --lh-normal:  1.5;  /* Body */
+  --lh-relaxed: 1.65; /* Long-form / instructional text */
+
+  /* Letter spacing */
+  --ls-tight:    -0.02em; /* Display headings */
+  --ls-normal:    0em;
+  --ls-wide:      0.05em; /* Labels */
+  --ls-widest:    0.12em; /* Small uppercase caps */
+}
+
+/* ─── Base reset ────────────────────────────────────────────────────────────── */
+
+html {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+}
+
+/* ─── Semantic element defaults ─────────────────────────────────────────────── */
+
+h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-extrabold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+h2 {
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-tight);
+}
+
+h3 {
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+}
+
+p {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+}
+
+/* ─── Utility classes ───────────────────────────────────────────────────────── */
+
+/* Display — reward screens, splash numbers */
+.text-display {
+  font-family: var(--font-primary);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-black);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+/* Page / screen title */
+.text-h1 {
+  font-family: var(--font-primary);
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-extrabold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+/* Section heading */
+.text-h2 {
+  font-family: var(--font-primary);
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+}
+
+/* Card / subsection heading */
+.text-h3 {
+  font-family: var(--font-primary);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+}
+
+/* Standard body */
+.text-body {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+}
+
+/* Slightly emphasised body — word list items, option buttons */
+.text-body-strong {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-normal);
+}
+
+/* Stat labels — "VOCABULARY LEARNED", "MISSIONS COMPLETED" */
+.text-label {
+  font-size: var(--fs-label);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+}
+
+/* Secondary descriptors — "Owned", "150", small captions */
+.text-small {
+  font-size: var(--fs-small);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-snug);
+}
+
+/* Button text — all caps, bold */
+.text-btn {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-extrabold);
+  line-height: 1;
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+}

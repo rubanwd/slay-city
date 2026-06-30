@@ -9,6 +9,32 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-primary)", "system-ui", "sans-serif"],
+      },
+      fontSize: {
+        display: "var(--fs-display)",
+        h1: "var(--fs-h1)",
+        h2: "var(--fs-h2)",
+        h3: "var(--fs-h3)",
+        body: "var(--fs-body)",
+        small: "var(--fs-small)",
+        label: "var(--fs-label)",
+      },
+      fontWeight: {
+        black: "900",
+      },
+      lineHeight: {
+        tight: "var(--lh-tight)",
+        snug: "var(--lh-snug)",
+        normal: "var(--lh-normal)",
+        relaxed: "var(--lh-relaxed)",
+      },
+      letterSpacing: {
+        tight: "var(--ls-tight)",
+        wide: "var(--ls-wide)",
+        widest: "var(--ls-widest)",
+      },
       colors: {
         "neon-pink": "var(--color-neon-pink)",
         "lime-green": "var(--color-lime-green)",
