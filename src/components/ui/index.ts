@@ -12,3 +12,6 @@ export type { StreakBadgeProps, StreakBadgeSize } from "./StreakBadge";
 
 export { default as RewardModal } from "./RewardModal";
 export type { RewardModalProps } from "./RewardModal";
+
+export { default as SlayCharacter } from "./SlayCharacter";
+export type { SlayCharacterProps, SlayCharacterSize } from "./SlayCharacter";
