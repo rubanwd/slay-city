@@ -1,0 +1,38 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
+export default function AuthGuard({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.replace("/");
+      } else {
+        setChecking(false);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        router.replace("/");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <span className="text-neon-pink text-2xl font-bold animate-pulse">Loading…</span>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
