@@ -9,3 +9,6 @@ export type { ProgressBarProps, ProgressBarVariant } from "./ProgressBar";
 
 export { default as StreakBadge } from "./StreakBadge";
 export type { StreakBadgeProps, StreakBadgeSize } from "./StreakBadge";
+
+export { default as RewardModal } from "./RewardModal";
+export type { RewardModalProps } from "./RewardModal";
