@@ -10,12 +10,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "neon-pink": "#FF2D8E",
-        "lime-green": "#9DFF00",
-        cyan: "#00F0FF",
-        purple: "#6A00FF",
-        black: "#111111",
-        white: "#FFFFFF",
+        "neon-pink": "var(--color-neon-pink)",
+        "lime-green": "var(--color-lime-green)",
+        cyan: "var(--color-cyan)",
+        purple: "var(--color-purple)",
+        black: "var(--color-black)",
+        white: "var(--color-white)",
       },
     },
   },

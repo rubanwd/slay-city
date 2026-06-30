@@ -1,0 +1,16 @@
+/* SLAY CITY brand tokens — single source of truth for all colors */
+:root {
+  /* Brand palette */
+  --color-neon-pink: #ff2d8e;
+  --color-lime-green: #9dff00;
+  --color-cyan: #00f0ff;
+  --color-purple: #6a00ff;
+  --color-black: #111111;
+  --color-white: #ffffff;
+
+  /* Semantic aliases */
+  --color-background: var(--color-black);
+  --color-foreground: var(--color-white);
+  --color-accent: var(--color-neon-pink);
+  --color-highlight: var(--color-lime-green);
+}

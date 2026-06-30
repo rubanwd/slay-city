@@ -1,18 +1,11 @@
+@import "./theme.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #111111;
-  --foreground: #ffffff;
-  --color-neon-pink: #FF2D8E;
-  --color-lime-green: #9DFF00;
-  --color-cyan: #00F0FF;
-  --color-purple: #6A00FF;
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
