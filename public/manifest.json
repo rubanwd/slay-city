@@ -1,0 +1,25 @@
+{
+  "name": "SLAY CITY",
+  "short_name": "SLAY CITY",
+  "description": "Gamified English learning for kids — explore the city, complete missions, earn rewards.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111111",
+  "theme_color": "#FF2D8E",
+  "categories": ["education", "games"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
