@@ -1,485 +1,695 @@
-/**
- * Hand-authored types matching the SLAY CITY MVP database schema.
- * Once real migrations land in `supabase/migrations/`, regenerate this file with:
- *   npx supabase gen types typescript --local > src/types/database.ts
- */
-
 export type Json =
   | string
   | number
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
-export type UserRole = "child" | "parent" | "admin";
-export type ContentStatus = "draft" | "published";
-export type ProgressStatus = "locked" | "unlocked" | "in_progress" | "completed";
-export type MissionTaskType = "vocabulary" | "matching" | "listening" | "quiz";
-export type AiContentDraftStatus = "pending" | "approved" | "rejected";
-
-export interface Database {
+export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string;
-          role: UserRole;
-          display_name: string;
-          avatar_url: string | null;
-          parent_id: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id: string;
-          role?: UserRole;
-          display_name: string;
-          avatar_url?: string | null;
-          parent_id?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          role?: UserRole;
-          display_name?: string;
-          avatar_url?: string | null;
-          parent_id?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      districts: {
-        Row: {
-          id: string;
-          name: string;
-          slug: string;
-          description: string | null;
-          image_url: string | null;
-          sort_order: number;
-          status: ContentStatus;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          slug: string;
-          description?: string | null;
-          image_url?: string | null;
-          sort_order?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          slug?: string;
-          description?: string | null;
-          image_url?: string | null;
-          sort_order?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      locations: {
-        Row: {
-          id: string;
-          district_id: string;
-          name: string;
-          slug: string;
-          description: string | null;
-          image_url: string | null;
-          position_x: number | null;
-          position_y: number | null;
-          required_location_id: string | null;
-          sort_order: number;
-          status: ContentStatus;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          district_id: string;
-          name: string;
-          slug: string;
-          description?: string | null;
-          image_url?: string | null;
-          position_x?: number | null;
-          position_y?: number | null;
-          required_location_id?: string | null;
-          sort_order?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          district_id?: string;
-          name?: string;
-          slug?: string;
-          description?: string | null;
-          image_url?: string | null;
-          position_x?: number | null;
-          position_y?: number | null;
-          required_location_id?: string | null;
-          sort_order?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      missions: {
-        Row: {
-          id: string;
-          location_id: string;
-          title: string;
-          description: string | null;
-          xp_reward: number;
-          coin_reward: number;
-          sort_order: number;
-          status: ContentStatus;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          location_id: string;
-          title: string;
-          description?: string | null;
-          xp_reward?: number;
-          coin_reward?: number;
-          sort_order?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          location_id?: string;
-          title?: string;
-          description?: string | null;
-          xp_reward?: number;
-          coin_reward?: number;
-          sort_order?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      vocabulary_items: {
-        Row: {
-          id: string;
-          word: string;
-          translation: string;
-          image_url: string | null;
-          audio_url: string | null;
-          example_sentence: string | null;
-          status: ContentStatus;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          word: string;
-          translation: string;
-          image_url?: string | null;
-          audio_url?: string | null;
-          example_sentence?: string | null;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          word?: string;
-          translation?: string;
-          image_url?: string | null;
-          audio_url?: string | null;
-          example_sentence?: string | null;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      mission_tasks: {
-        Row: {
-          id: string;
-          mission_id: string;
-          vocabulary_item_id: string | null;
-          task_type: MissionTaskType;
-          prompt: string | null;
-          options: Json | null;
-          correct_answer: Json | null;
-          sort_order: number;
-          status: ContentStatus;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          mission_id: string;
-          vocabulary_item_id?: string | null;
-          task_type: MissionTaskType;
-          prompt?: string | null;
-          options?: Json | null;
-          correct_answer?: Json | null;
-          sort_order?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          mission_id?: string;
-          vocabulary_item_id?: string | null;
-          task_type?: MissionTaskType;
-          prompt?: string | null;
-          options?: Json | null;
-          correct_answer?: Json | null;
-          sort_order?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      user_progress: {
-        Row: {
-          id: string;
-          user_id: string;
-          mission_id: string;
-          location_id: string;
-          status: ProgressStatus;
-          started_at: string | null;
-          completed_at: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          mission_id: string;
-          location_id: string;
-          status?: ProgressStatus;
-          started_at?: string | null;
-          completed_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          mission_id?: string;
-          location_id?: string;
-          status?: ProgressStatus;
-          started_at?: string | null;
-          completed_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      user_stats: {
-        Row: {
-          id: string;
-          user_id: string;
-          xp: number;
-          coins: number;
-          level: number;
-          current_streak: number;
-          longest_streak: number;
-          last_activity_date: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          xp?: number;
-          coins?: number;
-          level?: number;
-          current_streak?: number;
-          longest_streak?: number;
-          last_activity_date?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          xp?: number;
-          coins?: number;
-          level?: number;
-          current_streak?: number;
-          longest_streak?: number;
-          last_activity_date?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      wardrobe_items: {
-        Row: {
-          id: string;
-          name: string;
-          category: string;
-          image_url: string | null;
-          price_coins: number;
-          status: ContentStatus;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          category: string;
-          image_url?: string | null;
-          price_coins?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          category?: string;
-          image_url?: string | null;
-          price_coins?: number;
-          status?: ContentStatus;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      user_wardrobe_items: {
-        Row: {
-          id: string;
-          user_id: string;
-          wardrobe_item_id: string;
-          is_equipped: boolean;
-          acquired_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          wardrobe_item_id: string;
-          is_equipped?: boolean;
-          acquired_at?: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          wardrobe_item_id?: string;
-          is_equipped?: boolean;
-          acquired_at?: string;
-          created_at?: string;
-        };
-      };
       achievements: {
         Row: {
-          id: string;
-          name: string;
-          description: string | null;
-          icon_url: string | null;
-          criteria: Json | null;
-          created_at: string;
-          updated_at: string;
-        };
+          condition_type: string
+          condition_value: number
+          created_at: string
+          description: string | null
+          icon_url: string | null
+          id: string
+          is_published: boolean
+          name: string
+          updated_at: string
+        }
         Insert: {
-          id?: string;
-          name: string;
-          description?: string | null;
-          icon_url?: string | null;
-          criteria?: Json | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          condition_type: string
+          condition_value: number
+          created_at?: string
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          is_published?: boolean
+          name: string
+          updated_at?: string
+        }
         Update: {
-          id?: string;
-          name?: string;
-          description?: string | null;
-          icon_url?: string | null;
-          criteria?: Json | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      user_achievements: {
-        Row: {
-          id: string;
-          user_id: string;
-          achievement_id: string;
-          unlocked_at: string;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          achievement_id: string;
-          unlocked_at?: string;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          achievement_id?: string;
-          unlocked_at?: string;
-          created_at?: string;
-        };
-      };
+          condition_type?: string
+          condition_value?: number
+          created_at?: string
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          is_published?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_content_drafts: {
         Row: {
-          id: string;
-          content_type: string;
-          target_table: string | null;
-          target_id: string | null;
-          payload: Json;
-          status: AiContentDraftStatus;
-          generated_by: string | null;
-          reviewed_by: string | null;
-          reviewed_at: string | null;
-          created_at: string;
-          updated_at: string;
-        };
+          content: Json
+          created_at: string
+          id: string
+          mission_id: string
+          status: Database["public"]["Enums"]["ai_content_draft_status"]
+          updated_at: string
+        }
         Insert: {
-          id?: string;
-          content_type: string;
-          target_table?: string | null;
-          target_id?: string | null;
-          payload: Json;
-          status?: AiContentDraftStatus;
-          generated_by?: string | null;
-          reviewed_by?: string | null;
-          reviewed_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
+          content: Json
+          created_at?: string
+          id?: string
+          mission_id: string
+          status?: Database["public"]["Enums"]["ai_content_draft_status"]
+          updated_at?: string
+        }
         Update: {
-          id?: string;
-          content_type?: string;
-          target_table?: string | null;
-          target_id?: string | null;
-          payload?: Json;
-          status?: AiContentDraftStatus;
-          generated_by?: string | null;
-          reviewed_by?: string | null;
-          reviewed_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-    };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
+          content?: Json
+          created_at?: string
+          id?: string
+          mission_id?: string
+          status?: Database["public"]["Enums"]["ai_content_draft_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_content_drafts_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      districts: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          name: string
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      locations: {
+        Row: {
+          created_at: string
+          description: string | null
+          district_id: string
+          id: string
+          is_published: boolean
+          map_x: number | null
+          map_y: number | null
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          district_id: string
+          id?: string
+          is_published?: boolean
+          map_x?: number | null
+          map_y?: number | null
+          name: string
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          district_id?: string
+          id?: string
+          is_published?: boolean
+          map_x?: number | null
+          map_y?: number | null
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "locations_district_id_fkey"
+            columns: ["district_id"]
+            isOneToOne: false
+            referencedRelation: "districts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_tasks: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          is_published: boolean
+          mission_id: string
+          order_index: number
+          task_type: Database["public"]["Enums"]["mission_task_type"]
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          mission_id: string
+          order_index?: number
+          task_type: Database["public"]["Enums"]["mission_task_type"]
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          mission_id?: string
+          order_index?: number
+          task_type?: Database["public"]["Enums"]["mission_task_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_tasks_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missions: {
+        Row: {
+          coin_reward: number
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          location_id: string
+          title: string
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          location_id: string
+          title: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          coin_reward?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          location_id?: string
+          title?: string
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missions_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          role?: Database["public"]["Enums"]["user_role"]
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          username?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          profile_id: string
+          unlocked_at: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          profile_id: string
+          unlocked_at?: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          profile_id?: string
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_achievements_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          location_id: string
+          mission_id: string
+          profile_id: string
+          score: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          location_id: string
+          mission_id: string
+          profile_id: string
+          score?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          location_id?: string
+          mission_id?: string
+          profile_id?: string
+          score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_progress_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_progress_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_stats: {
+        Row: {
+          coins: number
+          created_at: string
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          level: number
+          longest_streak: number
+          profile_id: string
+          updated_at: string
+          xp: number
+        }
+        Insert: {
+          coins?: number
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          profile_id: string
+          updated_at?: string
+          xp?: number
+        }
+        Update: {
+          coins?: number
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          profile_id?: string
+          updated_at?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_stats_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_wardrobe_items: {
+        Row: {
+          acquired_at: string
+          equipped: boolean
+          id: string
+          profile_id: string
+          wardrobe_item_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          equipped?: boolean
+          id?: string
+          profile_id: string
+          wardrobe_item_id: string
+        }
+        Update: {
+          acquired_at?: string
+          equipped?: boolean
+          id?: string
+          profile_id?: string
+          wardrobe_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_wardrobe_items_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_wardrobe_items_wardrobe_item_id_fkey"
+            columns: ["wardrobe_item_id"]
+            isOneToOne: false
+            referencedRelation: "wardrobe_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vocabulary_items: {
+        Row: {
+          audio_url: string | null
+          created_at: string
+          example_sentence: string | null
+          id: string
+          image_url: string | null
+          is_published: boolean
+          mission_id: string
+          translation: string
+          updated_at: string
+          word: string
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string
+          example_sentence?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          mission_id: string
+          translation: string
+          updated_at?: string
+          word: string
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string
+          example_sentence?: string | null
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          mission_id?: string
+          translation?: string
+          updated_at?: string
+          word?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vocabulary_items_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wardrobe_items: {
+        Row: {
+          cost_coins: number
+          created_at: string
+          id: string
+          image_url: string | null
+          is_published: boolean
+          item_type: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          cost_coins?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          item_type: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          cost_coins?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          item_type?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      is_admin: { Args: never; Returns: boolean }
+    }
     Enums: {
-      user_role: UserRole;
-      content_status: ContentStatus;
-      progress_status: ProgressStatus;
-      mission_task_type: MissionTaskType;
-      ai_content_draft_status: AiContentDraftStatus;
-    };
-    CompositeTypes: Record<string, never>;
-  };
+      ai_content_draft_status: "pending" | "approved" | "rejected"
+      mission_task_type: "vocabulary" | "matching" | "listening" | "quiz"
+      user_role: "child" | "parent" | "admin"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      ai_content_draft_status: ["pending", "approved", "rejected"],
+      mission_task_type: ["vocabulary", "matching", "listening", "quiz"],
+      user_role: ["child", "parent", "admin"],
+    },
+  },
+} as const
+

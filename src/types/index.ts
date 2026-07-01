@@ -1,16 +1,13 @@
 import type { Database } from "./database";
 
-export type {
-  Database,
-  Json,
-  UserRole,
-  ContentStatus,
-  ProgressStatus,
-  MissionTaskType,
-  AiContentDraftStatus,
-} from "./database";
+export type { Database, Json } from "./database";
 
 type Tables = Database["public"]["Tables"];
+type Enums = Database["public"]["Enums"];
+
+export type UserRole = Enums["user_role"];
+export type MissionTaskType = Enums["mission_task_type"];
+export type AiContentDraftStatus = Enums["ai_content_draft_status"];
 
 export type Profile = Tables["profiles"]["Row"];
 export type ProfileInsert = Tables["profiles"]["Insert"];
