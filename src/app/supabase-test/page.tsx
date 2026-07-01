@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useMemo, useState } from "react";
+import { createBrowserSupabaseClient } from "@/lib/supabase";
 
 type Status = "checking" | "ok" | "error";
 
 export default function SupabaseTestPage() {
   const [status, setStatus] = useState<Status>("checking");
   const [message, setMessage] = useState("");
+  const supabase = useMemo(() => createBrowserSupabaseClient(), []);
 
   useEffect(() => {
     async function checkClient() {
@@ -30,7 +31,7 @@ export default function SupabaseTestPage() {
     }
 
     checkClient();
-  }, []);
+  }, [supabase]);
 
   const statusStyles: Record<Status, string> = {
     checking: "text-yellow-400",
