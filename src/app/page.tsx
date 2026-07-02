@@ -45,9 +45,12 @@ export default function WelcomeScreen() {
           >
             Get Started
           </Link>
-          <button className="text-btn w-full py-4 rounded-2xl border border-white/20 text-white hover:bg-white/10 transition-colors">
+          <Link
+            href="/auth/login"
+            className="text-btn w-full py-4 rounded-2xl border border-white/20 text-white text-center hover:bg-white/10 transition-colors"
+          >
             Sign In
-          </button>
+          </Link>
         </div>
       </Section>
     </AppContainer>
