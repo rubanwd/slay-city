@@ -12,6 +12,8 @@ export interface AuthFormProps {
   mode: "login" | "register";
   /** Form-bound server action (useActionState signature). */
   action: (prevState: AuthState, formData: FormData) => Promise<AuthState>;
+  /** Pre-filled status message, e.g. after a redirect from password reset. */
+  initialMessage?: string;
 }
 
 const COPY = {
@@ -34,8 +36,10 @@ const COPY = {
 } as const;
 
 const INPUT_CLASS =
-  "w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/40 " +
-  "border border-white/20 focus:outline-none focus:border-neon-pink transition-colors";
+  "w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/40 caret-neon-pink " +
+  "border border-white/20 transition-colors " +
+  "focus:outline-none focus:bg-white/15 focus:border-neon-pink " +
+  "focus:ring-2 focus:ring-neon-pink/60";
 
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -46,8 +50,10 @@ function SubmitButton({ label }: { label: string }) {
   );
 }
 
-export default function AuthForm({ mode, action }: AuthFormProps) {
-  const [state, formAction] = useActionState<AuthState, FormData>(action, {});
+export default function AuthForm({ mode, action, initialMessage }: AuthFormProps) {
+  const [state, formAction] = useActionState<AuthState, FormData>(action, {
+    message: initialMessage,
+  });
   const isRegister = mode === "register";
   const copy = COPY[mode];
 
@@ -72,7 +78,17 @@ export default function AuthForm({ mode, action }: AuthFormProps) {
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-label text-white/50 uppercase tracking-widest">Password</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-label text-white/50 uppercase tracking-widest">Password</span>
+            {!isRegister && (
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs text-cyan font-semibold hover:underline"
+              >
+                Forgot password?
+              </Link>
+            )}
+          </div>
           <input
             name="password"
             type="password"

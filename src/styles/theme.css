@@ -1,16 +1,19 @@
 /* SLAY CITY brand tokens — single source of truth for all colors */
 :root {
-  /* Brand palette */
-  --color-neon-pink: #ff2d8e;
-  --color-lime-green: #9dff00;
-  --color-cyan: #00f0ff;
-  --color-purple: #6a00ff;
-  --color-black: #111111;
-  --color-white: #ffffff;
+  /* Brand palette — space-separated RGB channels so Tailwind can apply opacity
+     modifiers (e.g. `bg-white/10`, `text-white/40`) via
+     `rgb(var(--color-x) / <alpha-value>)` in tailwind.config.ts. */
+  --color-neon-pink: 255 45 142;
+  --color-lime-green: 157 255 0;
+  --color-cyan: 0 240 255;
+  --color-purple: 106 0 255;
+  --color-black: 17 17 17;
+  --color-white: 255 255 255;
 
-  /* Semantic aliases */
-  --color-background: var(--color-black);
-  --color-foreground: var(--color-white);
-  --color-accent: var(--color-neon-pink);
-  --color-highlight: var(--color-lime-green);
+  /* Semantic aliases — wrapped in rgb() so they can be used directly as color
+     values in plain CSS (the channel vars above cannot be used on their own). */
+  --color-background: rgb(var(--color-black));
+  --color-foreground: rgb(var(--color-white));
+  --color-accent: rgb(var(--color-neon-pink));
+  --color-highlight: rgb(var(--color-lime-green));
 }

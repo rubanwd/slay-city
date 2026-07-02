@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase";
+import LogoutButton from "@/features/auth/LogoutButton";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -35,5 +36,12 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <div className="fixed bottom-4 right-4 z-50">
+        <LogoutButton />
+      </div>
+      {children}
+    </>
+  );
 }

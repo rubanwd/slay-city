@@ -103,3 +103,77 @@ export async function registerFormAction(
 
   return signUp(email, password);
 }
+
+/**
+ * Send a password-reset email. The link routes through `/auth/callback`,
+ * which exchanges the code for a (recovery) session and forwards on to
+ * `/auth/reset-password`.
+ */
+export async function requestPasswordReset(email: string): Promise<AuthState> {
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: origin ? `${origin}/auth/callback?next=/auth/reset-password` : undefined,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  // Same message whether or not the email is registered, so this can't be
+  // used to enumerate accounts.
+  return { message: "If an account exists for that email, a reset link has been sent." };
+}
+
+export async function forgotPasswordFormAction(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const email = String(formData.get("email") ?? "").trim();
+
+  if (!email) {
+    return { error: "Enter your email." };
+  }
+
+  return requestPasswordReset(email);
+}
+
+/**
+ * Set a new password for the signed-in user. Only valid within the recovery
+ * session created by clicking a reset-password email link. Signs the user out
+ * afterward so they log back in with the new password.
+ */
+export async function updatePassword(password: string): Promise<AuthState> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await supabase.auth.signOut();
+  revalidatePath("/", "layout");
+  redirect("/auth/login?message=" + encodeURIComponent("Password updated. Log in with your new password."));
+}
+
+export async function resetPasswordFormAction(
+  _prevState: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (!password) {
+    return { error: "Enter a new password." };
+  }
+  if (password.length < 6) {
+    return { error: "Password must be at least 6 characters." };
+  }
+  if (password !== confirmPassword) {
+    return { error: "Passwords do not match." };
+  }
+
+  return updatePassword(password);
+}

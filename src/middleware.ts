@@ -46,11 +46,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Authenticated users shouldn't see the login/register pages — send them in.
-  // The callback route is exempt so the code exchange can complete.
+  // The callback route is exempt so the code exchange can complete, and
+  // reset-password is exempt because the recovery link signs the user in
+  // (via a temporary session) specifically so they can set a new password.
   if (
     user &&
     pathname.startsWith("/auth") &&
-    !pathname.startsWith("/auth/callback")
+    !pathname.startsWith("/auth/callback") &&
+    !pathname.startsWith("/auth/reset-password")
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/map";
