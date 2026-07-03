@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import type { LocationState } from "./mapState";
-import SlayCharacter from "./SlayCharacter";
 
 export interface MapLocationNodeProps {
   name: string;
@@ -14,15 +13,23 @@ export interface MapLocationNodeProps {
 const STATE_CLASSES: Record<LocationState, string> = {
   locked: "bg-white/5 border-2 border-white/10 text-white/30",
   unlocked:
-    "bg-white/10 border-2 border-lime-green text-white shadow-[0_0_18px_2px_rgba(157,255,0,0.4)]",
-  current: "bg-white/10 border-2 border-neon-pink text-white animate-glow",
+    "bg-black/40 border-2 border-lime-green text-white shadow-[0_0_18px_2px_rgba(157,255,0,0.4)]",
+  current: "bg-black/40 border-2 border-neon-pink text-white animate-glow",
   completed: "bg-lime-green/10 border-2 border-lime-green/60 text-white",
 };
 
-function NodeGlyph({ state }: { state: LocationState }) {
-  if (state === "locked") return <span aria-hidden="true">🔒</span>;
-  if (state === "completed") return <span aria-hidden="true">✓</span>;
-  return <span aria-hidden="true">📍</span>;
+/** Themed picture for each location, keyed by its name. */
+const LOCATION_EMOJI: Record<string, string> = {
+  "Market Square": "🛒",
+  "In the Kitchen": "🍳",
+  "Cozy Café": "☕",
+  Classroom: "📚",
+  "Art Studio": "🎨",
+};
+
+function nodeImage(name: string, state: LocationState): string {
+  if (state === "locked") return "🔒";
+  return LOCATION_EMOJI[name] ?? "📍";
 }
 
 export default function MapLocationNode({ name, mapX, mapY, state, missionId }: MapLocationNodeProps) {
@@ -31,19 +38,29 @@ export default function MapLocationNode({ name, mapX, mapY, state, missionId }: 
   const circle = (
     <div
       className={[
-        "relative w-16 h-16 rounded-full flex items-center justify-center text-2xl transition-transform",
+        "relative w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-transform",
         STATE_CLASSES[state],
         interactive ? "hover:scale-110 active:scale-95" : "",
       ].join(" ")}
     >
-      {state === "current" && <SlayCharacter />}
-      <NodeGlyph state={state} />
+      <span aria-hidden="true" className={state === "locked" ? "opacity-70" : ""}>
+        {nodeImage(name, state)}
+      </span>
+
+      {state === "completed" && (
+        <span
+          aria-hidden="true"
+          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-lime-green text-black text-sm font-black flex items-center justify-center border-2 border-black"
+        >
+          ✓
+        </span>
+      )}
     </div>
   );
 
   return (
     <div
-      className="absolute flex flex-col items-center gap-2 -translate-x-1/2 -translate-y-1/2"
+      className="absolute z-10 flex flex-col items-center gap-2 -translate-x-1/2 -translate-y-1/2"
       style={{ left: `${mapX}%`, top: `${mapY}%` }}
     >
       {interactive && missionId ? (

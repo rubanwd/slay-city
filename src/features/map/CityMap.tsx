@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import MapBackground from "./MapBackground";
 import type { MapDistrictViewModel } from "./mapState";
 import MapLocationNode from "./MapLocationNode";
 
@@ -41,38 +42,21 @@ export default function CityMap({ districts, hud }: CityMapProps) {
         </div>
       </header>
 
-      <div className="relative flex-1 min-h-[520px] overflow-hidden bg-gradient-to-b from-purple/10 via-black to-black">
-        {districts.map((district) => (
-          <div key={district.id} className="contents">
-            <svg
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <polyline
-                points={district.locations.map((loc) => `${loc.mapX},${loc.mapY}`).join(" ")}
-                fill="none"
-                stroke="#9DFF00"
-                strokeWidth="3"
-                strokeLinecap="round"
-                vectorEffect="non-scaling-stroke"
-                opacity="0.6"
-              />
-            </svg>
+      <div className="relative flex-1 min-h-[520px] overflow-hidden">
+        <MapBackground />
 
-            {district.locations.map((loc) => (
-              <MapLocationNode
-                key={loc.id}
-                name={loc.name}
-                mapX={loc.mapX}
-                mapY={loc.mapY}
-                state={loc.state}
-                missionId={loc.missionId}
-              />
-            ))}
-          </div>
-        ))}
+        {districts
+          .flatMap((district) => district.locations)
+          .map((loc) => (
+            <MapLocationNode
+              key={loc.id}
+              name={loc.name}
+              mapX={loc.mapX}
+              mapY={loc.mapY}
+              state={loc.state}
+              missionId={loc.missionId}
+            />
+          ))}
       </div>
 
       {current?.missionId && (

@@ -553,6 +553,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_mission: {
+        Args: { p_mission_id: string }
+        Returns: {
+          already_completed: boolean
+          xp_earned: number
+          coins_earned: number
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
