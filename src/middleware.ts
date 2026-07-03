@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import type { Database } from "@/types/database";
+
 /** Routes reachable without a session. Everything else requires auth. */
 function isPublicPath(pathname: string): boolean {
   return pathname === "/" || pathname.startsWith("/auth");
@@ -10,7 +12,7 @@ export async function middleware(request: NextRequest) {
   // Start with a pass-through response we can attach refreshed cookies to.
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -58,6 +60,29 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/map";
     return NextResponse.redirect(url);
+  }
+
+  // Authenticated users without a profile row yet must finish onboarding
+  // first; users who already have one shouldn't be sent back through it.
+  if (user && !isPublicPath(pathname)) {
+    const onOnboarding = pathname.startsWith("/onboarding");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!profile && !onOnboarding) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
+
+    if (profile && onOnboarding) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/map";
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;
