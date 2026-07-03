@@ -1,0 +1,22 @@
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="150" cy="180" rx="70" ry="55" fill="#7ED600"/>
+  <path d="M90 150c0-38 27-64 60-64s60 26 60 64" fill="#9DFF00"/>
+  <circle cx="150" cy="128" r="66" fill="#9DFF00"/>
+
+  <path d="M92 118a58 58 0 01116 0" fill="none" stroke="#FF2D8E" stroke-width="14" stroke-linecap="round"/>
+  <rect x="78" y="112" width="24" height="34" rx="10" fill="#FF2D8E"/>
+  <rect x="198" y="112" width="24" height="34" rx="10" fill="#FF2D8E"/>
+
+  <ellipse cx="122" cy="130" rx="17" ry="20" fill="#FFFFFF"/>
+  <ellipse cx="178" cy="130" rx="17" ry="20" fill="#FFFFFF"/>
+  <circle cx="124" cy="134" r="8" fill="#6A00FF"/>
+  <circle cx="180" cy="134" r="8" fill="#6A00FF"/>
+  <circle cx="121" cy="131" r="2.5" fill="#FFFFFF"/>
+  <circle cx="177" cy="131" r="2.5" fill="#FFFFFF"/>
+
+  <path d="M138 160c4 4 20 4 24 0" stroke="#3F5C00" stroke-width="4" stroke-linecap="round" fill="none"/>
+
+  <path d="M70 210c0-22 36-40 80-40s80 18 80 40v70H70z" fill="#181818"/>
+  <path d="M70 214c18-10 40-16 80-16s62 6 80 16" fill="none" stroke="#2A2A2A" stroke-width="3"/>
+  <text x="150" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="30" fill="#FF2D8E" letter-spacing="1">SLAY</text>
+</svg>
