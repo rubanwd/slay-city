@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import AuthGuard from "@/components/auth/AuthGuard";
-import { AppContainer, Section } from "@/components/layout";
-import { SlayCharacter } from "@/components/ui";
+import { buildMapViewModel } from "@/features/map/mapState";
+import RewardScreen from "@/features/reward/RewardScreen";
 import { createClient } from "@/lib/supabase/server";
 
 interface MissionRewardPageProps {
@@ -18,7 +17,7 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return null;
+    redirect("/map");
   }
 
   const { data: mission } = await supabase
@@ -32,7 +31,8 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
     notFound();
   }
 
-  // Only show the reward screen to a user who has actually completed the mission.
+  // Only show the reward screen to a user who has actually completed the mission —
+  // otherwise there is no reward data to display, so send them back to the map.
   const { data: progress } = await supabase
     .from("user_progress")
     .select("id")
@@ -41,44 +41,73 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
     .maybeSingle();
 
   if (!progress) {
-    redirect(`/mission/${missionId}`);
+    redirect("/map");
   }
+
+  // Pull the streak (post-completion) and the map data needed to name the next
+  // stop the player just unlocked. Reward figures come straight from the mission
+  // row the completion action granted, so they match what was computed server-side.
+  const [statsRes, districtsRes, locationsRes, missionsRes, progressRes] = await Promise.all([
+    supabase
+      .from("user_stats")
+      .select("current_streak")
+      .eq("profile_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("districts")
+      .select("id, name, order_index")
+      .eq("is_published", true)
+      .order("order_index"),
+    supabase
+      .from("locations")
+      .select("id, district_id, name, description, order_index, map_x, map_y")
+      .eq("is_published", true)
+      .order("order_index"),
+    supabase
+      .from("missions")
+      .select("id, location_id")
+      .eq("is_published", true)
+      .order("created_at"),
+    supabase.from("user_progress").select("location_id, completed_at").eq("profile_id", user.id),
+  ]);
+
+  const districts = districtsRes.data ?? [];
+  const publishedDistrictIds = new Set(districts.map((d) => d.id));
+  const locations = (locationsRes.data ?? []).filter((loc) =>
+    publishedDistrictIds.has(loc.district_id)
+  );
+
+  const firstMissionIdByLocation = new Map<string, string>();
+  for (const m of missionsRes.data ?? []) {
+    if (!firstMissionIdByLocation.has(m.location_id)) {
+      firstMissionIdByLocation.set(m.location_id, m.id);
+    }
+  }
+
+  const completedLocationIds = new Set(
+    (progressRes.data ?? []).filter((row) => row.completed_at !== null).map((row) => row.location_id)
+  );
+
+  const mapDistricts = buildMapViewModel(
+    districts,
+    locations,
+    completedLocationIds,
+    firstMissionIdByLocation
+  );
+
+  // The "current" location is the next frontier stop the player can now play.
+  const nextStop =
+    mapDistricts.flatMap((d) => d.locations).find((l) => l.state === "current")?.name ?? null;
 
   return (
     <AuthGuard>
-      <AppContainer className="justify-center">
-        <Section className="items-center gap-6 text-center">
-          <SlayCharacter size="lg" wiggle aria-label="Slay celebrating" />
-
-          <div className="flex flex-col gap-2">
-            <span className="text-label uppercase tracking-widest text-lime-green font-bold">
-              Mission Complete
-            </span>
-            <h1 className="text-display font-black text-white leading-none">{mission.title}</h1>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="px-5 py-3 rounded-2xl bg-lime-green/15 text-lime-green font-black text-lg">
-              +{mission.xp_reward} XP
-            </span>
-            <span className="px-5 py-3 rounded-2xl bg-yellow-400/15 text-yellow-400 font-black text-lg">
-              +{mission.coin_reward} 🪙
-            </span>
-          </div>
-
-          <Link
-            href="/map"
-            className={[
-              "flex items-center justify-center w-full h-16 rounded-2xl",
-              "bg-lime-green text-black font-extrabold uppercase tracking-wide text-lg",
-              "hover:brightness-110 active:brightness-90 transition-all",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
-            ].join(" ")}
-          >
-            Back to Map
-          </Link>
-        </Section>
-      </AppContainer>
+      <RewardScreen
+        coins={mission.coin_reward}
+        xp={mission.xp_reward}
+        streak={statsRes.data?.current_streak ?? 0}
+        nextStop={nextStop}
+        continueHref="/map"
+      />
     </AuthGuard>
   );
 }
