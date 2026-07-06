@@ -93,8 +93,12 @@ export const config = {
     /*
      * Match all request paths except:
      * - _next/static, _next/image (build assets)
-     * - favicon.ico, manifest, icons, and image files
+     * - favicon.ico, manifest, the service worker, icons, and image files
+     *
+     * sw.js is excluded so the browser fetches the script directly instead of
+     * being redirected to /auth/login — service workers cannot register from a
+     * redirected script response.
      */
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
