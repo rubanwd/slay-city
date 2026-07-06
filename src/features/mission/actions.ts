@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { createClient } from "@/lib/supabase/server";
 
 export type MissionCompletionResult =
@@ -109,4 +111,33 @@ async function updateStreak(
     currentStreak: data.current_streak,
     longestStreak: data.longest_streak,
   };
+}
+
+/**
+ * TEMPORARY dev/test helper — wipes the caller's own mission-completion data
+ * (and the mission-driven stats: XP, coins, level, streaks) so content can be
+ * replayed while testing. Backed by the self-scoped `reset_my_progress`
+ * SECURITY DEFINER function, which only ever touches the caller's rows.
+ *
+ * This is exposed to every signed-in user for now; before launch it should be
+ * gated to admins only or removed (see the migration for details).
+ */
+export async function resetMissionProgress(): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to reset your progress." };
+  }
+
+  const { error } = await supabase.rpc("reset_my_progress");
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  // Refresh every route so the map HUD and location states reflect the wipe.
+  revalidatePath("/", "layout");
+  return { ok: true };
 }

@@ -562,6 +562,7 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      reset_my_progress: { Args: never; Returns: undefined }
     }
     Enums: {
       ai_content_draft_status: "pending" | "approved" | "rejected"
