@@ -3,9 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase";
-import LogoutButton from "@/features/auth/LogoutButton";
+import UserMenu from "@/features/auth/UserMenu";
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
+export default function AuthGuard({
+  children,
+  /**
+   * Set when the wrapped page renders its own {@link UserMenu} (e.g. inside a
+   * header), so we don't show the floating fallback on top of it.
+   */
+  hideMenu = false,
+}: {
+  children: React.ReactNode;
+  hideMenu?: boolean;
+}) {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
@@ -38,9 +48,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-50">
-        <LogoutButton />
-      </div>
+      {!hideMenu && (
+        <div className="fixed top-4 right-4 z-50">
+          <UserMenu />
+        </div>
+      )}
       {children}
     </>
   );
