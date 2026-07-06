@@ -18,7 +18,12 @@ export default defineConfig({
         test: {
           name: 'unit',
           environment: 'node',
-          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          // Includes the Edge Function streak tests, whose pure logic is
+          // runtime-agnostic and runs fine under Node.
+          include: [
+            'src/**/*.{test,spec}.{ts,tsx}',
+            'supabase/functions/**/*.{test,spec}.ts',
+          ],
         },
       },
       {

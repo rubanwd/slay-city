@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Deno Edge Functions: linted/type-checked by the Deno toolchain, not the
+    // Next.js/Node ESLint + tsc setup (which chokes on remote/`npm:` imports).
+    "supabase/functions/**",
   ]),
   ...storybook.configs["flat/recommended"]
 ]);
