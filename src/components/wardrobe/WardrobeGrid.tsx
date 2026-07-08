@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { BottomNav } from "@/components/layout";
+
 const ITEMS = [
   { id: 1, name: "Neon Jacket", emoji: "🧥", rarity: "rare", locked: false },
   { id: 2, name: "Cyber Shades", emoji: "🕶️", rarity: "epic", locked: false },
@@ -29,7 +31,7 @@ export default function WardrobeGrid() {
         <span className="text-neon-pink font-bold">✦ 240</span>
       </header>
 
-      <section className="flex-1 px-6 py-6">
+      <section className="flex-1 px-6 py-6 pb-28">
         <div className="grid grid-cols-3 gap-3">
           {ITEMS.map((item) => (
             <div
@@ -45,6 +47,8 @@ export default function WardrobeGrid() {
           ))}
         </div>
       </section>
+
+      <BottomNav />
     </main>
   );
 }

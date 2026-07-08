@@ -69,7 +69,7 @@ export default async function MapPage() {
   const stats = statsRes.data;
 
   return (
-    <AuthGuard hideMenu>
+    <AuthGuard>
       <CityMap
         districts={mapDistricts}
         hud={{

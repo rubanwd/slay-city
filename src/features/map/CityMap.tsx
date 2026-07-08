@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import UserMenu from "@/features/auth/UserMenu";
+import { BottomNav } from "@/components/layout";
 
 import MapBackground from "./MapBackground";
 import type { MapDistrictViewModel } from "./mapState";
@@ -41,7 +41,6 @@ export default function CityMap({ districts, hud }: CityMapProps) {
           <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-yellow-400">
             🪙 {hud.coins}
           </span>
-          <UserMenu className="ml-1" />
         </div>
       </header>
 
@@ -77,6 +76,8 @@ export default function CityMap({ districts, hud }: CityMapProps) {
           </Link>
         </div>
       )}
+
+      <BottomNav />
     </main>
   );
 }

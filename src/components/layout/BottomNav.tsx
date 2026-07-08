@@ -1,0 +1,112 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+/* ── Tab icons — small, single-purpose SVGs; not worth a shared icon lib. ──── */
+
+function HomeIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 10.5 12 3l9 7.5" />
+      <path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5" />
+      <path d="M9.5 21v-6h5v6" />
+    </svg>
+  );
+}
+
+function MapIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4z" />
+      <path d="M9 4v13" />
+      <path d="M15 6.5v13" />
+    </svg>
+  );
+}
+
+function WardrobeIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3a2 2 0 0 0-2 2c0 1 .8 1.7 2 2.2" />
+      <path d="M12 7.2 3.5 13.5a1 1 0 0 0 .6 1.8h15.8a1 1 0 0 0 .6-1.8L12 7.2z" />
+    </svg>
+  );
+}
+
+function ProfileIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" />
+    </svg>
+  );
+}
+
+type NavItem = {
+  label: string;
+  href: string;
+  icon: () => React.ReactElement;
+};
+
+const NAV_ITEMS: NavItem[] = [
+  { label: "Home", href: "/map", icon: HomeIcon },
+  { label: "Map", href: "/map", icon: MapIcon },
+  { label: "Wardrobe", href: "/wardrobe", icon: WardrobeIcon },
+  { label: "Profile", href: "/profile", icon: ProfileIcon },
+];
+
+/**
+ * Fixed bottom navigation shown on the main in-app screens (map, wardrobe,
+ * profile). Add `pb-24` to a page's scrollable content so this bar doesn't
+ * cover it. Active tab is the first item whose href matches the current path.
+ */
+export default function BottomNav() {
+  const pathname = usePathname();
+  const activeIndex = NAV_ITEMS.findIndex(
+    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
+  );
+
+  return (
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+    >
+      <ul className="mx-auto flex max-w-md items-stretch justify-around px-2 py-2">
+        {NAV_ITEMS.map((item, index) => {
+          const Icon = item.icon;
+          const active = index === activeIndex;
+          return (
+            <li key={item.label} className="flex-1">
+              <Link
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={[
+                  "flex flex-col items-center gap-1 rounded-xl py-1",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+                ].join(" ")}
+              >
+                <span
+                  className={[
+                    "flex h-10 w-10 items-center justify-center rounded-full transition-colors",
+                    active ? "bg-lime-green text-black" : "text-white/50",
+                  ].join(" ")}
+                >
+                  <Icon />
+                </span>
+                <span
+                  className={[
+                    "text-[11px] font-semibold leading-none transition-colors",
+                    active ? "text-lime-green" : "text-white/50",
+                  ].join(" ")}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
