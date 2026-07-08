@@ -267,6 +267,42 @@ export type Database = {
           },
         ]
       }
+      parent_child_links: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          parent_id: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          parent_id: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          parent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_child_links_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parent_child_links_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age: number | null
@@ -562,6 +598,15 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      is_linked_child: { Args: { p_child_id: string }; Returns: boolean }
+      link_child_by_email: {
+        Args: { p_child_email: string }
+        Returns: {
+          linked: boolean
+          child_id: string
+          reason: string
+        }[]
+      }
       reset_my_progress: { Args: never; Returns: undefined }
     }
     Enums: {
