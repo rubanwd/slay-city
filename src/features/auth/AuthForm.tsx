@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
-import type { AuthState } from "./actions";
+import type { AuthState, SignupRole } from "./actions";
 
 export interface AuthFormProps {
   mode: "login" | "register";
@@ -35,6 +35,11 @@ const COPY = {
   },
 } as const;
 
+const ROLE_OPTIONS: { value: SignupRole; label: string }[] = [
+  { value: "child", label: "Child" },
+  { value: "parent", label: "Parent" },
+];
+
 const INPUT_CLASS =
   "w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/40 caret-neon-pink " +
   "border border-white/20 transition-colors " +
@@ -54,6 +59,7 @@ export default function AuthForm({ mode, action, initialMessage }: AuthFormProps
   const [state, formAction] = useActionState<AuthState, FormData>(action, {
     message: initialMessage,
   });
+  const [role, setRole] = useState<SignupRole>("child");
   const isRegister = mode === "register";
   const copy = COPY[mode];
 
@@ -114,6 +120,57 @@ export default function AuthForm({ mode, action, initialMessage }: AuthFormProps
               placeholder="••••••••"
               className={INPUT_CLASS}
             />
+          </label>
+        )}
+
+        {isRegister && (
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className="mb-1.5 text-label text-white/50 uppercase tracking-widest">
+              I am a
+            </legend>
+            <div className="grid grid-cols-2 gap-2">
+              {ROLE_OPTIONS.map((option) => (
+                <label key={option.value} className="cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    value={option.value}
+                    checked={role === option.value}
+                    onChange={() => setRole(option.value)}
+                    className="peer sr-only"
+                  />
+                  <span
+                    className={[
+                      "block rounded-xl border px-4 py-3 text-center text-sm font-semibold transition-colors",
+                      "border-white/20 text-white/60",
+                      "peer-checked:border-neon-pink peer-checked:bg-neon-pink/10 peer-checked:text-white",
+                      "peer-focus-visible:ring-2 peer-focus-visible:ring-neon-pink/60",
+                    ].join(" ")}
+                  >
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
+        {isRegister && role === "parent" && (
+          <label className="flex flex-col gap-1.5">
+            <span className="text-label text-white/50 uppercase tracking-widest">
+              Child&apos;s Email
+            </span>
+            <input
+              name="childEmail"
+              type="email"
+              required
+              autoComplete="off"
+              placeholder="child@example.com"
+              className={INPUT_CLASS}
+            />
+            <span className="text-xs text-white/40">
+              We&apos;ll link your child&apos;s account so you can follow their progress.
+            </span>
           </label>
         )}
       </div>
