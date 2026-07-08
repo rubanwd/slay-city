@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import type { Database } from "@/types/database";
+import { roleHome } from "@/features/auth/roleRouting";
 
 /** Routes reachable without a session. Everything else requires auth. */
 function isPublicPath(pathname: string): boolean {
@@ -64,11 +65,15 @@ export async function middleware(request: NextRequest) {
 
   // Authenticated users without a profile row yet must finish onboarding
   // first; users who already have one shouldn't be sent back through it.
+  // We also enforce role-based area access here so it can't be bypassed by
+  // navigating directly: parents live only in the parent dashboard area, and
+  // children can never reach it.
   if (user && !isPublicPath(pathname)) {
     const onOnboarding = pathname.startsWith("/onboarding");
+    const inParentArea = pathname === "/parent" || pathname.startsWith("/parent/");
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id")
+      .select("id, role")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -80,8 +85,25 @@ export async function middleware(request: NextRequest) {
 
     if (profile && onOnboarding) {
       const url = request.nextUrl.clone();
-      url.pathname = "/map";
+      url.pathname = roleHome(profile.role);
       return NextResponse.redirect(url);
+    }
+
+    if (profile) {
+      // Parents may only use the parent dashboard — bounce them out of the
+      // child game screens (map, missions, wardrobe, profile, …).
+      if (profile.role === "parent" && !inParentArea) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/parent";
+        return NextResponse.redirect(url);
+      }
+      // Children (and any non-parent, non-admin role) can't view the parent
+      // dashboard. Admins are intentionally unrestricted.
+      if (profile.role === "child" && inParentArea) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/map";
+        return NextResponse.redirect(url);
+      }
     }
   }
 

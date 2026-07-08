@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { signOut } from "@/features/auth/actions";
 
 import type { ParentProgressSummary } from "./queries";
 
@@ -63,30 +63,36 @@ export default function ParentDashboard({ childName, summary }: ParentDashboardP
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <header className="flex items-center gap-3 py-5">
-          <Link
-            href="/map"
-            aria-label="Back to map"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:bg-white/5 hover:text-white"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </Link>
+        {/* No "back" affordance: parents live only in this dashboard, so there
+            is nowhere in-app to go back to. A Log Out control is the one exit. */}
+        <header className="flex items-center justify-between gap-3 py-5">
           <div className="min-w-0">
             <h1 className="text-h2 font-black text-white">Parent Dashboard</h1>
             <p className="text-small text-white/50">{childName}&apos;s progress</p>
           </div>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-neon-pink/40 px-3.5 py-2 text-xs font-semibold text-neon-pink transition-colors hover:bg-neon-pink/10"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Log Out
+            </button>
+          </form>
         </header>
 
         {/* ── Vocabulary highlight ───────────────────────────────────────── */}
