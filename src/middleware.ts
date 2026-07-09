@@ -71,6 +71,7 @@ export async function middleware(request: NextRequest) {
   if (user && !isPublicPath(pathname)) {
     const onOnboarding = pathname.startsWith("/onboarding");
     const inParentArea = pathname === "/parent" || pathname.startsWith("/parent/");
+    const inAdminArea = pathname === "/admin" || pathname.startsWith("/admin/");
     const { data: profile } = await supabase
       .from("profiles")
       .select("id, role")
@@ -90,6 +91,12 @@ export async function middleware(request: NextRequest) {
     }
 
     if (profile) {
+      // The admin console is admin-only. Everyone else is sent to their home.
+      if (inAdminArea && profile.role !== "admin") {
+        const url = request.nextUrl.clone();
+        url.pathname = roleHome(profile.role);
+        return NextResponse.redirect(url);
+      }
       // Parents may only use the parent dashboard — bounce them out of the
       // child game screens (map, missions, wardrobe, profile, …).
       if (profile.role === "parent" && !inParentArea) {
