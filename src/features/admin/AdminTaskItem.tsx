@@ -105,67 +105,65 @@ export default function AdminTaskItem({ missionId, task }: AdminTaskItemProps) {
   }
 
   return (
-    <li className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/10 text-xs font-bold text-white/70">
-            {task.order_index}
-          </span>
-          <span className="truncate text-body-strong capitalize text-white">
-            {task.task_type}
-          </span>
-          <span
+    <li className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/10 text-xs font-bold text-white/70">
+          {task.order_index}
+        </span>
+        <span className="truncate text-body-strong capitalize text-white">{task.task_type}</span>
+        <span
+          className={[
+            "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide",
+            task.is_published ? "bg-lime-green/20 text-lime-green" : "bg-cyan/20 text-cyan",
+          ].join(" ")}
+        >
+          {task.is_published ? "Published" : "Draft"}
+        </span>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white/60 transition-colors hover:bg-white/10"
+        >
+          Edit
+        </button>
+        <form action={task.is_published ? unpublishMissionTask : publishMissionTask}>
+          <input type="hidden" name="id" value={task.id} />
+          <input type="hidden" name="mission_id" value={missionId} />
+          <button
+            type="submit"
             className={[
-              "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide",
-              task.is_published ? "bg-lime-green/20 text-lime-green" : "bg-cyan/20 text-cyan",
+              "w-full rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors",
+              task.is_published
+                ? "border-white/20 text-white/60 hover:bg-white/10"
+                : "border-lime-green/50 text-lime-green hover:bg-lime-green/10",
             ].join(" ")}
           >
-            {task.is_published ? "Published" : "Draft"}
-          </span>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white/60 transition-colors hover:bg-white/10"
-          >
-            Edit
+            {task.is_published ? "Unpublish" : "Publish"}
           </button>
-          <form action={task.is_published ? unpublishMissionTask : publishMissionTask}>
-            <input type="hidden" name="id" value={task.id} />
-            <input type="hidden" name="mission_id" value={missionId} />
-            <button
-              type="submit"
-              className={[
-                "rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors",
-                task.is_published
-                  ? "border-white/20 text-white/60 hover:bg-white/10"
-                  : "border-lime-green/50 text-lime-green hover:bg-lime-green/10",
-              ].join(" ")}
-            >
-              {task.is_published ? "Unpublish" : "Publish"}
-            </button>
-          </form>
-          <form
-            action={deleteMissionTask}
-            onSubmit={(e) => {
-              if (!window.confirm("Delete this task? This cannot be undone.")) {
-                e.preventDefault();
-              }
-            }}
+        </form>
+        <form
+          action={deleteMissionTask}
+          onSubmit={(e) => {
+            if (!window.confirm("Delete this task? This cannot be undone.")) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <button
+            type="submit"
+            className="w-full rounded-full border border-neon-pink/50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
           >
-            <input type="hidden" name="id" value={task.id} />
-            <input type="hidden" name="mission_id" value={missionId} />
-            <button
-              type="submit"
-              className="rounded-full border border-neon-pink/50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
-            >
-              Delete
-            </button>
-          </form>
-        </div>
+            Delete
+          </button>
+          <input type="hidden" name="id" value={task.id} />
+          <input type="hidden" name="mission_id" value={missionId} />
+        </form>
       </div>
-      <pre className="mt-2 max-h-24 overflow-auto rounded-lg bg-black/40 px-3 py-2 text-xs text-white/50">
+
+      <pre className="mt-3 max-h-24 overflow-auto rounded-lg bg-black/40 px-3 py-2 text-xs text-white/50">
         {JSON.stringify(task.content)}
       </pre>
     </li>
