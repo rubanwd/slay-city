@@ -89,7 +89,12 @@ function LocationForm({ districts }: { districts: DistrictOption[] }) {
       <label className="flex flex-col gap-1.5">
         <span className={LABEL_CLASS}>District</span>
         {districts.length > 0 ? (
-          <select name="district_id" required defaultValue="" className={INPUT_CLASS}>
+          <select
+            name="district_id"
+            required
+            defaultValue=""
+            className={`${INPUT_CLASS} [&>option]:bg-[#1a1a1a] [&>option]:text-white`}
+          >
             <option value="" disabled>
               Select a district…
             </option>

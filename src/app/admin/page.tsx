@@ -31,6 +31,13 @@ export default async function AdminPage() {
       description: "Add districts and the locations inside them.",
       accent: "text-cyan",
     },
+    {
+      href: "/admin/admins",
+      title: "Manage Admins",
+      count: null,
+      description: "Add or remove admin access by email.",
+      accent: "text-purple",
+    },
   ];
 
   return (
@@ -56,7 +63,7 @@ export default async function AdminPage() {
                 <span className="text-small text-white/50">{card.description}</span>
               </span>
               <span className="flex items-center gap-2 text-white/40">
-                <span className="text-body-strong">{card.count}</span>
+                {card.count !== null && <span className="text-body-strong">{card.count}</span>}
                 <svg
                   width="18"
                   height="18"

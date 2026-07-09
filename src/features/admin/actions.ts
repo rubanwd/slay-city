@@ -198,6 +198,59 @@ export async function unpublishMissionTask(formData: FormData): Promise<void> {
   if (id && missionId) await setTaskPublished(id, missionId, false);
 }
 
+/* ── Admin allow-list ──────────────────────────────────────────────────────── */
+
+/** Loose email shape check — real validation happens at auth time. */
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Adds an email to the admin allow-list. Anyone on the list becomes an admin on
+ * their next login/registration (see `claim_admin`). Stored lower-cased so the
+ * list has no case-duplicate rows.
+ */
+export async function addAdminEmail(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+  if (!email) return { error: "Enter an email." };
+  if (!EMAIL_PATTERN.test(email)) return { error: "Enter a valid email address." };
+
+  const { error } = await supabase.from("admin_emails").insert({ email });
+  if (error) {
+    // 23505 = unique_violation — already on the list, treat as success.
+    if (error.code === "23505") {
+      return { success: `${email} is already an admin.` };
+    }
+    return { error: error.message };
+  }
+
+  revalidatePath("/admin/admins");
+  return { success: `${email} can now sign in as an admin.` };
+}
+
+/** Removes an email from the allow-list. Does not demote an already-granted
+ * admin profile — that stays until the role is changed directly. */
+export async function removeAdminEmail(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+  if (!email) return;
+
+  const { error } = await supabase.from("admin_emails").delete().eq("email", email);
+  if (!error) revalidatePath("/admin/admins");
+}
+
 /* ── Districts & locations ─────────────────────────────────────────────────── */
 
 export async function createDistrict(

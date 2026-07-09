@@ -50,7 +50,12 @@ export default function AdminTaskForm({ missionId, nextOrder }: AdminTaskFormPro
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
           <span className={LABEL_CLASS}>Task Type</span>
-          <select name="task_type" required defaultValue="vocabulary" className={INPUT_CLASS}>
+          <select
+            name="task_type"
+            required
+            defaultValue="vocabulary"
+            className={`${INPUT_CLASS} [&>option]:bg-[#1a1a1a] [&>option]:text-white`}
+          >
             {TASK_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t[0].toUpperCase() + t.slice(1)}
