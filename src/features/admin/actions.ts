@@ -178,6 +178,67 @@ export async function createMissionTask(
   return { success: "Task added." };
 }
 
+/** Updates a task's type, order, and content. */
+export async function updateMissionTask(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const taskId = String(formData.get("id") ?? "").trim();
+  const missionId = String(formData.get("mission_id") ?? "").trim();
+  const taskType = String(formData.get("task_type") ?? "").trim() as MissionTaskType;
+  const orderIndex = parseNonNegativeInt(formData.get("order_index"));
+  const contentRaw = String(formData.get("content") ?? "").trim();
+
+  if (!taskId) return { error: "A task is required." };
+  if (!missionId) return { error: "A mission is required." };
+  if (!MISSION_TASK_TYPES.includes(taskType)) {
+    return { error: "Choose a valid task type." };
+  }
+  if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
+
+  let content: Database["public"]["Tables"]["mission_tasks"]["Update"]["content"] = {};
+  if (contentRaw) {
+    try {
+      content = JSON.parse(contentRaw);
+    } catch {
+      return { error: "Content must be valid JSON." };
+    }
+  }
+
+  const { error } = await supabase
+    .from("mission_tasks")
+    .update({ task_type: taskType, order_index: orderIndex, content })
+    .eq("id", taskId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/missions/${missionId}/tasks`);
+  revalidatePath("/map", "layout");
+  return { success: "Task updated." };
+}
+
+/** Deletes a task from a mission. */
+export async function deleteMissionTask(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const taskId = String(formData.get("id") ?? "").trim();
+  const missionId = String(formData.get("mission_id") ?? "").trim();
+  if (!taskId || !missionId) return;
+
+  const { error } = await supabase.from("mission_tasks").delete().eq("id", taskId);
+
+  if (!error) {
+    revalidatePath(`/admin/missions/${missionId}/tasks`);
+    revalidatePath("/map", "layout");
+  }
+}
+
 /** Flips a task's published flag. Only published tasks appear in gameplay. */
 async function setTaskPublished(
   taskId: string,
