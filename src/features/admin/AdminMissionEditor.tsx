@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
@@ -35,9 +35,17 @@ function SubmitButton() {
 
 export default function AdminMissionEditor({ locations }: AdminMissionEditorProps) {
   const [state, formAction] = useActionState<AdminFormState, FormData>(createMission, {});
+  const [formKey, setFormKey] = useState(0);
+
+  // On a successful create, reset the form so the admin can add another mission fresh.
+  const [lastSuccess, setLastSuccess] = useState(state.success);
+  if (state.success !== lastSuccess) {
+    setLastSuccess(state.success);
+    if (state.success) setFormKey((k) => k + 1);
+  }
 
   return (
-    <form action={formAction} className="flex w-full flex-col gap-5">
+    <form key={formKey} action={formAction} className="flex w-full flex-col gap-5">
       <label className="flex flex-col gap-1.5">
         <span className={LABEL_CLASS}>Title</span>
         <input name="title" type="text" required placeholder="In the Kitchen" className={INPUT_CLASS} />
@@ -116,6 +124,11 @@ export default function AdminMissionEditor({ locations }: AdminMissionEditorProp
       {state.error && (
         <p role="alert" className="text-sm font-semibold text-neon-pink">
           {state.error}
+        </p>
+      )}
+      {state.success && (
+        <p role="status" className="text-sm font-semibold text-lime-green">
+          {state.success}
         </p>
       )}
 

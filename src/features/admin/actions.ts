@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
@@ -99,8 +98,52 @@ export async function createMission(
   if (error) return { error: error.message };
 
   revalidatePath("/admin/missions");
+  revalidatePath("/admin/districts/new");
   revalidatePath("/map", "layout");
-  redirect("/admin/missions");
+  return { success: `Mission "${title}" created.` };
+}
+
+/** Updates a mission's title, description, location, rewards, and published flag. */
+export async function updateMission(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const id = String(formData.get("id") ?? "").trim();
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const locationId = String(formData.get("location_id") ?? "").trim();
+  const xpReward = parseNonNegativeInt(formData.get("xp_reward"));
+  const coinReward = parseNonNegativeInt(formData.get("coin_reward"));
+  const isPublished = formData.get("is_published") === "on";
+
+  if (!id) return { error: "A mission is required." };
+  if (!title) return { error: "Title is required." };
+  if (!locationId) return { error: "Choose a location for this mission." };
+  if (xpReward === null) return { error: "XP reward must be a non-negative whole number." };
+  if (coinReward === null) return { error: "Coin reward must be a non-negative whole number." };
+
+  const { error } = await supabase
+    .from("missions")
+    .update({
+      title,
+      description: description || null,
+      location_id: locationId,
+      xp_reward: xpReward,
+      coin_reward: coinReward,
+      is_published: isPublished,
+    })
+    .eq("id", id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/missions");
+  revalidatePath("/admin/districts/new");
+  revalidatePath("/map", "layout");
+  return { success: `Mission "${title}" updated.` };
 }
 
 /** Flips a mission's published flag. Backing the publish/unpublish list buttons. */
@@ -358,6 +401,42 @@ export async function createDistrict(
   return { success: `District "${name}" created.` };
 }
 
+/** Updates a district's name, description, order, and published flag. */
+export async function updateDistrict(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const id = String(formData.get("id") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const orderIndex = parseNonNegativeInt(formData.get("order_index"));
+  const isPublished = formData.get("is_published") === "on";
+
+  if (!id) return { error: "A district is required." };
+  if (!name) return { error: "District name is required." };
+  if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
+
+  const { error } = await supabase
+    .from("districts")
+    .update({
+      name,
+      description: description || null,
+      order_index: orderIndex,
+      is_published: isPublished,
+    })
+    .eq("id", id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/districts/new");
+  revalidatePath("/map", "layout");
+  return { success: `District "${name}" updated.` };
+}
+
 export async function createLocation(
   _prevState: AdminFormState,
   formData: FormData
@@ -395,4 +474,49 @@ export async function createLocation(
   revalidatePath("/admin/districts/new");
   revalidatePath("/map", "layout");
   return { success: `Location "${name}" created.` };
+}
+
+/** Updates a location's district, name, description, order, map position, and published flag. */
+export async function updateLocation(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const id = String(formData.get("id") ?? "").trim();
+  const districtId = String(formData.get("district_id") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const orderIndex = parseNonNegativeInt(formData.get("order_index"));
+  const isPublished = formData.get("is_published") === "on";
+  const mapX = parsePercentCoordinate(formData.get("map_x"));
+  const mapY = parsePercentCoordinate(formData.get("map_y"));
+
+  if (!id) return { error: "A location is required." };
+  if (!districtId) return { error: "Choose a district for this location." };
+  if (!name) return { error: "Location name is required." };
+  if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
+  if (mapX === undefined) return { error: "Map X must be a number between 0 and 100." };
+  if (mapY === undefined) return { error: "Map Y must be a number between 0 and 100." };
+
+  const { error } = await supabase
+    .from("locations")
+    .update({
+      district_id: districtId,
+      name,
+      description: description || null,
+      order_index: orderIndex,
+      is_published: isPublished,
+      map_x: mapX,
+      map_y: mapY,
+    })
+    .eq("id", id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/districts/new");
+  revalidatePath("/map", "layout");
+  return { success: `Location "${name}" updated.` };
 }
