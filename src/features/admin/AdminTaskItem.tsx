@@ -4,8 +4,9 @@ import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
-import type { Database } from "@/types/database";
+import type { Database, Json } from "@/types/database";
 
+import AdminTaskContentFields from "./AdminTaskContentFields";
 import {
   deleteMissionTask,
   publishMissionTask,
@@ -13,17 +14,11 @@ import {
   updateMissionTask,
   type AdminFormState,
 } from "./actions";
+import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
 type MissionTaskType = Database["public"]["Enums"]["mission_task_type"];
 
 const TASK_TYPES: MissionTaskType[] = ["vocabulary", "matching", "listening", "quiz"];
-
-const INPUT_CLASS =
-  "w-full px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/40 caret-neon-pink " +
-  "border border-white/20 transition-colors " +
-  "focus:outline-none focus:bg-white/15 focus:border-neon-pink focus:ring-2 focus:ring-neon-pink/60";
-
-const LABEL_CLASS = "text-label text-white/50 uppercase tracking-widest";
 
 export interface AdminTaskItemProps {
   missionId: string;
@@ -31,7 +26,7 @@ export interface AdminTaskItemProps {
     id: string;
     task_type: MissionTaskType;
     order_index: number;
-    content: unknown;
+    content: Json;
     is_published: boolean;
   };
 }
@@ -47,6 +42,7 @@ function SaveButton() {
 
 export default function AdminTaskItem({ missionId, task }: AdminTaskItemProps) {
   const [editing, setEditing] = useState(false);
+  const [editTaskType, setEditTaskType] = useState<MissionTaskType>(task.task_type);
   const [state, formAction] = useActionState<AdminFormState, FormData>(updateMissionTask, {});
 
   if (editing) {
@@ -62,7 +58,8 @@ export default function AdminTaskItem({ missionId, task }: AdminTaskItemProps) {
               <select
                 name="task_type"
                 required
-                defaultValue={task.task_type}
+                value={editTaskType}
+                onChange={(e) => setEditTaskType(e.target.value as MissionTaskType)}
                 className={`${INPUT_CLASS} [&>option]:bg-[#1a1a1a] [&>option]:text-white`}
               >
                 {TASK_TYPES.map((t) => (
@@ -84,15 +81,11 @@ export default function AdminTaskItem({ missionId, task }: AdminTaskItemProps) {
             </label>
           </div>
 
-          <label className="flex flex-col gap-1.5">
-            <span className={LABEL_CLASS}>Content (JSON)</span>
-            <textarea
-              name="content"
-              rows={6}
-              defaultValue={JSON.stringify(task.content, null, 2)}
-              className={`${INPUT_CLASS} font-mono text-small`}
-            />
-          </label>
+          <AdminTaskContentFields
+            key={editTaskType}
+            taskType={editTaskType}
+            initialContent={editTaskType === task.task_type ? task.content : undefined}
+          />
 
           {state.error && (
             <p role="alert" className="text-sm font-semibold text-neon-pink">
