@@ -93,6 +93,11 @@ export async function resolveHomePath(supabase: SupabaseServerClient): Promise<s
   } = await supabase.auth.getUser();
   if (!user) return "/auth/login";
 
+  // Allow-listed emails become admins with no onboarding: `claim_admin` creates
+  // or promotes their profile server-side and reports whether they're an admin.
+  const { data: claimedAdmin } = await supabase.rpc("claim_admin");
+  if (claimedAdmin === true) return "/admin";
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
@@ -104,7 +109,7 @@ export async function resolveHomePath(supabase: SupabaseServerClient): Promise<s
   }
 
   // No profile yet — provision one for a trusted role flag so the user skips the
-  // child onboarding. Admin comes from app_metadata (service-role-set only);
+  // child onboarding. Admin can also come from app_metadata (service-role-set);
   // parent from user_metadata (self-selected at signup).
   if (user.app_metadata?.role === "admin") {
     if (await ensureRoleProfile(supabase, user, "admin")) return "/admin";

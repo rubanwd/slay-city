@@ -34,6 +34,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_emails: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           condition_type: string
@@ -597,6 +612,7 @@ export type Database = {
           coins_earned: number
         }[]
       }
+      claim_admin: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_linked_child: { Args: { p_child_id: string }; Returns: boolean }
       link_child_by_email: {

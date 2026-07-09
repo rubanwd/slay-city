@@ -97,6 +97,13 @@ export async function middleware(request: NextRequest) {
         url.pathname = roleHome(profile.role);
         return NextResponse.redirect(url);
       }
+      // Admins may only use the admin console — they don't play the game, so
+      // keep them out of the map, missions, wardrobe, etc.
+      if (profile.role === "admin" && !inAdminArea) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin";
+        return NextResponse.redirect(url);
+      }
       // Parents may only use the parent dashboard — bounce them out of the
       // child game screens (map, missions, wardrobe, profile, …).
       if (profile.role === "parent" && !inParentArea) {

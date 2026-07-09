@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { ensureRoleProfile, resolveHomePath } from "./roleRouting";
+import { resolveHomePath } from "./roleRouting";
 
 /** Result returned to a form on failure (or on a success that doesn't redirect). */
 export type AuthState = {
@@ -65,11 +65,11 @@ export async function signUp(
   }
 
   if (data.session) {
-    if (role === "parent" && data.user) {
-      await ensureRoleProfile(supabase, data.user, "parent");
-    }
+    // Route by role: allow-listed admins land on /admin (no onboarding), parents
+    // are provisioned to /parent, everyone else goes to /map → onboarding.
+    const destination = await resolveHomePath(supabase);
     revalidatePath("/", "layout");
-    redirect(role === "parent" ? "/parent" : "/map");
+    redirect(destination);
   }
 
   return {
