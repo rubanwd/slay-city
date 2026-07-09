@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { ensureParentProfile, resolveHomePath } from "./roleRouting";
+import { ensureRoleProfile, resolveHomePath } from "./roleRouting";
 
 /** Result returned to a form on failure (or on a success that doesn't redirect). */
 export type AuthState = {
@@ -66,7 +66,7 @@ export async function signUp(
 
   if (data.session) {
     if (role === "parent" && data.user) {
-      await ensureParentProfile(supabase, data.user);
+      await ensureRoleProfile(supabase, data.user, "parent");
     }
     revalidatePath("/", "layout");
     redirect(role === "parent" ? "/parent" : "/map");

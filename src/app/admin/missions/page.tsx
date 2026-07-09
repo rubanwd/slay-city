@@ -63,20 +63,28 @@ export default async function AdminMissionsPage() {
                     </span>
                   </p>
                 </div>
-                <form action={m.is_published ? unpublishMission : publishMission} className="shrink-0">
-                  <input type="hidden" name="id" value={m.id} />
-                  <button
-                    type="submit"
-                    className={[
-                      "rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors",
-                      m.is_published
-                        ? "border-white/20 text-white/60 hover:bg-white/10"
-                        : "border-lime-green/50 text-lime-green hover:bg-lime-green/10",
-                    ].join(" ")}
+                <div className="flex shrink-0 items-center gap-2">
+                  <Link
+                    href={`/admin/missions/${m.id}/tasks`}
+                    className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white/70 transition-colors hover:bg-white/10"
                   >
-                    {m.is_published ? "Unpublish" : "Publish"}
-                  </button>
-                </form>
+                    Tasks
+                  </Link>
+                  <form action={m.is_published ? unpublishMission : publishMission}>
+                    <input type="hidden" name="id" value={m.id} />
+                    <button
+                      type="submit"
+                      className={[
+                        "rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors",
+                        m.is_published
+                          ? "border-white/20 text-white/60 hover:bg-white/10"
+                          : "border-lime-green/50 text-lime-green hover:bg-lime-green/10",
+                      ].join(" ")}
+                    >
+                      {m.is_published ? "Unpublish" : "Publish"}
+                    </button>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>

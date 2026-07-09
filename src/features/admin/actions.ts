@@ -160,8 +160,42 @@ export async function createMissionTask(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/missions");
+  revalidatePath(`/admin/missions/${missionId}/tasks`);
   return { success: "Task added." };
+}
+
+/** Flips a task's published flag. Only published tasks appear in gameplay. */
+async function setTaskPublished(
+  taskId: string,
+  missionId: string,
+  isPublished: boolean
+): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const { error } = await supabase
+    .from("mission_tasks")
+    .update({ is_published: isPublished })
+    .eq("id", taskId);
+
+  if (!error) {
+    revalidatePath(`/admin/missions/${missionId}/tasks`);
+    // Published tasks are what the player actually plays through.
+    revalidatePath("/map", "layout");
+  }
+}
+
+export async function publishMissionTask(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "").trim();
+  const missionId = String(formData.get("mission_id") ?? "").trim();
+  if (id && missionId) await setTaskPublished(id, missionId, true);
+}
+
+export async function unpublishMissionTask(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "").trim();
+  const missionId = String(formData.get("mission_id") ?? "").trim();
+  if (id && missionId) await setTaskPublished(id, missionId, false);
 }
 
 /* ── Districts & locations ─────────────────────────────────────────────────── */
