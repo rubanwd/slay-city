@@ -51,6 +51,20 @@ function parseNonNegativeInt(raw: FormDataEntryValue | null, fallback = 0): numb
   return n;
 }
 
+/**
+ * Parses an optional 0–100 map coordinate (percent position on the city map).
+ * Empty input is allowed and means "use the map's default center" — returns
+ * `null`. Returns `undefined` when the value is present but not a number in
+ * range, so the caller can distinguish "omitted" from "invalid".
+ */
+function parsePercentCoordinate(raw: FormDataEntryValue | null): number | null | undefined {
+  const value = String(raw ?? "").trim();
+  if (value === "") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0 || n > 100) return undefined;
+  return n;
+}
+
 /* ── Missions ──────────────────────────────────────────────────────────────── */
 
 export async function createMission(
@@ -296,10 +310,14 @@ export async function createLocation(
   const description = String(formData.get("description") ?? "").trim();
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
   const isPublished = formData.get("is_published") === "on";
+  const mapX = parsePercentCoordinate(formData.get("map_x"));
+  const mapY = parsePercentCoordinate(formData.get("map_y"));
 
   if (!districtId) return { error: "Choose a district for this location." };
   if (!name) return { error: "Location name is required." };
   if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
+  if (mapX === undefined) return { error: "Map X must be a number between 0 and 100." };
+  if (mapY === undefined) return { error: "Map Y must be a number between 0 and 100." };
 
   const { error } = await supabase.from("locations").insert({
     district_id: districtId,
@@ -307,6 +325,8 @@ export async function createLocation(
     description: description || null,
     order_index: orderIndex,
     is_published: isPublished,
+    map_x: mapX,
+    map_y: mapY,
   });
 
   if (error) return { error: error.message };

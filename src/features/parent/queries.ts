@@ -24,7 +24,8 @@ export interface ParentProgressSummary {
   locationsUnlocked: number;
   /** Total published locations available in the game. */
   totalLocations: number;
-  /** Count of vocabulary items belonging to completed missions. */
+  /** Count of vocabulary tasks (mission_tasks where task_type = 'vocabulary')
+   * belonging to completed missions. */
   vocabularyCount: number;
   /** Up to the five most recently completed missions, newest first. */
   recentActivity: RecentActivityItem[];
@@ -34,9 +35,11 @@ export interface ParentProgressSummary {
  * Read-only progress summary for the parent dashboard.
  *
  * Joins `user_progress` (completed missions), `user_stats` (streaks),
- * `missions` (titles for recent activity) and `vocabulary_items` (words seen).
- * Every figure is derived from missions actually marked complete
- * (`completed_at IS NOT NULL`), so the dashboard only ever reflects real work.
+ * `missions` (titles for recent activity) and `mission_tasks` (vocabulary words
+ * actually seen — the words a child learns live in each mission's tasks, not
+ * in the separate, unused `vocabulary_items` table). Every figure is derived
+ * from missions actually marked complete (`completed_at IS NOT NULL`), so the
+ * dashboard only ever reflects real work.
  */
 export async function getParentProgressSummary(
   supabase: SupabaseServerClient,
@@ -66,13 +69,17 @@ export async function getParentProgressSummary(
   const completedMissionIds = [...new Set(completed.map((row) => row.mission_id))];
   const unlockedLocationIds = new Set(completed.map((row) => row.location_id));
 
-  // Count vocabulary items belonging to any completed mission. Skip the query
-  // entirely when nothing is completed — `.in()` with an empty list is wasteful.
+  // Count vocabulary tasks belonging to any completed mission — this is the
+  // actual authored content a child sees in-game (via mission_tasks.content),
+  // regardless of whether it came from the seed data or the admin console.
+  // Skip the query entirely when nothing is completed — `.in()` with an empty
+  // list is wasteful.
   let vocabularyCount = 0;
   if (completedMissionIds.length > 0) {
     const { count } = await supabase
-      .from("vocabulary_items")
+      .from("mission_tasks")
       .select("id", { count: "exact", head: true })
+      .eq("task_type", "vocabulary")
       .eq("is_published", true)
       .in("mission_id", completedMissionIds);
     vocabularyCount = count ?? 0;

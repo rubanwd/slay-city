@@ -1,11 +1,14 @@
 import Link from "next/link";
 
+import UiSlayCharacter from "@/components/ui/SlayCharacter";
+
 import type { LocationState } from "./mapState";
 
 export interface MapLocationNodeProps {
   name: string;
   mapX: number;
-  mapY: number;
+  /** Vertical position from the top of the scrollable path, in pixels. */
+  mapYPx: number;
   state: LocationState;
   missionId: string | null;
 }
@@ -32,36 +35,41 @@ function nodeImage(name: string, state: LocationState): string {
   return LOCATION_EMOJI[name] ?? "📍";
 }
 
-export default function MapLocationNode({ name, mapX, mapY, state, missionId }: MapLocationNodeProps) {
+export default function MapLocationNode({ name, mapX, mapYPx, state, missionId }: MapLocationNodeProps) {
   const interactive = missionId !== null && state !== "locked";
 
-  const circle = (
-    <div
-      className={[
-        "relative w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-transform",
-        STATE_CLASSES[state],
-        interactive ? "hover:scale-110 active:scale-95" : "",
-      ].join(" ")}
-    >
-      <span aria-hidden="true" className={state === "locked" ? "opacity-70" : ""}>
-        {nodeImage(name, state)}
-      </span>
-
-      {state === "completed" && (
-        <span
-          aria-hidden="true"
-          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-lime-green text-black text-sm font-black flex items-center justify-center border-2 border-black"
-        >
-          ✓
+  const marker =
+    state === "current" ? (
+      <div className={interactive ? "transition-transform hover:scale-110 active:scale-95" : ""}>
+        <UiSlayCharacter size="sm" wiggle aria-label={`${name} — you are here`} />
+      </div>
+    ) : (
+      <div
+        className={[
+          "relative w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-transform",
+          STATE_CLASSES[state],
+          interactive ? "hover:scale-110 active:scale-95" : "",
+        ].join(" ")}
+      >
+        <span aria-hidden="true" className={state === "locked" ? "opacity-70" : ""}>
+          {nodeImage(name, state)}
         </span>
-      )}
-    </div>
-  );
+
+        {state === "completed" && (
+          <span
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-lime-green text-black text-sm font-black flex items-center justify-center border-2 border-black"
+          >
+            ✓
+          </span>
+        )}
+      </div>
+    );
 
   return (
     <div
       className="absolute z-10 flex flex-col items-center gap-2 -translate-x-1/2 -translate-y-1/2"
-      style={{ left: `${mapX}%`, top: `${mapY}%` }}
+      style={{ left: `${mapX}%`, top: `${mapYPx}px` }}
     >
       {interactive && missionId ? (
         <Link
@@ -69,11 +77,11 @@ export default function MapLocationNode({ name, mapX, mapY, state, missionId }: 
           aria-label={`${name} — ${state}`}
           className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-pink focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-full"
         >
-          {circle}
+          {marker}
         </Link>
       ) : (
         <div aria-label={`${name} — locked`} aria-disabled="true">
-          {circle}
+          {marker}
         </div>
       )}
 

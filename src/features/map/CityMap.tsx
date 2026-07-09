@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 
 import { BottomNav } from "@/components/layout";
 
@@ -20,11 +21,33 @@ export interface CityMapProps {
   hud: HudStats;
 }
 
+/** Vertical gap between consecutive stops on the path, in pixels. */
+const ROW_HEIGHT = 150;
+/** Breathing room above the topmost stop and below the closest one. */
+const TOP_PADDING = 110;
+const BOTTOM_PADDING = 70;
+/** Horizontal zigzag: closest stop centered, then alternating left/right. */
+const X_PATTERN = [50, 28, 72];
+
 export default function CityMap({ districts, hud }: CityMapProps) {
-  const current = districts.flatMap((d) => d.locations).find((l) => l.state === "current");
+  const locations = districts.flatMap((d) => d.locations);
+  const current = locations.find((l) => l.state === "current");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const pathHeight =
+    locations.length > 0
+      ? TOP_PADDING + (locations.length - 1) * ROW_HEIGHT + BOTTOM_PADDING
+      : 0;
+
+  // The path is ordered closest-first; closest sits at the bottom, so scroll
+  // there by default instead of dropping the player at the far, locked end.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, []);
 
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <main className="h-screen bg-black flex flex-col overflow-hidden">
       <header className="flex items-center justify-between gap-2 px-5 py-4 border-b border-white/10">
         <h1 className="text-lg font-black text-lime-green leading-tight uppercase">
           Slay
@@ -44,21 +67,46 @@ export default function CityMap({ districts, hud }: CityMapProps) {
         </div>
       </header>
 
-      <div className="relative flex-1 min-h-[520px] overflow-hidden">
-        <MapBackground />
+      <div ref={scrollRef} className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+        <div className="relative" style={{ height: pathHeight }}>
+          <MapBackground />
 
-        {districts
-          .flatMap((district) => district.locations)
-          .map((loc) => (
+          {locations.length > 1 && (
+            <svg
+              className="absolute inset-0 w-full pointer-events-none"
+              height={pathHeight}
+              viewBox={`0 0 100 ${pathHeight}`}
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <polyline
+                points={locations
+                  .map((_, i) => {
+                    const x = X_PATTERN[i % X_PATTERN.length];
+                    const y = pathHeight - BOTTOM_PADDING - i * ROW_HEIGHT;
+                    return `${x},${y}`;
+                  })
+                  .join(" ")}
+                fill="none"
+                stroke="#9DFF00"
+                strokeWidth={1.2}
+                strokeOpacity={0.7}
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
+          )}
+
+          {locations.map((loc, i) => (
             <MapLocationNode
               key={loc.id}
               name={loc.name}
-              mapX={loc.mapX}
-              mapY={loc.mapY}
+              mapX={X_PATTERN[i % X_PATTERN.length]}
+              mapYPx={pathHeight - BOTTOM_PADDING - i * ROW_HEIGHT}
               state={loc.state}
               missionId={loc.missionId}
             />
           ))}
+        </div>
       </div>
 
       {current?.missionId && (
