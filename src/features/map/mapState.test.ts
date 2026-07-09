@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildMapViewModel } from "./mapState";
+import { buildLocationProgress, buildMapViewModel } from "./mapState";
 
 const districts = [{ id: "d1", name: "Central Plaza", order_index: 0 }];
 
@@ -72,5 +72,43 @@ describe("buildMapViewModel", () => {
 
     expect(district.locations[0].missionId).toBe("m1");
     expect(district.locations[1].missionId).toBeNull();
+  });
+});
+
+describe("buildLocationProgress", () => {
+  const missions = [
+    { id: "m1", location_id: "l1", order_index: 0 },
+    { id: "m2", location_id: "l1", order_index: 1 },
+    { id: "m3", location_id: "l2", order_index: 0 },
+  ];
+
+  it("picks the first mission (by order_index) as next when none are completed", () => {
+    const { completedLocationIds, nextMissionIdByLocation } = buildLocationProgress(missions, new Set());
+
+    expect(nextMissionIdByLocation.get("l1")).toBe("m1");
+    expect(nextMissionIdByLocation.get("l2")).toBe("m3");
+    expect(completedLocationIds.size).toBe(0);
+  });
+
+  it("advances to the next mission at a location once the current one is completed", () => {
+    const { completedLocationIds, nextMissionIdByLocation } = buildLocationProgress(
+      missions,
+      new Set(["m1"])
+    );
+
+    expect(nextMissionIdByLocation.get("l1")).toBe("m2");
+    expect(completedLocationIds.has("l1")).toBe(false);
+  });
+
+  it("marks a location completed once every one of its missions is completed", () => {
+    const { completedLocationIds, nextMissionIdByLocation } = buildLocationProgress(
+      missions,
+      new Set(["m1", "m2"])
+    );
+
+    expect(completedLocationIds.has("l1")).toBe(true);
+    expect(nextMissionIdByLocation.has("l1")).toBe(false);
+    // l2's mission is untouched — it should be unaffected by l1's completion.
+    expect(nextMissionIdByLocation.get("l2")).toBe("m3");
   });
 });

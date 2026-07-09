@@ -77,12 +77,14 @@ export async function createMission(
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const locationId = String(formData.get("location_id") ?? "").trim();
+  const orderIndex = parseNonNegativeInt(formData.get("order_index"));
   const xpReward = parseNonNegativeInt(formData.get("xp_reward"));
   const coinReward = parseNonNegativeInt(formData.get("coin_reward"));
   const isPublished = formData.get("is_published") === "on";
 
   if (!title) return { error: "Title is required." };
   if (!locationId) return { error: "Choose a location for this mission." };
+  if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
   if (xpReward === null) return { error: "XP reward must be a non-negative whole number." };
   if (coinReward === null) return { error: "Coin reward must be a non-negative whole number." };
 
@@ -90,6 +92,7 @@ export async function createMission(
     title,
     description: description || null,
     location_id: locationId,
+    order_index: orderIndex,
     xp_reward: xpReward,
     coin_reward: coinReward,
     is_published: isPublished,
@@ -116,6 +119,7 @@ export async function updateMission(
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const locationId = String(formData.get("location_id") ?? "").trim();
+  const orderIndex = parseNonNegativeInt(formData.get("order_index"));
   const xpReward = parseNonNegativeInt(formData.get("xp_reward"));
   const coinReward = parseNonNegativeInt(formData.get("coin_reward"));
   const isPublished = formData.get("is_published") === "on";
@@ -123,6 +127,7 @@ export async function updateMission(
   if (!id) return { error: "A mission is required." };
   if (!title) return { error: "Title is required." };
   if (!locationId) return { error: "Choose a location for this mission." };
+  if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
   if (xpReward === null) return { error: "XP reward must be a non-negative whole number." };
   if (coinReward === null) return { error: "Coin reward must be a non-negative whole number." };
 
@@ -132,6 +137,7 @@ export async function updateMission(
       title,
       description: description || null,
       location_id: locationId,
+      order_index: orderIndex,
       xp_reward: xpReward,
       coin_reward: coinReward,
       is_published: isPublished,

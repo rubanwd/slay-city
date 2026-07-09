@@ -246,6 +246,7 @@ export type Database = {
           id: string
           is_published: boolean
           location_id: string
+          order_index: number
           title: string
           updated_at: string
           xp_reward: number
@@ -257,6 +258,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           location_id: string
+          order_index?: number
           title: string
           updated_at?: string
           xp_reward?: number
@@ -268,6 +270,7 @@ export type Database = {
           id?: string
           is_published?: boolean
           location_id?: string
+          order_index?: number
           title?: string
           updated_at?: string
           xp_reward?: number

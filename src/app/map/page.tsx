@@ -1,6 +1,6 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import CityMap from "@/features/map/CityMap";
-import { buildMapViewModel } from "@/features/map/mapState";
+import { buildLocationProgress, buildMapViewModel } from "@/features/map/mapState";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function MapPage() {
@@ -29,10 +29,10 @@ export default async function MapPage() {
       .order("order_index"),
     supabase
       .from("missions")
-      .select("id, location_id")
+      .select("id, location_id, order_index")
       .eq("is_published", true)
-      .order("created_at"),
-    supabase.from("user_progress").select("location_id, completed_at").eq("profile_id", user.id),
+      .order("order_index"),
+    supabase.from("user_progress").select("mission_id, completed_at").eq("profile_id", user.id),
     supabase
       .from("user_stats")
       .select("xp, coins, level, current_streak")
@@ -46,24 +46,22 @@ export default async function MapPage() {
     publishedDistrictIds.has(loc.district_id)
   );
 
-  const firstMissionIdByLocation = new Map<string, string>();
-  for (const mission of missionsRes.data ?? []) {
-    if (!firstMissionIdByLocation.has(mission.location_id)) {
-      firstMissionIdByLocation.set(mission.location_id, mission.id);
-    }
-  }
-
-  const completedLocationIds = new Set(
+  const completedMissionIds = new Set(
     (progressRes.data ?? [])
       .filter((row) => row.completed_at !== null)
-      .map((row) => row.location_id)
+      .map((row) => row.mission_id)
+  );
+
+  const { completedLocationIds, nextMissionIdByLocation } = buildLocationProgress(
+    missionsRes.data ?? [],
+    completedMissionIds
   );
 
   const mapDistricts = buildMapViewModel(
     districts,
     locations,
     completedLocationIds,
-    firstMissionIdByLocation
+    nextMissionIdByLocation
   );
 
   const stats = statsRes.data;

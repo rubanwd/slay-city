@@ -20,7 +20,8 @@ export default async function NewDistrictLocationPage() {
       .order("order_index"),
     supabase
       .from("missions")
-      .select("id, title, description, xp_reward, coin_reward, is_published, location_id"),
+      .select("id, title, description, order_index, xp_reward, coin_reward, is_published, location_id")
+      .order("order_index"),
   ]);
 
   const districtRows: AdminDistrictItemData[] = districts ?? [];

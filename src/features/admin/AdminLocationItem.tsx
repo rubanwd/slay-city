@@ -29,7 +29,7 @@ function SaveButton({ label = "Save" }: { label?: string }) {
   );
 }
 
-function AddMissionForm({ locationId }: { locationId: string }) {
+function AddMissionForm({ locationId, nextOrder }: { locationId: string; nextOrder: number }) {
   const [state, formAction] = useActionState<AdminFormState, FormData>(createMission, {});
   const [formKey, setFormKey] = useState(0);
 
@@ -54,6 +54,11 @@ function AddMissionForm({ locationId }: { locationId: string }) {
       <label className="flex flex-col gap-1.5">
         <span className={LABEL_CLASS}>Description</span>
         <textarea name="description" rows={2} placeholder="Optional" className={INPUT_CLASS} />
+      </label>
+      <label className="flex flex-col gap-1.5">
+        <span className={LABEL_CLASS}>Order</span>
+        <input name="order_index" type="number" min={0} defaultValue={nextOrder} className={INPUT_CLASS} />
+        <span className="text-xs text-white/40">Missions at this location play in this order.</span>
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
@@ -213,15 +218,17 @@ export default function AdminLocationItem({ location, missions }: AdminLocationI
           </button>
         </div>
 
-        {addingMission && <AddMissionForm locationId={location.id} />}
+        {addingMission && <AddMissionForm locationId={location.id} nextOrder={missions.length} />}
 
         {missions.length === 0 ? (
           <p className="rounded-lg bg-black/20 px-3 py-2 text-xs text-white/40">No missions yet.</p>
         ) : (
           <ul className="flex flex-col gap-2">
-            {missions.map((m) => (
-              <AdminMissionItem key={m.id} mission={m} />
-            ))}
+            {[...missions]
+              .sort((a, b) => a.order_index - b.order_index)
+              .map((m) => (
+                <AdminMissionItem key={m.id} mission={m} />
+              ))}
           </ul>
         )}
       </div>

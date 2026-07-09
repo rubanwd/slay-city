@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import AuthGuard from "@/components/auth/AuthGuard";
-import { buildMapViewModel } from "@/features/map/mapState";
+import { buildLocationProgress, buildMapViewModel } from "@/features/map/mapState";
 import RewardScreen from "@/features/reward/RewardScreen";
 import { createClient } from "@/lib/supabase/server";
 
@@ -65,10 +65,10 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
       .order("order_index"),
     supabase
       .from("missions")
-      .select("id, location_id")
+      .select("id, location_id, order_index")
       .eq("is_published", true)
-      .order("created_at"),
-    supabase.from("user_progress").select("location_id, completed_at").eq("profile_id", user.id),
+      .order("order_index"),
+    supabase.from("user_progress").select("mission_id, completed_at").eq("profile_id", user.id),
   ]);
 
   const districts = districtsRes.data ?? [];
@@ -77,22 +77,20 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
     publishedDistrictIds.has(loc.district_id)
   );
 
-  const firstMissionIdByLocation = new Map<string, string>();
-  for (const m of missionsRes.data ?? []) {
-    if (!firstMissionIdByLocation.has(m.location_id)) {
-      firstMissionIdByLocation.set(m.location_id, m.id);
-    }
-  }
+  const completedMissionIds = new Set(
+    (progressRes.data ?? []).filter((row) => row.completed_at !== null).map((row) => row.mission_id)
+  );
 
-  const completedLocationIds = new Set(
-    (progressRes.data ?? []).filter((row) => row.completed_at !== null).map((row) => row.location_id)
+  const { completedLocationIds, nextMissionIdByLocation } = buildLocationProgress(
+    missionsRes.data ?? [],
+    completedMissionIds
   );
 
   const mapDistricts = buildMapViewModel(
     districts,
     locations,
     completedLocationIds,
-    firstMissionIdByLocation
+    nextMissionIdByLocation
   );
 
   // The "current" location is the next frontier stop the player can now play.

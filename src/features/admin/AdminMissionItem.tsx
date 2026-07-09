@@ -13,6 +13,7 @@ export interface AdminMissionItemData {
   id: string;
   title: string;
   description: string | null;
+  order_index: number;
   xp_reward: number;
   coin_reward: number;
   is_published: boolean;
@@ -49,6 +50,16 @@ export default function AdminMissionItem({ mission }: { mission: AdminMissionIte
               name="description"
               rows={2}
               defaultValue={mission.description ?? ""}
+              className={INPUT_CLASS}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className={LABEL_CLASS}>Order</span>
+            <input
+              name="order_index"
+              type="number"
+              min={0}
+              defaultValue={mission.order_index}
               className={INPUT_CLASS}
             />
           </label>
@@ -104,6 +115,9 @@ export default function AdminMissionItem({ mission }: { mission: AdminMissionIte
   return (
     <li className="rounded-xl border border-white/10 bg-black/30 px-3 py-3">
       <div className="flex min-w-0 items-center gap-2">
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-white/10 text-[10px] font-bold text-white/70">
+          {mission.order_index}
+        </span>
         <span className="truncate text-small font-bold text-white">{mission.title}</span>
         <span
           className={[

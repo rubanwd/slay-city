@@ -86,6 +86,14 @@ export default function AdminMissionEditor({ locations }: AdminMissionEditorProp
         )}
       </label>
 
+      <label className="flex flex-col gap-1.5">
+        <span className={LABEL_CLASS}>Order</span>
+        <input name="order_index" type="number" min={0} defaultValue={0} className={INPUT_CLASS} />
+        <span className="text-xs text-white/40">
+          When a location has several missions, this controls the order they&apos;re played in.
+        </span>
+      </label>
+
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
           <span className={LABEL_CLASS}>XP Reward</span>
