@@ -25,10 +25,10 @@ export default async function AdminPage() {
       accent: "text-lime-green",
     },
     {
-      href: "/admin/districts/new",
+      href: "/admin/districts",
       title: "Districts & Locations",
-      count: (districtsRes.count ?? 0) + (locationsRes.count ?? 0),
-      description: "Add districts and the locations inside them.",
+      count: districtsRes.count ?? 0,
+      description: "Districts, their locations, and the missions inside them.",
       accent: "text-cyan",
     },
     {

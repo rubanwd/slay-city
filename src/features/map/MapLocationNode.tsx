@@ -6,9 +6,10 @@ import type { LocationState } from "./mapState";
 
 export interface MapLocationNodeProps {
   name: string;
+  /** Horizontal position, as a percentage of the map area's width. */
   mapX: number;
-  /** Vertical position from the top of the scrollable path, in pixels. */
-  mapYPx: number;
+  /** Vertical position, as a percentage of the map area's height. */
+  mapY: number;
   state: LocationState;
   missionId: string | null;
 }
@@ -35,7 +36,7 @@ function nodeImage(name: string, state: LocationState): string {
   return LOCATION_EMOJI[name] ?? "📍";
 }
 
-export default function MapLocationNode({ name, mapX, mapYPx, state, missionId }: MapLocationNodeProps) {
+export default function MapLocationNode({ name, mapX, mapY, state, missionId }: MapLocationNodeProps) {
   const interactive = missionId !== null && state !== "locked";
 
   const marker =
@@ -46,7 +47,7 @@ export default function MapLocationNode({ name, mapX, mapYPx, state, missionId }
     ) : (
       <div
         className={[
-          "relative w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-transform",
+          "relative w-[clamp(3.25rem,11vmin,5rem)] h-[clamp(3.25rem,11vmin,5rem)] rounded-full flex items-center justify-center text-[clamp(1.5rem,5vmin,2.25rem)] transition-transform",
           STATE_CLASSES[state],
           interactive ? "hover:scale-110 active:scale-95" : "",
         ].join(" ")}
@@ -68,8 +69,8 @@ export default function MapLocationNode({ name, mapX, mapYPx, state, missionId }
 
   return (
     <div
-      className="absolute z-10 flex flex-col items-center gap-2 -translate-x-1/2 -translate-y-1/2"
-      style={{ left: `${mapX}%`, top: `${mapYPx}px` }}
+      className="absolute z-10 flex flex-col items-center gap-1.5 -translate-x-1/2 -translate-y-1/2"
+      style={{ left: `${mapX}%`, top: `${mapY}%` }}
     >
       {interactive && missionId ? (
         <Link
@@ -87,7 +88,7 @@ export default function MapLocationNode({ name, mapX, mapYPx, state, missionId }
 
       <span
         className={[
-          "text-xs font-semibold uppercase tracking-wide px-2 py-1 rounded-lg bg-black/60 whitespace-nowrap",
+          "max-w-[22vw] truncate text-[clamp(0.6rem,2.2vmin,0.75rem)] font-semibold uppercase tracking-wide px-2 py-1 rounded-lg bg-black/60",
           state === "locked" ? "text-white/30" : "text-white/80",
         ].join(" ")}
       >

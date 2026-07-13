@@ -52,6 +52,7 @@ export interface MapLocationViewModel {
   mapY: number;
   state: LocationState;
   missionId: string | null;
+  districtName: string;
 }
 
 export interface MapDistrictViewModel {
@@ -115,9 +116,36 @@ export function buildMapViewModel(
         mapY: Number(loc.map_y ?? 50),
         state,
         missionId: missionIdByLocation.get(loc.id) ?? null,
+        districtName: district.name,
       };
     });
 
     return { id: district.id, name: district.name, locations: viewLocations };
   });
+}
+
+/**
+ * Hard cap on stops the map shows at once. The layout is hand-tuned for up
+ * to this many and is intentionally scroll-free, so it can never grow past
+ * it regardless of how many locations exist in the database.
+ */
+export const MAX_VISIBLE_LOCATIONS = 6;
+
+/**
+ * When there are more locations than the map can show at once, picks a
+ * window of `max` consecutive stops centered on the current one — so the
+ * player's frontier is always visible — instead of always showing the
+ * earliest (or latest) stops.
+ */
+export function selectVisibleLocations(
+  locations: MapLocationViewModel[],
+  max: number = MAX_VISIBLE_LOCATIONS
+): MapLocationViewModel[] {
+  if (locations.length <= max) return locations;
+
+  const currentIndex = locations.findIndex((loc) => loc.state === "current");
+  const anchor = currentIndex === -1 ? locations.length - 1 : currentIndex;
+  const start = Math.min(Math.max(0, anchor - Math.floor(max / 2)), locations.length - max);
+
+  return locations.slice(start, start + max);
 }

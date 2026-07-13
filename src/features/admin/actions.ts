@@ -101,7 +101,7 @@ export async function createMission(
   if (error) return { error: error.message };
 
   revalidatePath("/admin/missions");
-  revalidatePath("/admin/districts/new");
+  revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `Mission "${title}" created.` };
 }
@@ -147,7 +147,7 @@ export async function updateMission(
   if (error) return { error: error.message };
 
   revalidatePath("/admin/missions");
-  revalidatePath("/admin/districts/new");
+  revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `Mission "${title}" updated.` };
 }
@@ -402,7 +402,7 @@ export async function createDistrict(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/districts/new");
+  revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `District "${name}" created.` };
 }
@@ -438,7 +438,7 @@ export async function updateDistrict(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/districts/new");
+  revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `District "${name}" updated.` };
 }
@@ -477,7 +477,7 @@ export async function createLocation(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/districts/new");
+  revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `Location "${name}" created.` };
 }
@@ -522,7 +522,7 @@ export async function updateLocation(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/districts/new");
+  revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `Location "${name}" updated.` };
 }
