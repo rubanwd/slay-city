@@ -86,8 +86,19 @@ export default function RewardScreen({
           0%   { transform: translateY(16px); opacity: 0; }
           100% { transform: translateY(0);    opacity: 1; }
         }
+        @keyframes reward-headline-pulse {
+          0%, 100% {
+            transform: scale(1);
+            text-shadow: 0 0 12px rgba(255,45,142,0.9), 0 0 28px rgba(255,45,142,0.55);
+          }
+          50% {
+            transform: scale(1.06);
+            text-shadow: 0 0 20px rgba(255,45,142,1), 0 0 44px rgba(255,45,142,0.8);
+          }
+        }
         @media (prefers-reduced-motion: reduce) {
           .reward-drop { display: none; }
+          .reward-headline { animation: none !important; }
         }
       `}</style>
 
@@ -116,11 +127,12 @@ export default function RewardScreen({
       <Section className="relative z-10 items-center gap-6 text-center">
         {/* Headline */}
         <h1
-          className="text-display font-black uppercase leading-none text-neon-pink"
+          className="reward-headline text-display font-black uppercase leading-none text-neon-pink"
           style={{
             textShadow:
               "0 0 12px rgba(255,45,142,0.9), 0 0 28px rgba(255,45,142,0.55)",
-            animation: "reward-pop 0.5s ease-out both",
+            animation:
+              "reward-pop 0.5s ease-out both, reward-headline-pulse 1.6s ease-in-out 0.5s infinite",
           }}
         >
           Amazing!
