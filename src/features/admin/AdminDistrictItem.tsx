@@ -6,6 +6,7 @@ export interface AdminDistrictItemData {
   description: string | null;
   order_index: number;
   is_published: boolean;
+  background_image_url: string | null;
 }
 
 export interface AdminDistrictItemProps {

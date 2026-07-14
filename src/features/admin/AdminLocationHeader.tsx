@@ -6,7 +6,9 @@ import { useFormStatus } from "react-dom";
 import { SlayButton } from "@/components/ui";
 
 import type { AdminLocationItemData } from "./AdminLocationItem";
-import { updateLocation, type AdminFormState } from "./actions";
+import ImageUploadField from "./ImageUploadField";
+import MapPositionPicker from "./MapPositionPicker";
+import { deleteLocation, updateLocation, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
 function SaveButton() {
@@ -18,8 +20,17 @@ function SaveButton() {
   );
 }
 
+export interface AdminLocationHeaderProps {
+  location: AdminLocationItemData;
+  /** The district's background, shown in the position picker to match the child's map. */
+  districtBackgroundUrl?: string | null;
+}
+
 /** Editable location card shown at the top of the location detail page. */
-export default function AdminLocationHeader({ location }: { location: AdminLocationItemData }) {
+export default function AdminLocationHeader({
+  location,
+  districtBackgroundUrl,
+}: AdminLocationHeaderProps) {
   const [editing, setEditing] = useState(false);
   const [state, formAction] = useActionState<AdminFormState, FormData>(updateLocation, {});
 
@@ -43,42 +54,28 @@ export default function AdminLocationHeader({ location }: { location: AdminLocat
               className={INPUT_CLASS}
             />
           </label>
-          <div className="grid grid-cols-3 gap-3">
-            <label className="flex flex-col gap-1.5">
-              <span className={LABEL_CLASS}>Order</span>
-              <input
-                name="order_index"
-                type="number"
-                min={0}
-                defaultValue={location.order_index}
-                className={INPUT_CLASS}
-              />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className={LABEL_CLASS}>Map X</span>
-              <input
-                name="map_x"
-                type="number"
-                min={0}
-                max={100}
-                step={0.1}
-                defaultValue={location.map_x ?? 50}
-                className={INPUT_CLASS}
-              />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className={LABEL_CLASS}>Map Y</span>
-              <input
-                name="map_y"
-                type="number"
-                min={0}
-                max={100}
-                step={0.1}
-                defaultValue={location.map_y ?? 50}
-                className={INPUT_CLASS}
-              />
-            </label>
-          </div>
+          <label className="flex flex-col gap-1.5">
+            <span className={LABEL_CLASS}>Order</span>
+            <input
+              name="order_index"
+              type="number"
+              min={0}
+              defaultValue={location.order_index}
+              className={INPUT_CLASS}
+            />
+          </label>
+          <MapPositionPicker
+            defaultX={location.map_x ?? 50}
+            defaultY={location.map_y ?? 50}
+            backgroundUrl={districtBackgroundUrl}
+            iconUrl={location.icon_url}
+          />
+          <ImageUploadField
+            name="icon_url"
+            label="Map Icon"
+            folder="locations"
+            defaultValue={location.icon_url}
+          />
           <label className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3">
             <span className="text-body-strong text-white">Published</span>
             <input
@@ -131,6 +128,31 @@ export default function AdminLocationHeader({ location }: { location: AdminLocat
             Map: {location.map_x ?? "—"}, {location.map_y ?? "—"}
           </p>
         </div>
+      )}
+
+      {editing && (
+        <form
+          action={deleteLocation}
+          onSubmit={(e) => {
+            if (
+              !window.confirm(
+                "Delete this location and ALL its missions and tasks? This cannot be undone."
+              )
+            ) {
+              e.preventDefault();
+            }
+          }}
+          className="mt-3 border-t border-white/10 pt-3"
+        >
+          <input type="hidden" name="id" value={location.id} />
+          <input type="hidden" name="district_id" value={location.district_id} />
+          <button
+            type="submit"
+            className="rounded-full border border-neon-pink/50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
+          >
+            Delete Location
+          </button>
+        </form>
       )}
     </div>
   );

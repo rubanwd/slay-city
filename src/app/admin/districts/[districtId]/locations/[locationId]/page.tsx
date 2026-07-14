@@ -19,7 +19,9 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
 
   const { data: location } = await supabase
     .from("locations")
-    .select("id, district_id, name, description, order_index, is_published, map_x, map_y, districts(name)")
+    .select(
+      "id, district_id, name, description, order_index, is_published, map_x, map_y, icon_url, districts(name, background_image_url)"
+    )
     .eq("id", locationId)
     .maybeSingle();
 
@@ -38,6 +40,7 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
   const locationData: AdminLocationItemData = locationCols;
   const missionRows: AdminMissionItemData[] = missions ?? [];
   const districtName = districts?.name ?? "District";
+  const districtBackgroundUrl = districts?.background_image_url ?? null;
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -56,7 +59,7 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
           <span className="truncate text-white/60">{location.name}</span>
         </nav>
 
-        <AdminLocationHeader location={locationData} />
+        <AdminLocationHeader location={locationData} districtBackgroundUrl={districtBackgroundUrl} />
 
         <h2 className="mb-2 text-label text-white/50">Missions ({missionRows.length})</h2>
         {missionRows.length === 0 ? (

@@ -18,7 +18,7 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
 
   const { data: district } = await supabase
     .from("districts")
-    .select("id, name, description, order_index, is_published")
+    .select("id, name, description, order_index, is_published, background_image_url")
     .eq("id", districtId)
     .maybeSingle();
 
@@ -29,7 +29,7 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
   const [{ data: locations }, { data: missions }] = await Promise.all([
     supabase
       .from("locations")
-      .select("id, district_id, name, description, order_index, is_published, map_x, map_y")
+      .select("id, district_id, name, description, order_index, is_published, map_x, map_y, icon_url")
       .eq("district_id", districtId)
       .order("order_index"),
     supabase.from("missions").select("id, location_id"),
@@ -67,7 +67,10 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
           </ul>
         )}
 
-        <AdminLocationForm fixedDistrictId={districtId} />
+        <AdminLocationForm
+          fixedDistrictId={districtId}
+          districtBackgroundUrl={district.background_image_url}
+        />
       </div>
     </main>
   );

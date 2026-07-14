@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
@@ -389,6 +390,7 @@ export async function createDistrict(
   const description = String(formData.get("description") ?? "").trim();
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
   const isPublished = formData.get("is_published") === "on";
+  const backgroundImageUrl = String(formData.get("background_image_url") ?? "").trim();
 
   if (!name) return { error: "District name is required." };
   if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
@@ -398,6 +400,7 @@ export async function createDistrict(
     description: description || null,
     order_index: orderIndex,
     is_published: isPublished,
+    background_image_url: backgroundImageUrl || null,
   });
 
   if (error) return { error: error.message };
@@ -421,6 +424,7 @@ export async function updateDistrict(
   const description = String(formData.get("description") ?? "").trim();
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
   const isPublished = formData.get("is_published") === "on";
+  const backgroundImageUrl = String(formData.get("background_image_url") ?? "").trim();
 
   if (!id) return { error: "A district is required." };
   if (!name) return { error: "District name is required." };
@@ -433,6 +437,7 @@ export async function updateDistrict(
       description: description || null,
       order_index: orderIndex,
       is_published: isPublished,
+      background_image_url: backgroundImageUrl || null,
     })
     .eq("id", id);
 
@@ -458,6 +463,7 @@ export async function createLocation(
   const isPublished = formData.get("is_published") === "on";
   const mapX = parsePercentCoordinate(formData.get("map_x"));
   const mapY = parsePercentCoordinate(formData.get("map_y"));
+  const iconUrl = String(formData.get("icon_url") ?? "").trim();
 
   if (!districtId) return { error: "Choose a district for this location." };
   if (!name) return { error: "Location name is required." };
@@ -473,6 +479,7 @@ export async function createLocation(
     is_published: isPublished,
     map_x: mapX,
     map_y: mapY,
+    icon_url: iconUrl || null,
   });
 
   if (error) return { error: error.message };
@@ -499,6 +506,7 @@ export async function updateLocation(
   const isPublished = formData.get("is_published") === "on";
   const mapX = parsePercentCoordinate(formData.get("map_x"));
   const mapY = parsePercentCoordinate(formData.get("map_y"));
+  const iconUrl = String(formData.get("icon_url") ?? "").trim();
 
   if (!id) return { error: "A location is required." };
   if (!districtId) return { error: "Choose a district for this location." };
@@ -517,6 +525,7 @@ export async function updateLocation(
       is_published: isPublished,
       map_x: mapX,
       map_y: mapY,
+      icon_url: iconUrl || null,
     })
     .eq("id", id);
 
@@ -525,4 +534,46 @@ export async function updateLocation(
   revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `Location "${name}" updated.` };
+}
+
+/**
+ * Deletes a district. Foreign-key cascades remove its locations, their
+ * missions, tasks, and related progress. Redirects to the district list, since
+ * the current detail page no longer exists afterwards.
+ */
+export async function deleteDistrict(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return;
+
+  const { error } = await supabase.from("districts").delete().eq("id", id);
+  if (error) return;
+
+  revalidatePath("/admin/districts", "layout");
+  revalidatePath("/map", "layout");
+  redirect("/admin/districts");
+}
+
+/**
+ * Deletes a location. Foreign-key cascades remove its missions, tasks, and
+ * related progress. Redirects back to the owning district's detail page.
+ */
+export async function deleteLocation(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const id = String(formData.get("id") ?? "").trim();
+  const districtId = String(formData.get("district_id") ?? "").trim();
+  if (!id) return;
+
+  const { error } = await supabase.from("locations").delete().eq("id", id);
+  if (error) return;
+
+  revalidatePath("/admin/districts", "layout");
+  revalidatePath("/map", "layout");
+  redirect(districtId ? `/admin/districts/${districtId}` : "/admin/districts");
 }

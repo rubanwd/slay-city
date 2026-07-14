@@ -53,6 +53,10 @@ export interface MapLocationViewModel {
   state: LocationState;
   missionId: string | null;
   districtName: string;
+  /** The location's own map icon, if uploaded. */
+  iconUrl: string | null;
+  /** Background image of the district this location belongs to, if uploaded. */
+  districtBackgroundUrl: string | null;
 }
 
 export interface MapDistrictViewModel {
@@ -73,8 +77,8 @@ export interface MapDistrictViewModel {
  * but not "current".
  */
 export function buildMapViewModel(
-  districts: Pick<District, "id" | "name" | "order_index">[],
-  locations: Pick<Location, "id" | "district_id" | "name" | "description" | "order_index" | "map_x" | "map_y">[],
+  districts: Pick<District, "id" | "name" | "order_index" | "background_image_url">[],
+  locations: Pick<Location, "id" | "district_id" | "name" | "description" | "order_index" | "map_x" | "map_y" | "icon_url">[],
   completedLocationIds: ReadonlySet<string>,
   missionIdByLocation: ReadonlyMap<string, string>
 ): MapDistrictViewModel[] {
@@ -117,6 +121,8 @@ export function buildMapViewModel(
         state,
         missionId: missionIdByLocation.get(loc.id) ?? null,
         districtName: district.name,
+        iconUrl: loc.icon_url ?? null,
+        districtBackgroundUrl: district.background_image_url ?? null,
       };
     });
 

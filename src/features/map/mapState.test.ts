@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { buildLocationProgress, buildMapViewModel } from "./mapState";
 
-const districts = [{ id: "d1", name: "Central Plaza", order_index: 0 }];
+const districts = [
+  { id: "d1", name: "Central Plaza", order_index: 0, background_image_url: null },
+];
 
 const locations = [
   {
@@ -13,6 +15,7 @@ const locations = [
     order_index: 0,
     map_x: 25,
     map_y: 40,
+    icon_url: null,
   },
   {
     id: "l2",
@@ -22,6 +25,7 @@ const locations = [
     order_index: 1,
     map_x: 60,
     map_y: 55,
+    icon_url: null,
   },
 ];
 
@@ -43,8 +47,8 @@ describe("buildMapViewModel", () => {
 
   it("only assigns 'current' once across multiple districts, others become 'unlocked'", () => {
     const twoDistricts = [
-      { id: "d1", name: "Central Plaza", order_index: 0 },
-      { id: "d2", name: "Second District", order_index: 1 },
+      { id: "d1", name: "Central Plaza", order_index: 0, background_image_url: null },
+      { id: "d2", name: "Second District", order_index: 1, background_image_url: null },
     ];
     const twoDistrictLocations = [
       ...locations,
@@ -56,6 +60,7 @@ describe("buildMapViewModel", () => {
         order_index: 0,
         map_x: 10,
         map_y: 10,
+        icon_url: null,
       },
     ];
 

@@ -9,6 +9,7 @@ export interface AdminLocationItemData {
   is_published: boolean;
   map_x: number | null;
   map_y: number | null;
+  icon_url: string | null;
 }
 
 export interface AdminLocationItemProps {

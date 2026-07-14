@@ -10,7 +10,7 @@ export default async function AdminDistrictsPage() {
   const [{ data: districts }, { data: locations }] = await Promise.all([
     supabase
       .from("districts")
-      .select("id, name, description, order_index, is_published")
+      .select("id, name, description, order_index, is_published, background_image_url")
       .order("order_index"),
     supabase.from("locations").select("id, district_id"),
   ]);

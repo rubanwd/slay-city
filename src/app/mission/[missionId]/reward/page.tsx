@@ -55,12 +55,12 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
       .maybeSingle(),
     supabase
       .from("districts")
-      .select("id, name, order_index")
+      .select("id, name, order_index, background_image_url")
       .eq("is_published", true)
       .order("order_index"),
     supabase
       .from("locations")
-      .select("id, district_id, name, description, order_index, map_x, map_y")
+      .select("id, district_id, name, description, order_index, map_x, map_y, icon_url")
       .eq("is_published", true)
       .order("order_index"),
     supabase

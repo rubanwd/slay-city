@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BottomNav } from "@/components/layout";
 
 import MapBackground from "./MapBackground";
+import { MAP_ASPECT } from "./mapConstants";
 import { MAX_VISIBLE_LOCATIONS, selectVisibleLocations } from "./mapState";
 import type { MapDistrictViewModel } from "./mapState";
 import MapLocationNode from "./MapLocationNode";
@@ -21,26 +22,6 @@ export interface CityMapProps {
   hud: HudStats;
 }
 
-/**
- * Horizontal zigzag (percent of map width), closest stop first. Hand-tuned
- * for up to MAX_VISIBLE_LOCATIONS stops so the path reads as a winding road
- * rather than a straight line, while keeping every stop clear of the edges.
- */
-const X_PATTERN = [50, 76, 24, 68, 32, 50];
-/** Vertical breathing room (percent of map height) around the end stops. */
-const TOP_PADDING = 14;
-const BOTTOM_PADDING = 12;
-
-/** Position of stop `index` of `total`, as percentages of the map area. */
-function stopPosition(index: number, total: number) {
-  const x = X_PATTERN[index % X_PATTERN.length];
-  const y =
-    total <= 1
-      ? 50
-      : 100 - BOTTOM_PADDING - (index * (100 - TOP_PADDING - BOTTOM_PADDING)) / (total - 1);
-  return { x, y };
-}
-
 export default function CityMap({ districts, hud }: CityMapProps) {
   const locations = selectVisibleLocations(
     districts.flatMap((d) => d.locations),
@@ -49,7 +30,9 @@ export default function CityMap({ districts, hud }: CityMapProps) {
   const current = locations.find((l) => l.state === "current");
   // Which district the player is in right now — falls back to the closest
   // visible stop if every location is already completed.
-  const activeDistrictName = current?.districtName ?? locations[0]?.districtName;
+  const activeLocation = current ?? locations[0];
+  const activeDistrictName = activeLocation?.districtName;
+  const activeBackgroundUrl = activeLocation?.districtBackgroundUrl ?? null;
 
   return (
     <main className="h-dvh bg-black flex flex-col overflow-hidden">
@@ -70,31 +53,62 @@ export default function CityMap({ districts, hud }: CityMapProps) {
         </div>
       </header>
 
-      <div className="relative flex-1 min-h-0">
-        <MapBackground />
-
-        {activeDistrictName && (
-          <span
-            className="absolute top-3 left-1/2 -translate-x-1/2 z-0 text-[11px] font-semibold uppercase tracking-[0.3em] text-white/25 pointer-events-none"
+      {/*
+        The coordinate space is a MAP_ASPECT-ratio frame — identical to the
+        admin position picker — so a pin placed in the admin lands on the exact
+        same spot here (WYSIWYG). A blurred copy of the background fills the rest
+        of the screen so the frame never shows black bars.
+      */}
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        {activeBackgroundUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={activeBackgroundUrl}
+            alt=""
             aria-hidden="true"
-          >
-            {activeDistrictName}
-          </span>
+            className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-40"
+          />
         )}
 
-        {locations.map((loc, i) => {
-          const { x, y } = stopPosition(i, locations.length);
-          return (
-            <MapLocationNode
-              key={loc.id}
-              name={loc.name}
-              mapX={x}
-              mapY={y}
-              state={loc.state}
-              missionId={loc.missionId}
-            />
-          );
-        })}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="relative w-full max-h-full overflow-hidden"
+            style={{ aspectRatio: String(MAP_ASPECT) }}
+          >
+            {activeBackgroundUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={activeBackgroundUrl}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <MapBackground />
+            )}
+
+            {activeDistrictName && (
+              <span
+                className="absolute top-3 left-1/2 -translate-x-1/2 z-0 rounded-full bg-black/55 backdrop-blur px-4 py-1.5 text-sm font-extrabold uppercase tracking-[0.15em] text-lime-green shadow-[0_0_14px_rgba(157,255,0,0.35)] pointer-events-none"
+                aria-hidden="true"
+              >
+                {activeDistrictName}
+              </span>
+            )}
+
+            {locations.map((loc) => (
+              <MapLocationNode
+                key={loc.id}
+                name={loc.name}
+                mapX={loc.mapX}
+                mapY={loc.mapY}
+                state={loc.state}
+                missionId={loc.missionId}
+                iconUrl={loc.iconUrl}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {current?.missionId && (

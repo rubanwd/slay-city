@@ -12,6 +12,8 @@ export interface MapLocationNodeProps {
   mapY: number;
   state: LocationState;
   missionId: string | null;
+  /** Uploaded icon for this location; falls back to a themed emoji when absent. */
+  iconUrl?: string | null;
 }
 
 const STATE_CLASSES: Record<LocationState, string> = {
@@ -36,8 +38,18 @@ function nodeImage(name: string, state: LocationState): string {
   return LOCATION_EMOJI[name] ?? "📍";
 }
 
-export default function MapLocationNode({ name, mapX, mapY, state, missionId }: MapLocationNodeProps) {
+export default function MapLocationNode({
+  name,
+  mapX,
+  mapY,
+  state,
+  missionId,
+  iconUrl,
+}: MapLocationNodeProps) {
   const interactive = missionId !== null && state !== "locked";
+  // A custom icon replaces the emoji for any non-locked state (locked always
+  // shows the 🔒 so it reads as unavailable).
+  const showIcon = iconUrl && state !== "locked";
 
   const marker =
     state === "current" ? (
@@ -52,9 +64,14 @@ export default function MapLocationNode({ name, mapX, mapY, state, missionId }: 
           interactive ? "hover:scale-110 active:scale-95" : "",
         ].join(" ")}
       >
-        <span aria-hidden="true" className={state === "locked" ? "opacity-70" : ""}>
-          {nodeImage(name, state)}
-        </span>
+        {showIcon ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={iconUrl} alt="" aria-hidden="true" className="h-full w-full rounded-full object-cover" />
+        ) : (
+          <span aria-hidden="true" className={state === "locked" ? "opacity-70" : ""}>
+            {nodeImage(name, state)}
+          </span>
+        )}
 
         {state === "completed" && (
           <span
@@ -88,7 +105,7 @@ export default function MapLocationNode({ name, mapX, mapY, state, missionId }: 
 
       <span
         className={[
-          "max-w-[22vw] truncate text-[clamp(0.6rem,2.2vmin,0.75rem)] font-semibold uppercase tracking-wide px-2 py-1 rounded-lg bg-black/60",
+          "max-w-[26vw] text-center break-words text-[clamp(0.6rem,2.2vmin,0.75rem)] font-semibold uppercase leading-tight tracking-wide px-2 py-1 rounded-lg bg-black/60",
           state === "locked" ? "text-white/30" : "text-white/80",
         ].join(" ")}
       >

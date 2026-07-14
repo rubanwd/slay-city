@@ -122,6 +122,7 @@ export type Database = {
       }
       districts: {
         Row: {
+          background_image_url: string | null
           created_at: string
           description: string | null
           id: string
@@ -131,6 +132,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          background_image_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -140,6 +142,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          background_image_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -155,6 +158,7 @@ export type Database = {
           created_at: string
           description: string | null
           district_id: string
+          icon_url: string | null
           id: string
           is_published: boolean
           map_x: number | null
@@ -167,6 +171,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           district_id: string
+          icon_url?: string | null
           id?: string
           is_published?: boolean
           map_x?: number | null
@@ -179,6 +184,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           district_id?: string
+          icon_url?: string | null
           id?: string
           is_published?: boolean
           map_x?: number | null

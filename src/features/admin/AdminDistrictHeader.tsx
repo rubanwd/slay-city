@@ -6,7 +6,8 @@ import { useFormStatus } from "react-dom";
 import { SlayButton } from "@/components/ui";
 
 import type { AdminDistrictItemData } from "./AdminDistrictItem";
-import { updateDistrict, type AdminFormState } from "./actions";
+import ImageCropField from "./ImageCropField";
+import { deleteDistrict, updateDistrict, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
 function SaveButton() {
@@ -52,6 +53,12 @@ export default function AdminDistrictHeader({ district }: { district: AdminDistr
               className={INPUT_CLASS}
             />
           </label>
+          <ImageCropField
+            name="background_image_url"
+            label="Map Background"
+            folder="districts"
+            defaultValue={district.background_image_url}
+          />
           <label className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3">
             <span className="text-body-strong text-white">Published</span>
             <input
@@ -68,7 +75,7 @@ export default function AdminDistrictHeader({ district }: { district: AdminDistr
             </p>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <SaveButton />
             <SlayButton type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
               Cancel
@@ -101,6 +108,30 @@ export default function AdminDistrictHeader({ district }: { district: AdminDistr
             <p className="text-small text-white/50">{district.description}</p>
           )}
         </div>
+      )}
+
+      {editing && (
+        <form
+          action={deleteDistrict}
+          onSubmit={(e) => {
+            if (
+              !window.confirm(
+                "Delete this district and ALL its locations, missions, and tasks? This cannot be undone."
+              )
+            ) {
+              e.preventDefault();
+            }
+          }}
+          className="mt-3 border-t border-white/10 pt-3"
+        >
+          <input type="hidden" name="id" value={district.id} />
+          <button
+            type="submit"
+            className="rounded-full border border-neon-pink/50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
+          >
+            Delete District
+          </button>
+        </form>
       )}
     </div>
   );
