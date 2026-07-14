@@ -89,7 +89,7 @@ export default function CityMap({ districts, hud }: CityMapProps) {
 
             {activeDistrictName && (
               <span
-                className="absolute top-3 left-1/2 -translate-x-1/2 z-0 rounded-full bg-black/55 backdrop-blur px-4 py-1.5 text-sm font-extrabold uppercase tracking-[0.15em] text-lime-green shadow-[0_0_14px_rgba(157,255,0,0.35)] pointer-events-none"
+                className="absolute top-3 left-1/2 -translate-x-1/2 z-0 rounded-full bg-black/55 backdrop-blur px-4 py-1.5 text-sm font-extrabold uppercase tracking-[0.15em] text-white shadow-[0_0_14px_rgba(255,255,255,0.35)] pointer-events-none"
                 aria-hidden="true"
               >
                 {activeDistrictName}

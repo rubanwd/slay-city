@@ -494,6 +494,7 @@ export type Database = {
           acquired_at: string
           equipped: boolean
           id: string
+          item_type: string | null
           profile_id: string
           wardrobe_item_id: string
         }
@@ -501,6 +502,7 @@ export type Database = {
           acquired_at?: string
           equipped?: boolean
           id?: string
+          item_type?: string | null
           profile_id: string
           wardrobe_item_id: string
         }
@@ -508,6 +510,7 @@ export type Database = {
           acquired_at?: string
           equipped?: boolean
           id?: string
+          item_type?: string | null
           profile_id?: string
           wardrobe_item_id?: string
         }
@@ -579,31 +582,46 @@ export type Database = {
         Row: {
           cost_coins: number
           created_at: string
+          description: string | null
           id: string
           image_url: string | null
+          is_default: boolean
           is_published: boolean
           item_type: string
           name: string
+          order_index: number
+          preview_url: string | null
+          unlock_level: number | null
           updated_at: string
         }
         Insert: {
           cost_coins?: number
           created_at?: string
+          description?: string | null
           id?: string
           image_url?: string | null
+          is_default?: boolean
           is_published?: boolean
           item_type: string
           name: string
+          order_index?: number
+          preview_url?: string | null
+          unlock_level?: number | null
           updated_at?: string
         }
         Update: {
           cost_coins?: number
           created_at?: string
+          description?: string | null
           id?: string
           image_url?: string | null
+          is_default?: boolean
           is_published?: boolean
           item_type?: string
           name?: string
+          order_index?: number
+          preview_url?: string | null
+          unlock_level?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -633,6 +651,15 @@ export type Database = {
         }[]
       }
       reset_my_progress: { Args: never; Returns: undefined }
+      purchase_wardrobe_item: {
+        Args: { p_item_id: string }
+        Returns: {
+          coins_remaining: number
+          item_id: string
+        }[]
+      }
+      equip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
+      unequip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
     }
     Enums: {
       ai_content_draft_status: "pending" | "approved" | "rejected"
