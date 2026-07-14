@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 /** Storage bucket for admin-managed content imagery (see the content_images migration). */
 const BUCKET = "content";
 
-export type ContentImageFolder = "districts" | "locations";
+export type ContentImageFolder = "districts" | "locations" | "wardrobe";
 
 /**
  * Uploads an image blob to the public `content` bucket and returns its public

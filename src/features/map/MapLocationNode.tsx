@@ -14,6 +14,8 @@ export interface MapLocationNodeProps {
   missionId: string | null;
   /** Uploaded icon for this location; falls back to a themed emoji when absent. */
   iconUrl?: string | null;
+  /** Mascot image shown on the current-location marker. */
+  mascotImageUrl?: string;
 }
 
 const STATE_CLASSES: Record<LocationState, string> = {
@@ -45,6 +47,7 @@ export default function MapLocationNode({
   state,
   missionId,
   iconUrl,
+  mascotImageUrl,
 }: MapLocationNodeProps) {
   const interactive = missionId !== null && state !== "locked";
   // A custom icon replaces the emoji for any non-locked state (locked always
@@ -54,7 +57,12 @@ export default function MapLocationNode({
   const marker =
     state === "current" ? (
       <div className={interactive ? "transition-transform hover:scale-110 active:scale-95" : ""}>
-        <UiSlayCharacter size="sm" wiggle aria-label={`${name} — you are here`} />
+        <UiSlayCharacter
+          size="sm"
+          wiggle
+          src={mascotImageUrl}
+          aria-label={`${name} — you are here`}
+        />
       </div>
     ) : (
       <div
@@ -66,7 +74,12 @@ export default function MapLocationNode({
       >
         {showIcon ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={iconUrl} alt="" aria-hidden="true" className="h-full w-full rounded-full object-cover" />
+          <img
+            src={iconUrl}
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full rounded-full object-cover"
+          />
         ) : (
           <span aria-hidden="true" className={state === "locked" ? "opacity-70" : ""}>
             {nodeImage(name, state)}

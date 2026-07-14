@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { isWardrobeCategory } from "@/features/wardrobe/categories";
 import type { Database } from "@/types/database";
 
 /** State returned to admin forms via useActionState. */
@@ -62,6 +63,19 @@ function parsePercentCoordinate(raw: FormDataEntryValue | null): number | null |
   if (value === "") return null;
   const n = Number(value);
   if (!Number.isFinite(n) || n < 0 || n > 100) return undefined;
+  return n;
+}
+
+/**
+ * Parses an optional unlock level. Empty means "no level requirement" → `null`.
+ * Returns `undefined` when present but not a positive integer, so the caller can
+ * tell "omitted" from "invalid".
+ */
+function parseOptionalLevel(raw: FormDataEntryValue | null): number | null | undefined {
+  const value = String(raw ?? "").trim();
+  if (value === "") return null;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 1) return undefined;
   return n;
 }
 
@@ -576,4 +590,136 @@ export async function deleteLocation(formData: FormData): Promise<void> {
   revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   redirect(districtId ? `/admin/districts/${districtId}` : "/admin/districts");
+}
+
+/* ── Wardrobe items ────────────────────────────────────────────────────────── */
+
+/** Fields shared by wardrobe create/update, parsed and validated from a form. */
+type ParsedWardrobeFields =
+  | {
+      ok: true;
+      values: {
+        name: string;
+        item_type: string;
+        cost_coins: number;
+        unlock_level: number | null;
+        image_url: string | null;
+        order_index: number;
+        is_published: boolean;
+      };
+    }
+  | { ok: false; error: string };
+
+function parseWardrobeFields(formData: FormData): ParsedWardrobeFields {
+  const name = String(formData.get("name") ?? "").trim();
+  const itemType = String(formData.get("item_type") ?? "").trim();
+  const cost = parseNonNegativeInt(formData.get("cost_coins"));
+  const level = parseOptionalLevel(formData.get("unlock_level"));
+  const orderIndex = parseNonNegativeInt(formData.get("order_index"));
+  const imageUrl = String(formData.get("image_url") ?? "").trim();
+  const isPublished = formData.get("is_published") === "on";
+
+  if (!name) return { ok: false, error: "Item name is required." };
+  if (!isWardrobeCategory(itemType)) return { ok: false, error: "Choose a valid category." };
+  if (cost === null) return { ok: false, error: "Price must be a non-negative whole number." };
+  if (level === undefined)
+    return { ok: false, error: "Unlock level must be a whole number of 1 or more." };
+  if (orderIndex === null)
+    return { ok: false, error: "Order must be a non-negative whole number." };
+
+  return {
+    ok: true,
+    values: {
+      name,
+      item_type: itemType,
+      cost_coins: cost,
+      unlock_level: level,
+      image_url: imageUrl || null,
+      order_index: orderIndex,
+      is_published: isPublished,
+    },
+  };
+}
+
+/** Revalidates every surface a catalog change can affect. */
+function revalidateWardrobe(): void {
+  revalidatePath("/admin/wardrobe");
+  revalidatePath("/wardrobe");
+  // The equipped item drives the mascot shown on the map's current location.
+  revalidatePath("/map", "layout");
+}
+
+export async function createWardrobeItem(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const parsed = parseWardrobeFields(formData);
+  if (!parsed.ok) return { error: parsed.error };
+
+  const { error } = await supabase.from("wardrobe_items").insert(parsed.values);
+  if (error) return { error: error.message };
+
+  revalidateWardrobe();
+  return { success: `"${parsed.values.name}" created.` };
+}
+
+export async function updateWardrobeItem(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return { error: "An item is required." };
+
+  const parsed = parseWardrobeFields(formData);
+  if (!parsed.ok) return { error: parsed.error };
+
+  const { error } = await supabase.from("wardrobe_items").update(parsed.values).eq("id", id);
+  if (error) return { error: error.message };
+
+  revalidateWardrobe();
+  return { success: `"${parsed.values.name}" updated.` };
+}
+
+async function setWardrobeItemPublished(itemId: string, isPublished: boolean): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const { error } = await supabase
+    .from("wardrobe_items")
+    .update({ is_published: isPublished })
+    .eq("id", itemId);
+
+  if (!error) revalidateWardrobe();
+}
+
+export async function publishWardrobeItem(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "").trim();
+  if (id) await setWardrobeItemPublished(id, true);
+}
+
+export async function unpublishWardrobeItem(formData: FormData): Promise<void> {
+  const id = String(formData.get("id") ?? "").trim();
+  if (id) await setWardrobeItemPublished(id, false);
+}
+
+/** Deletes a wardrobe item. FK cascade removes any ownership rows. */
+export async function deleteWardrobeItem(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return;
+
+  const { error } = await supabase.from("wardrobe_items").delete().eq("id", id);
+  if (!error) revalidateWardrobe();
 }

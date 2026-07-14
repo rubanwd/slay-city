@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { BottomNav } from "@/components/layout";
+import FullScreenLoader from "@/components/ui/FullScreenLoader";
 
 import MapBackground from "./MapBackground";
 import { MAP_ASPECT } from "./mapConstants";
@@ -20,9 +22,11 @@ export interface HudStats {
 export interface CityMapProps {
   districts: MapDistrictViewModel[];
   hud: HudStats;
+  /** Mascot image for the current-location marker (equipped item or default). */
+  mascotImageUrl: string;
 }
 
-export default function CityMap({ districts, hud }: CityMapProps) {
+export default function CityMap({ districts, hud, mascotImageUrl }: CityMapProps) {
   const locations = selectVisibleLocations(
     districts.flatMap((d) => d.locations),
     MAX_VISIBLE_LOCATIONS
@@ -34,12 +38,34 @@ export default function CityMap({ districts, hud }: CityMapProps) {
   const activeDistrictName = activeLocation?.districtName;
   const activeBackgroundUrl = activeLocation?.districtBackgroundUrl ?? null;
 
+  // Show a loader over the map area until the (large, remote) district
+  // background image has fully decoded, so the player never sees a blank or
+  // half-painted frame on first open. Preloading via an Image() reports load
+  // reliably even when the file is already in cache (where a JSX onLoad can
+  // miss). We track which URL finished loading so `bgLoaded` derives cleanly
+  // and re-arms automatically whenever the background changes.
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
+  const bgLoaded = !activeBackgroundUrl || loadedUrl === activeBackgroundUrl;
+  useEffect(() => {
+    if (!activeBackgroundUrl) return;
+    const img = new Image();
+    let cancelled = false;
+    const done = () => {
+      if (!cancelled) setLoadedUrl(activeBackgroundUrl);
+    };
+    img.onload = done;
+    img.onerror = done;
+    img.src = activeBackgroundUrl;
+    if (img.complete) queueMicrotask(done);
+    return () => {
+      cancelled = true;
+    };
+  }, [activeBackgroundUrl]);
+
   return (
     <main className="h-dvh bg-black flex flex-col overflow-hidden">
       <header className="flex items-center justify-between gap-2 px-5 py-3 border-b border-white/10 shrink-0">
-        <h1 className="text-lg font-black text-lime-green leading-tight uppercase">
-          Slay City
-        </h1>
+        <h1 className="text-lg font-black text-lime-green leading-tight uppercase">Slay City</h1>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-neon-pink">
             🔥 {hud.currentStreak}
@@ -81,7 +107,10 @@ export default function CityMap({ districts, hud }: CityMapProps) {
                 src={activeBackgroundUrl}
                 alt=""
                 aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-cover"
+                className={[
+                  "absolute inset-0 h-full w-full object-cover transition-opacity duration-500",
+                  bgLoaded ? "opacity-100" : "opacity-0",
+                ].join(" ")}
               />
             ) : (
               <MapBackground />
@@ -105,10 +134,15 @@ export default function CityMap({ districts, hud }: CityMapProps) {
                 state={loc.state}
                 missionId={loc.missionId}
                 iconUrl={loc.iconUrl}
+                mascotImageUrl={mascotImageUrl}
               />
             ))}
           </div>
         </div>
+
+        {activeBackgroundUrl && !bgLoaded && (
+          <FullScreenLoader fullScreen={false} label="Loading map…" />
+        )}
       </div>
 
       {current?.missionId && (

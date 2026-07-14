@@ -10,10 +10,11 @@ import { requireAdminPage } from "@/features/admin/guard";
 export default async function AdminPage() {
   const { supabase } = await requireAdminPage();
 
-  const [missionsRes, districtsRes, locationsRes] = await Promise.all([
+  const [missionsRes, districtsRes, locationsRes, wardrobeRes] = await Promise.all([
     supabase.from("missions").select("id", { count: "exact", head: true }),
     supabase.from("districts").select("id", { count: "exact", head: true }),
     supabase.from("locations").select("id", { count: "exact", head: true }),
+    supabase.from("wardrobe_items").select("id", { count: "exact", head: true }),
   ]);
 
   const cards = [
@@ -30,6 +31,13 @@ export default async function AdminPage() {
       count: districtsRes.count ?? 0,
       description: "Districts, their locations, and the missions inside them.",
       accent: "text-cyan",
+    },
+    {
+      href: "/admin/wardrobe",
+      title: "Wardrobe",
+      count: wardrobeRes.count ?? 0,
+      description: "Upload item art, set prices, and publish outfits for kids.",
+      accent: "text-neon-pink",
     },
     {
       href: "/admin/admins",

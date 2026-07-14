@@ -5,11 +5,17 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { BottomNav } from "@/components/layout";
+import { SlayCharacter } from "@/components/ui";
 import {
   equipWardrobeItem,
   purchaseWardrobeItem,
   unequipWardrobeItem,
 } from "@/features/wardrobe/actions";
+import {
+  WARDROBE_CATEGORIES,
+  wardrobeCategoryEmoji,
+  wardrobeCategoryLabel,
+} from "@/features/wardrobe/categories";
 
 export type WardrobeItemVM = {
   id: string;
@@ -28,27 +34,14 @@ type WardrobeGridProps = {
   items: WardrobeItemVM[];
   coins: number;
   level: number;
+  /** Resolved mascot preview image reflecting the currently equipped items. */
+  mascotImageUrl: string;
 };
 
-/** Display metadata for each item category, in the order slots are shown. */
-const CATEGORY_META: Record<string, { label: string; emoji: string }> = {
-  hat: { label: "Hats", emoji: "🧢" },
-  glasses: { label: "Glasses", emoji: "🕶️" },
-  accessory: { label: "Accessories", emoji: "👜" },
-  color: { label: "Colors", emoji: "🎨" },
-};
+/** Slot order shown in the grid — the shared category set (no more "color"). */
+const CATEGORY_ORDER: readonly string[] = WARDROBE_CATEGORIES;
 
-const CATEGORY_ORDER = ["hat", "glasses", "accessory", "color"];
-
-function categoryLabel(category: string) {
-  return CATEGORY_META[category]?.label ?? category;
-}
-
-function categoryEmoji(category: string) {
-  return CATEGORY_META[category]?.emoji ?? "✨";
-}
-
-export default function WardrobeGrid({ items, coins, level }: WardrobeGridProps) {
+export default function WardrobeGrid({ items, coins, level, mascotImageUrl }: WardrobeGridProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   // Id of the item whose action is currently running, so only its card shows a
@@ -70,15 +63,9 @@ export default function WardrobeGrid({ items, coins, level }: WardrobeGridProps)
     });
   }
 
-  // Group items by category, preserving the defined category order.
-  const categories = CATEGORY_ORDER.filter((cat) =>
-    items.some((item) => item.category === cat)
-  ).concat(
-    // Any unexpected categories from the DB, appended after the known ones.
-    Array.from(new Set(items.map((i) => i.category))).filter(
-      (cat) => !CATEGORY_ORDER.includes(cat)
-    )
-  );
+  // Only the known categories are shown, in slot order. Any retired category
+  // still lingering in the catalog (e.g. "color") is intentionally hidden.
+  const categories = CATEGORY_ORDER.filter((cat) => items.some((item) => item.category === cat));
 
   return (
     <main className="min-h-screen bg-black flex flex-col">
@@ -91,6 +78,24 @@ export default function WardrobeGrid({ items, coins, level }: WardrobeGridProps)
           ✦ {coins}
         </span>
       </header>
+
+      {/* Mascot preview — reflects the currently equipped outfit. */}
+      <div className="flex flex-col items-center gap-1 px-6 pt-6 pb-2">
+        <style>{`
+          @keyframes lookFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50%      { transform: translateY(-8px) scale(1.04); }
+          }
+        `}</style>
+        <div className="flex h-40 w-40 items-center justify-center rounded-full bg-white/5 p-3 ring-1 ring-white/10">
+          <div className="h-full w-full animate-[lookFloat_3s_ease-in-out_infinite]">
+            <SlayCharacter size="full" src={mascotImageUrl} aria-label="Your mascot" />
+          </div>
+        </div>
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-white/40">
+          Your look
+        </span>
+      </div>
 
       {error && (
         <p
@@ -110,7 +115,7 @@ export default function WardrobeGrid({ items, coins, level }: WardrobeGridProps)
           categories.map((category) => (
             <div key={category} className="mb-8 last:mb-0">
               <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-white/50">
-                {categoryLabel(category)}
+                {wardrobeCategoryLabel(category)}
               </h2>
               <div className="grid grid-cols-3 gap-3">
                 {items
@@ -175,13 +180,9 @@ function WardrobeCard({
       <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-white/5">
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- catalog art, remote or static
-          <img
-            src={item.imageUrl}
-            alt=""
-            className="h-full w-full rounded-xl object-cover"
-          />
+          <img src={item.imageUrl} alt="" className="h-full w-full rounded-xl object-cover" />
         ) : (
-          <span className="text-4xl">{categoryEmoji(item.category)}</span>
+          <span className="text-4xl">{wardrobeCategoryEmoji(item.category)}</span>
         )}
       </div>
 

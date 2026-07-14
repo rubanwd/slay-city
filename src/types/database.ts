@@ -493,6 +493,7 @@ export type Database = {
         Row: {
           acquired_at: string
           equipped: boolean
+          equipped_at: string | null
           id: string
           item_type: string | null
           profile_id: string
@@ -501,6 +502,7 @@ export type Database = {
         Insert: {
           acquired_at?: string
           equipped?: boolean
+          equipped_at?: string | null
           id?: string
           item_type?: string | null
           profile_id: string
@@ -509,6 +511,7 @@ export type Database = {
         Update: {
           acquired_at?: string
           equipped?: boolean
+          equipped_at?: string | null
           id?: string
           item_type?: string | null
           profile_id?: string

@@ -6,30 +6,31 @@ export interface SlayCharacterProps {
   size?: SlayCharacterSize;
   /** Plays the wiggle animation continuously */
   wiggle?: boolean;
+  /** Mascot image to render; defaults to the base snake illustration. */
+  src?: string;
   className?: string;
   "aria-label"?: string;
 }
 
 const SIZE_PX: Record<SlayCharacterSize, number | string> = {
-  xs:    64,
-  sm:    96,
-  md:   144,
-  lg:   200,
-  xl:   280,
+  xs: 64,
+  sm: 96,
+  md: 144,
+  lg: 200,
+  xl: 280,
   full: "100%",
 };
 
 export default function SlayCharacter({
   size = "md",
   wiggle = false,
+  src = "/mascot-slay.svg",
   className = "",
   "aria-label": ariaLabel = "Slay City snake character",
 }: SlayCharacterProps) {
   const dim = SIZE_PX[size];
   const style =
-    typeof dim === "number"
-      ? { width: dim, height: dim }
-      : { width: dim, aspectRatio: "1 / 1" };
+    typeof dim === "number" ? { width: dim, height: dim } : { width: dim, aspectRatio: "1 / 1" };
 
   return (
     <div
@@ -53,9 +54,9 @@ export default function SlayCharacter({
         `}</style>
       )}
 
-      {/* eslint-disable-next-line @next/next/no-img-element -- local static mascot illustration */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- mascot illustration (static or uploaded item art) */}
       <img
-        src="/mascot-slay.svg"
+        src={src}
         alt={ariaLabel}
         style={{ width: "100%", height: "100%", objectFit: "contain" }}
       />
