@@ -1,20 +1,69 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { AppContainer, Section } from "@/components/layout";
 
+/* ── Typewriter subtitle ────────────────────────────────────────────────── */
+
+interface SubtitlePart {
+  text: string;
+  className: string;
+}
+
+/** Rendered as two lines: line 1 is its own part list, line 2 is the rest. */
+const SUBTITLE_LINE_1: SubtitlePart[] = [{ text: "Learn English.", className: "text-white/70" }];
+const SUBTITLE_LINE_2: SubtitlePart[] = [
+  { text: "Slay", className: "text-lime-green" },
+  { text: " your goals.", className: "text-white/70" },
+];
+const SUBTITLE_LENGTH = [...SUBTITLE_LINE_1, ...SUBTITLE_LINE_2].reduce(
+  (sum, part) => sum + part.text.length,
+  0
+);
+
+/** Reveals `total` characters one at a time, starting after `delay` ms. */
+function useTypewriter(total: number, speed = 45, delay = 350) {
+  const [revealed, setRevealed] = useState(0);
+
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval>;
+    const timeoutId = setTimeout(() => {
+      intervalId = setInterval(() => {
+        setRevealed((prev) => {
+          const next = prev + 1;
+          if (next >= total) clearInterval(intervalId);
+          return next;
+        });
+      }, speed);
+    }, delay);
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, [total, speed, delay]);
+
+  return revealed;
+}
+
+/** Slices `parts` down to `budget` visible characters, in reading order. */
+function renderTypedParts(parts: SubtitlePart[], budget: number, consumedBefore: number) {
+  let consumed = consumedBefore;
+  return parts.map((part, index) => {
+    const remaining = Math.max(0, budget - consumed);
+    const visible = part.text.slice(0, remaining);
+    consumed += part.text.length;
+    return (
+      <span key={index} className={part.className}>
+        {visible}
+      </span>
+    );
+  });
+}
+
 /* ── Decorative inline icons — one-off, brand-specific, not worth a shared
    icon library for a single screen. ──────────────────────────────────────── */
-
-function CrownIcon() {
-  return (
-    <svg width="28" height="20" viewBox="0 0 28 20" fill="none" aria-hidden="true">
-      <path
-        d="M2 18l3-11 5.5 6L14 2l3.5 11L23 7l3 11H2z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
 
 function LightningIcon({ className = "" }: { className?: string }) {
   return (
@@ -95,22 +144,32 @@ function ChevronIcon() {
 }
 
 export default function WelcomeScreen() {
+  const revealed = useTypewriter(SUBTITLE_LENGTH);
+
   return (
     <AppContainer>
-      <Section py="lg" className="gap-2">
-        <div className="flex items-start gap-1.5">
-          <span className="text-4xl font-black italic text-neon-pink lowercase tracking-tight">
-            slay
-          </span>
-          <span className="text-lime-green mt-1">
-            <CrownIcon />
-          </span>
+      <Section py="lg" className="gap-2 items-start text-left">
+        <div className="relative self-start -ml-2 h-14 w-auto">
+          {/* eslint-disable-next-line @next/next/no-img-element -- local static brand logo */}
+          <img src="/logo.svg" alt="Slay" className="block h-14 w-auto" />
+          <span aria-hidden="true" className="absolute inset-0 logo-shimmer" />
         </div>
 
-        <p className="text-sm font-semibold uppercase tracking-wide">
-          <span className="text-white/70">Learn English. </span>
-          <span className="text-lime-green">Slay</span>
-          <span className="text-white/70"> your goals.</span>
+        <p className="relative text-sm font-semibold uppercase tracking-wide leading-relaxed">
+          {/* Invisible full text reserves the two-line height up front, so the
+             layout below never shifts as the typewriter reveals characters. */}
+          <span aria-hidden="true" className="invisible block">
+            <span className="block">{renderTypedParts(SUBTITLE_LINE_1, SUBTITLE_LENGTH, 0)}</span>
+            <span className="block">
+              {renderTypedParts(SUBTITLE_LINE_2, SUBTITLE_LENGTH, SUBTITLE_LINE_1[0].text.length)}
+            </span>
+          </span>
+          <span className="absolute inset-0 block">
+            <span className="block">{renderTypedParts(SUBTITLE_LINE_1, revealed, 0)}</span>
+            <span className="block">
+              {renderTypedParts(SUBTITLE_LINE_2, revealed, SUBTITLE_LINE_1[0].text.length)}
+            </span>
+          </span>
         </p>
       </Section>
 
@@ -135,7 +194,7 @@ export default function WelcomeScreen() {
 
       <Section py="lg" className="gap-4">
         <Link
-          href="/auth/register"
+          href="/auth/login"
           className={[
             "inline-flex items-center justify-center gap-2.5 w-full h-16 px-8 rounded-2xl",
             "font-extrabold uppercase tracking-wide text-lg",
@@ -147,13 +206,6 @@ export default function WelcomeScreen() {
           Let&apos;s Go!
           <ChevronIcon />
         </Link>
-
-        <p className="text-sm text-white/50 text-center">
-          Already have an account?{" "}
-          <Link href="/auth/login" className="text-neon-pink font-semibold hover:underline">
-            Log in
-          </Link>
-        </p>
       </Section>
     </AppContainer>
   );
