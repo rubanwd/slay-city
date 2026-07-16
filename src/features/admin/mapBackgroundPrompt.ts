@@ -48,7 +48,7 @@ export function buildMapBackgroundPrompt(input: MapBackgroundPromptInput): strin
   const sections: string[] = [];
 
   sections.push(
-    `Illustrated background art for the "${name}" district of SLAY CITY, a neon city map in a mobile English-learning game for children aged 7-14.`
+    `Top-down illustrated map art for the "${name}" district of SLAY CITY, the city map in a mobile English-learning game for children aged 7-14.`
   );
 
   if (description) {
@@ -62,28 +62,28 @@ export function buildMapBackgroundPrompt(input: MapBackgroundPromptInput): strin
       )
       .join("\n");
     sections.push(
-      `The district contains these landmarks. Show each one as a distinct, recognisable building or feature, spread across the scene so none overlap:\n${list}`
+      `The district contains these landmarks. Show each one as a distinct, recognisable building or feature seen from directly above, spread evenly around the plaza so none overlap, each joined to the path network:\n${list}`
     );
   }
 
   sections.push(
     [
       `Composition: portrait ${MAP_IMAGE_WIDTH}x${MAP_IMAGE_HEIGHT} pixels, 3:4 aspect ratio.`,
-      "Slightly elevated three-quarter view looking down over the district, like a stylised game world map.",
-      "Landmarks sit in the middle band of the image. Keep the composition uncluttered and readable at phone size (390px wide) — round interactive markers will be layered on top, so avoid busy detail that would compete with them.",
-      "The skyline hugs the bottom edge; the night sky fills the top.",
+      "Strict top-down orthographic bird's-eye view, camera pointing straight down at the ground, like a board-game map or a city tile — no horizon, no sky, no skyline.",
+      "An open paved plaza with a central feature anchors the middle of the image. Roads, crosswalks and paved walkways form a connected network that links every landmark and runs off all four edges; buildings sit along the outer edges and are cropped by the frame.",
+      "Fill the gaps with trees, hedges, planters, benches and lit street lamps. Keep the plaza and paths relatively open and readable at phone size (390px wide) — round interactive markers will be layered on top, so nothing fussy should compete with them there.",
     ].join(" ")
   );
 
   sections.push(
     [
-      "Style: bold, playful, vibrant cartoon/vector game art with clean shapes and thick outlines. Night-time neon city energy — glowing signs, light bloom, wet reflective streets. Fun and high-energy, never school-like or corporate.",
-      "Palette — use these colours only: neon pink #FF2D8E, lime green #9DFF00, cyan #00F0FF, purple #6A00FF, on a near-black #111111 background.",
+      "Style: painterly, semi-realistic illustrated game-map art, richly detailed with soft diffuse lighting and gentle shadows. Calm, moody night scene lit warmly from below by street lamps and glowing windows, light pooling softly on the pavement. Atmospheric and cosy, never neon, never flat vector cartoon, never harsh contrast.",
+      "Palette — muted and desaturated: near-black #111111 and dark charcoal-blue #1B1F26 asphalt, slate-blue rooftops #2E3A4E, deep forest-green foliage #2F4A32, warm sandstone paving #C8A87C, warm amber lamplight #F0B860. Small accents only in muted red #B5473F and muted blue #4A6C9B (awnings, canopies). No neon, no saturated pinks, limes or cyans, no glow bloom.",
     ].join(" ")
   );
 
   sections.push(
-    "Hard constraints: no text, no letters, no numbers, no signage lettering, no logos, no watermarks. No people, characters, or mascots. No UI elements, map pins, markers, frames, or borders. Background art only, edge to edge."
+    "Hard constraints: no text, no letters, no numbers, no signage lettering, no logos, no watermarks. No people, characters, mascots or vehicles. No UI elements, map pins, markers, frames, or borders. Background art only, edge to edge."
   );
 
   if (extra) {

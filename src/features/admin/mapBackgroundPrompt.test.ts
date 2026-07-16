@@ -52,13 +52,23 @@ describe("buildMapBackgroundPrompt", () => {
     expect(prompt).toContain("1. Lighthouse");
   });
 
-  it("states the map size, aspect ratio, and brand palette", () => {
+  it("states the map size and aspect ratio", () => {
     const prompt = buildMapBackgroundPrompt({ districtName: "Neon Harbour" });
     expect(prompt).toContain(`${MAP_IMAGE_WIDTH}x${MAP_IMAGE_HEIGHT}`);
     expect(prompt).toContain("3:4");
-    for (const hex of ["#FF2D8E", "#9DFF00", "#00F0FF", "#6A00FF", "#111111"]) {
+  });
+
+  it("states the muted top-down palette", () => {
+    const prompt = buildMapBackgroundPrompt({ districtName: "Neon Harbour" });
+    for (const hex of ["#111111", "#1B1F26", "#2E3A4E", "#2F4A32", "#C8A87C", "#F0B860"]) {
       expect(prompt).toContain(hex);
     }
+  });
+
+  it("asks for a straight top-down view and rules out neon", () => {
+    const prompt = buildMapBackgroundPrompt({ districtName: "Neon Harbour" });
+    expect(prompt).toContain("top-down orthographic");
+    expect(prompt).toContain("No neon");
   });
 
   it("bans text so the model does not fight the location labels", () => {
