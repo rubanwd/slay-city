@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
-import type { Database, Json } from "@/types/database";
+import type { Json } from "@/types/database";
 
 import AdminTaskContentFields from "./AdminTaskContentFields";
 import {
@@ -15,10 +15,7 @@ import {
   type AdminFormState,
 } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
-
-type MissionTaskType = Database["public"]["Enums"]["mission_task_type"];
-
-const TASK_TYPES: MissionTaskType[] = ["vocabulary", "matching", "listening", "quiz"];
+import { TASK_TYPES, taskTypeLabel, type MissionTaskType } from "./taskTypes";
 
 export interface AdminTaskItemProps {
   missionId: string;
@@ -64,7 +61,7 @@ export default function AdminTaskItem({ missionId, task }: AdminTaskItemProps) {
               >
                 {TASK_TYPES.map((t) => (
                   <option key={t} value={t}>
-                    {t[0].toUpperCase() + t.slice(1)}
+                    {taskTypeLabel(t)}
                   </option>
                 ))}
               </select>
@@ -110,7 +107,7 @@ export default function AdminTaskItem({ missionId, task }: AdminTaskItemProps) {
         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/10 text-xs font-bold text-white/70">
           {task.order_index}
         </span>
-        <span className="truncate text-body-strong capitalize text-white">{task.task_type}</span>
+        <span className="truncate text-body-strong text-white">{taskTypeLabel(task.task_type)}</span>
         <span
           className={[
             "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide",

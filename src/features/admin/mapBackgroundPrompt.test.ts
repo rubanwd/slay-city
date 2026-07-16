@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { MAP_ASPECT } from "../map/mapConstants";
+import { MAP_ASPECT, MAP_ASPECT_H, MAP_ASPECT_W } from "../map/mapConstants";
 import {
   MAP_IMAGE_HEIGHT,
   MAP_IMAGE_WIDTH,
@@ -10,6 +10,11 @@ import {
 describe("MAP_IMAGE dimensions", () => {
   it("match the map aspect ratio the cropper uses", () => {
     expect(MAP_IMAGE_WIDTH / MAP_IMAGE_HEIGHT).toBeCloseTo(MAP_ASPECT, 3);
+  });
+
+  it("is 5% taller than a 3:4 frame, to fill the dead space on phone screens", () => {
+    const heightAt3by4 = MAP_IMAGE_WIDTH / (3 / 4);
+    expect(MAP_IMAGE_HEIGHT / heightAt3by4).toBeCloseTo(1.05, 2);
   });
 });
 
@@ -55,7 +60,7 @@ describe("buildMapBackgroundPrompt", () => {
   it("states the map size and aspect ratio", () => {
     const prompt = buildMapBackgroundPrompt({ districtName: "Neon Harbour" });
     expect(prompt).toContain(`${MAP_IMAGE_WIDTH}x${MAP_IMAGE_HEIGHT}`);
-    expect(prompt).toContain("3:4");
+    expect(prompt).toContain(`${MAP_ASPECT_W}:${MAP_ASPECT_H}`);
   });
 
   it("states the muted top-down palette", () => {

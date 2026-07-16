@@ -10,10 +10,12 @@ import { submitMissionCompletion } from "./actions";
 import MatchingTask from "./MatchingTask";
 import ProgressBar from "./ProgressBar";
 import QuizTask from "./QuizTask";
+import SnakeGameTask from "./SnakeGameTask";
 import VocabularyTask from "./VocabularyTask";
 import {
   parseMatchingContent,
   parseQuizContent,
+  parseSnakeGameContent,
   parseVocabularyContent,
   type MissionTaskViewModel,
   type MissionViewModel,
@@ -140,6 +142,13 @@ function MissionTaskRenderer({
     const content = parseQuizContent(task.content);
     if (content) {
       return <QuizTask content={content} onComplete={onComplete} actionLabel={actionLabel} />;
+    }
+  }
+
+  if (task.taskType === "snake_game") {
+    const content = parseSnakeGameContent(task.content);
+    if (content) {
+      return <SnakeGameTask content={content} onComplete={onComplete} actionLabel={actionLabel} />;
     }
   }
 

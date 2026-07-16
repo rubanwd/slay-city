@@ -8,6 +8,7 @@ import { SlayButton } from "@/components/ui";
 import type { AdminDistrictItemData } from "./AdminDistrictItem";
 import MapBackgroundField from "./MapBackgroundField";
 import type { MapBackgroundLocation } from "./mapBackgroundPrompt";
+import { useAdminToast } from "./AdminToast";
 import { deleteDistrict, updateDistrict, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
@@ -29,7 +30,19 @@ export interface AdminDistrictHeaderProps {
 /** Editable district card shown at the top of the district detail page. */
 export default function AdminDistrictHeader({ district, locations }: AdminDistrictHeaderProps) {
   const [editing, setEditing] = useState(false);
-  const [state, formAction] = useActionState<AdminFormState, FormData>(updateDistrict, {});
+  const toast = useAdminToast();
+
+  // Wraps the server action so a successful save can collapse the card back to
+  // its read-only view. The toast is what confirms the write, since the card
+  // itself shows little of what changed.
+  const [state, formAction] = useActionState<AdminFormState, FormData>(async (prev, formData) => {
+    const result = await updateDistrict(prev, formData);
+    if (result.success) {
+      toast.success(result.success);
+      setEditing(false);
+    }
+    return result;
+  }, {});
 
   return (
     <div className="mb-6 rounded-2xl border border-white/10 bg-[#1a1a1a] p-4">

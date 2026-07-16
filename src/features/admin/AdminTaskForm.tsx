@@ -4,17 +4,13 @@ import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
-import type { Database } from "@/types/database";
 
 import AdminTaskContentFields from "./AdminTaskContentFields";
 import { useAdminModalControls } from "./AdminModal";
 import { useAdminToast } from "./AdminToast";
 import { createMissionTask, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
-
-type MissionTaskType = Database["public"]["Enums"]["mission_task_type"];
-
-const TASK_TYPES: MissionTaskType[] = ["vocabulary", "matching", "listening", "quiz"];
+import { TASK_TYPES, taskTypeLabel, type MissionTaskType } from "./taskTypes";
 
 export interface AdminTaskFormProps {
   missionId: string;
@@ -64,7 +60,7 @@ export default function AdminTaskForm({ missionId, nextOrder }: AdminTaskFormPro
           >
             {TASK_TYPES.map((t) => (
               <option key={t} value={t}>
-                {t[0].toUpperCase() + t.slice(1)}
+                {taskTypeLabel(t)}
               </option>
             ))}
           </select>

@@ -53,6 +53,13 @@ export interface QuizContent {
   correctIndex: number;
 }
 
+export interface SnakeGameContent {
+  /** Normalized to uppercase with whitespace stripped — one grid letter per char. */
+  word: string;
+  translation: string | null;
+  prompt: string;
+}
+
 /* ── Defensive parsers ─────────────────────────────────────────────────────
  * `content` is untyped JSONB, so authored data may be malformed. Each parser
  * returns a well-formed value or `null`, and callers render a safe fallback
@@ -127,5 +134,20 @@ export function parseQuizContent(content: Json): QuizContent | null {
     imageUrl: asString(content.imageUrl ?? content.image_url),
     options,
     correctIndex,
+  };
+}
+
+export function parseSnakeGameContent(content: Json): SnakeGameContent | null {
+  if (!isRecord(content)) return null;
+  const rawWord = asString(content.word);
+  if (!rawWord) return null;
+
+  const word = rawWord.replace(/\s+/g, "").toUpperCase();
+  if (word.length === 0) return null;
+
+  return {
+    word,
+    translation: asString(content.translation),
+    prompt: asString(content.prompt) ?? "Collect the letters in order",
   };
 }

@@ -1,4 +1,4 @@
-import { MAP_ASPECT } from "../map/mapConstants";
+import { MAP_ASPECT, MAP_ASPECT_H, MAP_ASPECT_W } from "../map/mapConstants";
 
 /**
  * Pixel size requested from the image model, matched to `MAP_ASPECT` so a
@@ -68,7 +68,7 @@ export function buildMapBackgroundPrompt(input: MapBackgroundPromptInput): strin
 
   sections.push(
     [
-      `Composition: portrait ${MAP_IMAGE_WIDTH}x${MAP_IMAGE_HEIGHT} pixels, 3:4 aspect ratio.`,
+      `Composition: portrait ${MAP_IMAGE_WIDTH}x${MAP_IMAGE_HEIGHT} pixels, ${MAP_ASPECT_W}:${MAP_ASPECT_H} aspect ratio — tall and narrow, filling a phone screen.`,
       "Strict top-down orthographic bird's-eye view, camera pointing straight down at the ground, like a board-game map or a city tile — no horizon, no sky, no skyline.",
       "An open paved plaza with a central feature anchors the middle of the image. Roads, crosswalks and paved walkways form a connected network that links every landmark and runs off all four edges; buildings sit along the outer edges and are cropped by the frame.",
       "Fill the gaps with trees, hedges, planters, benches and lit street lamps. Keep the plaza and paths relatively open and readable at phone size (390px wide) — round interactive markers will be layered on top, so nothing fussy should compete with them there.",

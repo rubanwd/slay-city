@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { SlayButton } from "@/components/ui";
 
@@ -49,9 +49,13 @@ const TAB_BASE =
  * appears once that source is chosen.
  *
  * Both sources feed one hidden input, so the district actions keep reading a
- * single `background_image_url`. An AI candidate is only uploaded to storage
- * when the admin picks it, which lets them regenerate freely and go back to an
- * earlier attempt they preferred without littering the bucket.
+ * single `background_image_url`.
+ *
+ * An AI attempt only reaches storage when the admin picks it with "Use this
+ * one", which keeps regenerating cheap and lets them step back to an earlier
+ * favourite. Because an unpicked attempt is only a data URL in memory, saving
+ * the form would silently discard it — so submitting with one on screen is
+ * intercepted and confirmed first.
  */
 export default function MapBackgroundField({
   name,
@@ -68,9 +72,52 @@ export default function MapBackgroundField({
   const [generating, setGenerating] = useState(false);
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const rootRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
   const current = candidates[index];
+
+  const isApplied = Boolean(current?.uploadedUrl && current.uploadedUrl === url);
+  const busy = generating || applying;
+
+  /** An attempt is on screen that was never picked — saving would drop it. */
+  const hasUnpickedAttempt = candidates.length > 0 && !isApplied;
+
+  // The submit listener below is registered once, so it reads the live value
+  // through a ref rather than closing over a stale render.
+  const hasUnpickedAttemptRef = useRef(hasUnpickedAttempt);
+  const bypassRef = useRef(false);
+
+  useEffect(() => {
+    hasUnpickedAttemptRef.current = hasUnpickedAttempt;
+  }, [hasUnpickedAttempt]);
+
+  /**
+   * Intercepts the district form's submit while an unpicked attempt is showing.
+   * Runs in the capture phase on the form itself, so it fires before React's
+   * root-level handler; stopping propagation there keeps the form action from
+   * running until the admin has answered.
+   */
+  useEffect(() => {
+    const form = rootRef.current?.closest("form");
+    if (!form) return;
+    formRef.current = form;
+
+    function handleSubmit(event: Event) {
+      if (bypassRef.current) {
+        bypassRef.current = false;
+        return;
+      }
+      if (!hasUnpickedAttemptRef.current) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setConfirmOpen(true);
+    }
+
+    form.addEventListener("submit", handleSubmit, true);
+    return () => form.removeEventListener("submit", handleSubmit, true);
+  }, []);
 
   /**
    * Reads the district's name and description straight from the surrounding
@@ -116,7 +163,11 @@ export default function MapBackgroundField({
     setGenerating(false);
   }
 
-  /** Uploads the shown attempt and makes it the district's background. */
+  /**
+   * Uploads the shown attempt and makes it the district's background. Storage is
+   * the only place the form can point at — the model's inline data URL is far
+   * too large for a database column.
+   */
   async function handleApply() {
     if (!current) return;
     if (current.uploadedUrl) {
@@ -140,8 +191,12 @@ export default function MapBackgroundField({
     }
   }
 
-  const isApplied = Boolean(current?.uploadedUrl && current.uploadedUrl === url);
-  const busy = generating || applying;
+  /** Lets the blocked submit through untouched. */
+  function saveAnyway() {
+    setConfirmOpen(false);
+    bypassRef.current = true;
+    formRef.current?.requestSubmit();
+  }
 
   return (
     <div ref={rootRef} className="flex flex-col gap-2">
@@ -202,17 +257,26 @@ export default function MapBackgroundField({
               </span>
             )}
 
-            {generating && (
+            {busy && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                <span className="text-small font-bold text-lime-green">Generating…</span>
+                <span className="text-small font-bold text-lime-green">
+                  {generating ? "Generating…" : "Saving…"}
+                </span>
               </div>
             )}
 
-            {isApplied && !generating && (
-              <span className="absolute left-2 top-2 rounded-md bg-lime-green px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-black">
-                Selected
-              </span>
-            )}
+            {!busy &&
+              (isApplied ? (
+                <span className="absolute left-2 top-2 rounded-md bg-lime-green px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-black">
+                  Selected
+                </span>
+              ) : (
+                current && (
+                  <span className="absolute left-2 top-2 rounded-md bg-neon-pink px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white">
+                    Not used yet
+                  </span>
+                )
+              ))}
           </div>
 
           {/* Attempt history — regenerate freely, then come back to a favourite. */}
@@ -291,6 +355,12 @@ export default function MapBackgroundField({
               </button>
             )}
           </div>
+
+          {hasUnpickedAttempt && !busy && (
+            <p className="text-xs text-neon-pink">
+              This attempt only exists in your browser. Press “Use this one” to keep it.
+            </p>
+          )}
         </div>
       )}
 
@@ -298,6 +368,38 @@ export default function MapBackgroundField({
         <p role="alert" className="text-sm font-semibold text-neon-pink">
           {error}
         </p>
+      )}
+
+      {/* ── Unpicked-attempt guard ─────────────────────────────────────────── */}
+      {confirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="map-bg-confirm-title"
+            className="flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-white/10 bg-[#141414] p-5"
+          >
+            <h3 id="map-bg-confirm-title" className="text-h3 font-bold text-white">
+              Background not used
+            </h3>
+            <p className="text-small text-white/60">
+              You generated a background but never pressed “Use this one”, so it will be discarded
+              when you save.{" "}
+              {url
+                ? "The district will keep the background currently selected."
+                : "The district will be saved without a background."}
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <SlayButton type="button" variant="ghost" size="sm" onClick={() => setConfirmOpen(false)}>
+                Back to form
+              </SlayButton>
+              <SlayButton type="button" variant="pink" size="sm" onClick={saveAnyway}>
+                {url ? "Save with the selected one" : "Save without a background"}
+              </SlayButton>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -5,16 +5,16 @@ import { useState } from "react";
 import {
   parseMatchingContent,
   parseQuizContent,
+  parseSnakeGameContent,
   parseVocabularyContent,
   type MatchingMode,
 } from "@/features/mission/types";
-import type { Database, Json } from "@/types/database";
+import type { Json } from "@/types/database";
 
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
+import type { MissionTaskType } from "./taskTypes";
 
-type MissionTaskType = Database["public"]["Enums"]["mission_task_type"];
-
-const GUIDED_TYPES: MissionTaskType[] = ["vocabulary", "matching", "quiz"];
+const GUIDED_TYPES: MissionTaskType[] = ["vocabulary", "matching", "quiz", "snake_game"];
 
 export interface AdminTaskContentFieldsProps {
   taskType: MissionTaskType;
@@ -41,10 +41,16 @@ export default function AdminTaskContentFields({
   const initialVocab = taskType === "vocabulary" ? parseVocabularyContent(initialContent ?? null) : null;
   const initialMatching = taskType === "matching" ? parseMatchingContent(initialContent ?? null) : null;
   const initialQuiz = taskType === "quiz" ? parseQuizContent(initialContent ?? null) : null;
+  const initialSnake = taskType === "snake_game" ? parseSnakeGameContent(initialContent ?? null) : null;
 
   const hasExistingContent = isRecord(initialContent) && Object.keys(initialContent).length > 0;
   const initialParseFailed =
-    hasExistingContent && supportsGuided && !initialVocab && !initialMatching && !initialQuiz;
+    hasExistingContent &&
+    supportsGuided &&
+    !initialVocab &&
+    !initialMatching &&
+    !initialQuiz &&
+    !initialSnake;
 
   const [mode, setMode] = useState<"guided" | "raw">(
     !supportsGuided || initialParseFailed ? "raw" : "guided"
@@ -72,6 +78,10 @@ export default function AdminTaskContentFields({
   const [options, setOptions] = useState<string[]>(initialQuiz?.options ?? ["", ""]);
   const [correctIndex, setCorrectIndex] = useState(initialQuiz?.correctIndex ?? 0);
 
+  const [snakeWord, setSnakeWord] = useState(initialSnake?.word ?? "");
+  const [snakeTranslation, setSnakeTranslation] = useState(initialSnake?.translation ?? "");
+  const [snakePrompt, setSnakePrompt] = useState(initialSnake?.prompt ?? "Collect the letters in order");
+
   function buildGuidedContent(): Record<string, unknown> {
     if (taskType === "vocabulary") {
       return { word, translation, imageUrl: imageUrl || null, exampleSentence: exampleSentence || null };
@@ -91,6 +101,13 @@ export default function AdminTaskContentFields({
         imageUrl: quizImageUrl || null,
         options: options.filter((o) => o.trim()),
         correctIndex,
+      };
+    }
+    if (taskType === "snake_game") {
+      return {
+        word: snakeWord,
+        translation: snakeTranslation || null,
+        prompt: snakePrompt,
       };
     }
     return {};
@@ -126,6 +143,13 @@ export default function AdminTaskContentFields({
           setQuizImageUrl(c.imageUrl ?? "");
           setOptions(c.options);
           setCorrectIndex(c.correctIndex);
+        }
+      } else if (taskType === "snake_game") {
+        const c = parseSnakeGameContent(parsed);
+        if (c) {
+          setSnakeWord(c.word);
+          setSnakeTranslation(c.translation ?? "");
+          setSnakePrompt(c.prompt);
         }
       }
     } catch {
@@ -322,7 +346,41 @@ export default function AdminTaskContentFields({
               </div>
             </div>
           )}
+
+          {taskType === "snake_game" && (
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-1.5">
+                <span className={LABEL_CLASS}>Word to collect</span>
+                <input
+                  value={snakeWord}
+                  onChange={(e) => setSnakeWord(e.target.value.toUpperCase())}
+                  placeholder="CAT"
+                  className={INPUT_CLASS}
+                />
+                <span className="text-xs text-white/40">
+                  The child steers the snake over these letters in order. 3–8 letters works best.
+                </span>
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className={LABEL_CLASS}>Translation (optional)</span>
+                <input
+                  value={snakeTranslation}
+                  onChange={(e) => setSnakeTranslation(e.target.value)}
+                  className={INPUT_CLASS}
+                />
+              </label>
+              <label className="flex flex-col gap-1.5">
+                <span className={LABEL_CLASS}>Prompt</span>
+                <input
+                  value={snakePrompt}
+                  onChange={(e) => setSnakePrompt(e.target.value)}
+                  className={INPUT_CLASS}
+                />
+              </label>
+            </div>
+          )}
         </>
+
       )}
     </div>
   );

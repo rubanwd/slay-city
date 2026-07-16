@@ -8,6 +8,7 @@ import { SlayButton } from "@/components/ui";
 import type { AdminLocationItemData } from "./AdminLocationItem";
 import ImageUploadField from "./ImageUploadField";
 import MapPositionPicker from "./MapPositionPicker";
+import { useAdminToast } from "./AdminToast";
 import { deleteLocation, updateLocation, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
@@ -32,7 +33,19 @@ export default function AdminLocationHeader({
   districtBackgroundUrl,
 }: AdminLocationHeaderProps) {
   const [editing, setEditing] = useState(false);
-  const [state, formAction] = useActionState<AdminFormState, FormData>(updateLocation, {});
+  const toast = useAdminToast();
+
+  // Wraps the server action so a successful save can collapse the card back to
+  // its read-only view. The toast is what confirms the write, since the card
+  // itself shows little of what changed.
+  const [state, formAction] = useActionState<AdminFormState, FormData>(async (prev, formData) => {
+    const result = await updateLocation(prev, formData);
+    if (result.success) {
+      toast.success(result.success);
+      setEditing(false);
+    }
+    return result;
+  }, {});
 
   return (
     <div className="mb-6 rounded-2xl border border-white/10 bg-[#1a1a1a] p-4">

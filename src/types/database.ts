@@ -666,7 +666,7 @@ export type Database = {
     }
     Enums: {
       ai_content_draft_status: "pending" | "approved" | "rejected"
-      mission_task_type: "vocabulary" | "matching" | "listening" | "quiz"
+      mission_task_type: "vocabulary" | "matching" | "listening" | "quiz" | "snake_game"
       user_role: "child" | "parent" | "admin"
     }
     CompositeTypes: {

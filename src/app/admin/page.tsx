@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import AdminHeader from "@/features/admin/AdminHeader";
+import AdminSnakePlayground from "@/features/admin/AdminSnakePlayground";
 import { requireAdminPage } from "@/features/admin/guard";
 
 /**
@@ -90,6 +91,8 @@ export default async function AdminPage() {
           ))}
         </nav>
       </div>
+
+      <AdminSnakePlayground />
     </main>
   );
 }
