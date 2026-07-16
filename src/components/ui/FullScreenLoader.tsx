@@ -8,17 +8,23 @@ export interface FullScreenLoaderProps {
    * an overlay on top of content that is still loading (e.g. the map image).
    */
   fullScreen?: boolean;
+  /**
+   * Show the bobbing mascot. Kept on for the kid-facing game screens; turned
+   * off on admin/tooling surfaces, where a mascot on every navigation is noise.
+   */
+  mascot?: boolean;
 }
 
 /**
  * Branded loading state — a bobbing SLAY snake over the neon-city black, with a
- * pulsing shadow and three bouncing dots. Rendered both as the app-wide route
- * transition fallback (`app/loading.tsx`) and as an overlay while heavy remote
- * images decode. Respects `prefers-reduced-motion` (animations disabled).
+ * pulsing shadow and three bouncing dots. Rendered as the route transition
+ * fallback (`loading.tsx`) and as an overlay while heavy remote images decode.
+ * Respects `prefers-reduced-motion` (animations disabled).
  */
 export default function FullScreenLoader({
   label,
   fullScreen = true,
+  mascot = true,
 }: FullScreenLoaderProps) {
   return (
     <div
@@ -26,19 +32,22 @@ export default function FullScreenLoader({
       aria-live="polite"
       className={[
         fullScreen ? "fixed inset-0 z-50" : "absolute inset-0 z-30",
-        "flex flex-col items-center justify-center gap-6 bg-black",
+        "flex flex-col items-center justify-center bg-black",
+        mascot ? "gap-6" : "gap-4",
       ].join(" ")}
     >
-      <div className="flex flex-col items-center">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={DEFAULT_MASCOT_IMAGE}
-          alt=""
-          aria-hidden="true"
-          className="h-24 w-24 object-contain drop-shadow-[0_0_20px_rgba(157,255,0,0.45)] animate-loader-bob"
-        />
-        <span className="mt-1 h-2 w-16 rounded-full bg-lime-green/40 blur-[3px] animate-loader-shadow" />
-      </div>
+      {mascot && (
+        <div className="flex flex-col items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={DEFAULT_MASCOT_IMAGE}
+            alt=""
+            aria-hidden="true"
+            className="h-24 w-24 object-contain drop-shadow-[0_0_20px_rgba(157,255,0,0.45)] animate-loader-bob"
+          />
+          <span className="mt-1 h-2 w-16 rounded-full bg-lime-green/40 blur-[3px] animate-loader-shadow" />
+        </div>
+      )}
 
       <div className="flex items-center gap-2" aria-hidden="true">
         <span className="h-2.5 w-2.5 rounded-full bg-neon-pink animate-loader-dot [animation-delay:0ms]" />
@@ -46,9 +55,11 @@ export default function FullScreenLoader({
         <span className="h-2.5 w-2.5 rounded-full bg-cyan animate-loader-dot [animation-delay:360ms]" />
       </div>
 
-      <span className="text-sm font-bold uppercase tracking-[0.2em] text-white/70">
-        {label ?? "Slay City"}
-      </span>
+      {(label || mascot) && (
+        <span className="text-sm font-bold uppercase tracking-[0.2em] text-white/70">
+          {label ?? "Slay City"}
+        </span>
+      )}
     </div>
   );
 }

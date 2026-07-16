@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 import { BottomNav } from "@/components/layout";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
+import { useImageLoaded } from "@/hooks/useImageLoaded";
 
 import MapBackground from "./MapBackground";
 import { MAP_ASPECT } from "./mapConstants";
@@ -38,29 +38,10 @@ export default function CityMap({ districts, hud, mascotImageUrl }: CityMapProps
   const activeDistrictName = activeLocation?.districtName;
   const activeBackgroundUrl = activeLocation?.districtBackgroundUrl ?? null;
 
-  // Show a loader over the map area until the (large, remote) district
-  // background image has fully decoded, so the player never sees a blank or
-  // half-painted frame on first open. Preloading via an Image() reports load
-  // reliably even when the file is already in cache (where a JSX onLoad can
-  // miss). We track which URL finished loading so `bgLoaded` derives cleanly
-  // and re-arms automatically whenever the background changes.
-  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
-  const bgLoaded = !activeBackgroundUrl || loadedUrl === activeBackgroundUrl;
-  useEffect(() => {
-    if (!activeBackgroundUrl) return;
-    const img = new Image();
-    let cancelled = false;
-    const done = () => {
-      if (!cancelled) setLoadedUrl(activeBackgroundUrl);
-    };
-    img.onload = done;
-    img.onerror = done;
-    img.src = activeBackgroundUrl;
-    if (img.complete) queueMicrotask(done);
-    return () => {
-      cancelled = true;
-    };
-  }, [activeBackgroundUrl]);
+  // Hold a loader over the map area until the (large, remote) district
+  // background has decoded, so the player never sees a blank or half-painted
+  // frame on first open.
+  const bgLoaded = useImageLoaded(activeBackgroundUrl);
 
   return (
     <main className="h-dvh bg-black flex flex-col overflow-hidden">

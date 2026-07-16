@@ -2,6 +2,9 @@
 
 import { useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
+import FullScreenLoader from "@/components/ui/FullScreenLoader";
+import { useImageLoaded } from "@/hooks/useImageLoaded";
+
 import { MAP_ASPECT } from "../map/mapConstants";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
@@ -44,6 +47,10 @@ export default function MapPositionPicker({
   aspect = MAP_ASPECT,
 }: MapPositionPickerProps) {
   const [pos, setPos] = useState({ x: clampPercent(defaultX), y: clampPercent(defaultY) });
+  // Same treatment as the child's map: hold a loader over the frame until the
+  // district background has decoded, so admins don't place a pin against a
+  // blank preview and mis-position it.
+  const bgLoaded = useImageLoaded(backgroundUrl);
   const previewRef = useRef<HTMLDivElement>(null);
   const xInputRef = useRef<HTMLInputElement>(null);
   const yInputRef = useRef<HTMLInputElement>(null);
@@ -125,7 +132,11 @@ export default function MapPositionPicker({
             src={backgroundUrl}
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            className={[
+              "pointer-events-none absolute inset-0 h-full w-full object-cover",
+              "transition-opacity duration-500",
+              bgLoaded ? "opacity-100" : "opacity-0",
+            ].join(" ")}
           />
         )}
 
@@ -145,6 +156,8 @@ export default function MapPositionPicker({
             <span className="block h-4 w-4 rounded-full border-2 border-black bg-neon-pink shadow-[0_0_10px_2px_rgba(255,45,142,0.7)]" />
           )}
         </span>
+
+        {backgroundUrl && !bgLoaded && <FullScreenLoader fullScreen={false} mascot={false} />}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
