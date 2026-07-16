@@ -72,6 +72,7 @@ export async function middleware(request: NextRequest) {
     const onOnboarding = pathname.startsWith("/onboarding");
     const inParentArea = pathname === "/parent" || pathname.startsWith("/parent/");
     const inAdminArea = pathname === "/admin" || pathname.startsWith("/admin/");
+    const onMap = pathname === "/map";
     const { data: profile } = await supabase
       .from("profiles")
       .select("id, role")
@@ -98,8 +99,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
       }
       // Admins may only use the admin console — they don't play the game, so
-      // keep them out of the map, missions, wardrobe, etc.
-      if (profile.role === "admin" && !inAdminArea) {
+      // keep them out of missions, wardrobe, etc. The map itself is the one
+      // exception: it is the only place a district background can be seen in
+      // position, so admins need it to check their own content. Without it the
+      // only way to look was to demote yourself to a player, which silently
+      // breaks every admin write.
+      if (profile.role === "admin" && !inAdminArea && !onMap) {
         const url = request.nextUrl.clone();
         url.pathname = "/admin";
         return NextResponse.redirect(url);
