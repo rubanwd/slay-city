@@ -6,12 +6,7 @@ import { useFormStatus } from "react-dom";
 import { SlayButton } from "@/components/ui";
 
 import { createMission, type AdminFormState } from "./actions";
-
-export interface LocationOption {
-  id: string;
-  /** Display label, e.g. "Downtown District • Central Café". */
-  label: string;
-}
+import type { LocationOption } from "./locationOptions";
 
 export interface AdminMissionEditorProps {
   locations: LocationOption[];

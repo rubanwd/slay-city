@@ -7,6 +7,7 @@ import type { AdminLocationItemData } from "@/features/admin/AdminLocationItem";
 import AdminMissionForm from "@/features/admin/AdminMissionForm";
 import AdminMissionItem, { type AdminMissionItemData } from "@/features/admin/AdminMissionItem";
 import { requireAdminPage } from "@/features/admin/guard";
+import { toLocationOptions } from "@/features/admin/locationOptions";
 
 interface LocationDetailPageProps {
   params: Promise<{ districtId: string; locationId: string }>;
@@ -30,15 +31,22 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
     redirect(`/admin/districts/${districtId}`);
   }
 
-  const { data: missions } = await supabase
-    .from("missions")
-    .select("id, title, description, order_index, xp_reward, coin_reward, is_published, location_id")
-    .eq("location_id", locationId)
-    .order("order_index");
+  const [{ data: missions }, { data: allLocations }] = await Promise.all([
+    supabase
+      .from("missions")
+      .select(
+        "id, title, description, order_index, xp_reward, coin_reward, is_published, location_id"
+      )
+      .eq("location_id", locationId)
+      .order("order_index"),
+    // Every location, so a mission can be moved elsewhere from its edit form.
+    supabase.from("locations").select("id, name, districts(name)").order("order_index"),
+  ]);
 
   const { districts, ...locationCols } = location;
   const locationData: AdminLocationItemData = locationCols;
   const missionRows: AdminMissionItemData[] = missions ?? [];
+  const locationOptions = toLocationOptions(allLocations);
   const districtName = districts?.name ?? "District";
   const districtBackgroundUrl = districts?.background_image_url ?? null;
 
@@ -69,7 +77,7 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
         ) : (
           <ul className="mb-6 flex flex-col gap-2">
             {missionRows.map((m) => (
-              <AdminMissionItem key={m.id} mission={m} />
+              <AdminMissionItem key={m.id} mission={m} locations={locationOptions} />
             ))}
           </ul>
         )}

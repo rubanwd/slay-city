@@ -1,6 +1,7 @@
 import AdminHeader from "@/features/admin/AdminHeader";
-import AdminMissionEditor, { type LocationOption } from "@/features/admin/AdminMissionEditor";
+import AdminMissionEditor from "@/features/admin/AdminMissionEditor";
 import { requireAdminPage } from "@/features/admin/guard";
+import { toLocationOptions } from "@/features/admin/locationOptions";
 
 /** Form to create a new mission, linked to an existing location. */
 export default async function NewMissionPage() {
@@ -11,10 +12,7 @@ export default async function NewMissionPage() {
     .select("id, name, districts(name)")
     .order("order_index");
 
-  const options: LocationOption[] = (locations ?? []).map((loc) => ({
-    id: loc.id,
-    label: `${loc.districts?.name ?? "—"} • ${loc.name}`,
-  }));
+  const options = toLocationOptions(locations);
 
   return (
     <main className="min-h-screen bg-black text-white">

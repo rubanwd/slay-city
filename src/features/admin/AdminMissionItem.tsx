@@ -6,8 +6,15 @@ import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
-import { publishMission, unpublishMission, updateMission, type AdminFormState } from "./actions";
+import {
+  deleteMission,
+  publishMission,
+  unpublishMission,
+  updateMission,
+  type AdminFormState,
+} from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
+import type { LocationOption } from "./locationOptions";
 
 export interface AdminMissionItemData {
   id: string;
@@ -20,6 +27,12 @@ export interface AdminMissionItemData {
   location_id: string;
 }
 
+export interface AdminMissionItemProps {
+  mission: AdminMissionItemData;
+  /** Every location, so the mission can be moved to another one while editing. */
+  locations?: LocationOption[];
+}
+
 function SaveButton() {
   const { pending } = useFormStatus();
   return (
@@ -29,7 +42,7 @@ function SaveButton() {
   );
 }
 
-export default function AdminMissionItem({ mission }: { mission: AdminMissionItemData }) {
+export default function AdminMissionItem({ mission, locations }: AdminMissionItemProps) {
   const [editing, setEditing] = useState(false);
   const [state, formAction] = useActionState<AdminFormState, FormData>(updateMission, {});
 
@@ -38,7 +51,6 @@ export default function AdminMissionItem({ mission }: { mission: AdminMissionIte
       <li className="rounded-xl border border-white/10 bg-black/30 px-3 py-3">
         <form action={formAction} className="flex flex-col gap-3">
           <input type="hidden" name="id" value={mission.id} />
-          <input type="hidden" name="location_id" value={mission.location_id} />
 
           <label className="flex flex-col gap-1.5">
             <span className={LABEL_CLASS}>Title</span>
@@ -53,6 +65,29 @@ export default function AdminMissionItem({ mission }: { mission: AdminMissionIte
               className={INPUT_CLASS}
             />
           </label>
+
+          {locations && locations.length > 0 ? (
+            <label className="flex flex-col gap-1.5">
+              <span className={LABEL_CLASS}>Location</span>
+              <select
+                name="location_id"
+                defaultValue={mission.location_id}
+                className={`${INPUT_CLASS} [&>option]:bg-[#1a1a1a] [&>option]:text-white`}
+              >
+                {locations.map((loc) => (
+                  <option key={loc.id} value={loc.id}>
+                    {loc.label}
+                  </option>
+                ))}
+              </select>
+              <span className="text-xs text-white/40">
+                Pick another location to move this mission there.
+              </span>
+            </label>
+          ) : (
+            <input type="hidden" name="location_id" value={mission.location_id} />
+          )}
+
           <label className="flex flex-col gap-1.5">
             <span className={LABEL_CLASS}>Order</span>
             <input
@@ -107,6 +142,28 @@ export default function AdminMissionItem({ mission }: { mission: AdminMissionIte
               Cancel
             </SlayButton>
           </div>
+        </form>
+
+        <form
+          action={deleteMission}
+          onSubmit={(e) => {
+            if (
+              !window.confirm(
+                `Delete "${mission.title}" and ALL its tasks? This cannot be undone.`
+              )
+            ) {
+              e.preventDefault();
+            }
+          }}
+          className="mt-3 border-t border-white/10 pt-3"
+        >
+          <input type="hidden" name="id" value={mission.id} />
+          <button
+            type="submit"
+            className="rounded-full border border-neon-pink/50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
+          >
+            Delete Mission
+          </button>
         </form>
       </li>
     );

@@ -14,7 +14,9 @@ export default async function AdminMissionsPage() {
 
   const { data: missions } = await supabase
     .from("missions")
-    .select("id, title, is_published, xp_reward, coin_reward, locations(name, districts(name))")
+    .select(
+      "id, title, is_published, xp_reward, coin_reward, locations(id, name, district_id, districts(name))"
+    )
     .order("created_at", { ascending: false });
 
   const rows = missions ?? [];
@@ -56,7 +58,16 @@ export default async function AdminMissionsPage() {
                     <StatusBadge published={m.is_published} />
                   </div>
                   <p className="truncate text-small text-white/50">
-                    {m.locations?.districts?.name ?? "—"} • {m.locations?.name ?? "—"}
+                    {m.locations ? (
+                      <Link
+                        href={`/admin/districts/${m.locations.district_id}/locations/${m.locations.id}`}
+                        className="underline decoration-white/20 underline-offset-2 hover:text-white"
+                      >
+                        {m.locations.districts?.name ?? "—"} • {m.locations.name}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
                     <span className="text-white/30">
                       {" "}
                       · {m.xp_reward} XP · {m.coin_reward} coins

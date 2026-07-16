@@ -195,6 +195,26 @@ export async function unpublishMission(formData: FormData): Promise<void> {
   if (id) await setMissionPublished(id, false);
 }
 
+/**
+ * Deletes a mission. Foreign-key cascades remove its tasks, vocabulary items,
+ * and the related progress rows.
+ */
+export async function deleteMission(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return;
+
+  const { error } = await supabase.from("missions").delete().eq("id", id);
+  if (error) return;
+
+  revalidatePath("/admin/missions");
+  revalidatePath("/admin/districts", "layout");
+  revalidatePath("/map", "layout");
+}
+
 /* ── Mission tasks ─────────────────────────────────────────────────────────── */
 
 /**
