@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
-import ImageCropField from "./ImageCropField";
+import MapBackgroundField from "./MapBackgroundField";
 import { useAdminModalControls } from "./AdminModal";
 import { useAdminToast } from "./AdminToast";
 import { createDistrict, type AdminFormState } from "./actions";
@@ -51,7 +51,9 @@ export default function AdminDistrictForm() {
         <span className={LABEL_CLASS}>Order</span>
         <input name="order_index" type="number" min={0} defaultValue={0} className={INPUT_CLASS} />
       </label>
-      <ImageCropField name="background_image_url" label="Map Background" folder="districts" />
+      {/* A brand-new district has no locations yet — the prompt falls back to
+          its name, description, and the admin's own notes. */}
+      <MapBackgroundField name="background_image_url" label="Map Background" />
       <label className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3">
         <span className="text-body-strong text-white">Published</span>
         <input name="is_published" type="checkbox" className="h-5 w-5 shrink-0 accent-lime-green" />

@@ -7,41 +7,17 @@ import { createClient } from "@/lib/supabase/server";
 import { isWardrobeCategory } from "@/features/wardrobe/categories";
 import type { Database } from "@/types/database";
 
+import { requireAdmin } from "./requireAdmin";
+
 /** State returned to admin forms via useActionState. */
 export type AdminFormState = {
   error?: string;
   success?: string;
 };
 
-type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type MissionTaskType = Database["public"]["Enums"]["mission_task_type"];
 
 const MISSION_TASK_TYPES: MissionTaskType[] = ["vocabulary", "matching", "listening", "quiz"];
-
-/**
- * Confirms the caller is a signed-in admin before any write. RLS on the content
- * tables independently restricts writes to admins (`*_insert/update_admin`
- * policies), so this is defence-in-depth plus a friendly error message.
- */
-async function requireAdmin(
-  supabase: SupabaseServerClient
-): Promise<{ ok: true; userId: string } | { ok: false; error: string }> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "You must be signed in." };
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (profile?.role !== "admin") {
-    return { ok: false, error: "Only admins can manage content." };
-  }
-  return { ok: true, userId: user.id };
-}
 
 /** Parses a non-negative integer from a form field, defaulting to `fallback`. */
 function parseNonNegativeInt(raw: FormDataEntryValue | null, fallback = 0): number | null {

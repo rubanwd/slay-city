@@ -6,7 +6,8 @@ import { useFormStatus } from "react-dom";
 import { SlayButton } from "@/components/ui";
 
 import type { AdminDistrictItemData } from "./AdminDistrictItem";
-import ImageCropField from "./ImageCropField";
+import MapBackgroundField from "./MapBackgroundField";
+import type { MapBackgroundLocation } from "./mapBackgroundPrompt";
 import { deleteDistrict, updateDistrict, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
@@ -19,8 +20,14 @@ function SaveButton() {
   );
 }
 
+export interface AdminDistrictHeaderProps {
+  district: AdminDistrictItemData;
+  /** This district's locations, in map order — they shape the AI background prompt. */
+  locations?: MapBackgroundLocation[];
+}
+
 /** Editable district card shown at the top of the district detail page. */
-export default function AdminDistrictHeader({ district }: { district: AdminDistrictItemData }) {
+export default function AdminDistrictHeader({ district, locations }: AdminDistrictHeaderProps) {
   const [editing, setEditing] = useState(false);
   const [state, formAction] = useActionState<AdminFormState, FormData>(updateDistrict, {});
 
@@ -53,11 +60,11 @@ export default function AdminDistrictHeader({ district }: { district: AdminDistr
               className={INPUT_CLASS}
             />
           </label>
-          <ImageCropField
+          <MapBackgroundField
             name="background_image_url"
             label="Map Background"
-            folder="districts"
             defaultValue={district.background_image_url}
+            locations={locations}
           />
           <label className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3">
             <span className="text-body-strong text-white">Published</span>

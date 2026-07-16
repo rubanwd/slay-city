@@ -8,14 +8,12 @@ import { SlayButton } from "@/components/ui";
 
 import { MAP_ASPECT } from "../map/mapConstants";
 import { uploadContentImage, type ContentImageFolder } from "./uploadContentImage";
-import { LABEL_CLASS } from "./formStyles";
 
 export interface ImageCropFieldProps {
-  /** Name of the hidden input carrying the uploaded public URL. */
-  name: string;
-  label: string;
-  /** Existing URL when editing. */
-  defaultValue?: string | null;
+  /** Public URL of the current image, or "" for none. Controlled by the parent. */
+  value: string;
+  /** Called with the public URL of a newly uploaded image, or "" when removed. */
+  onChange: (url: string) => void;
   /** Storage folder the image is uploaded into. */
   folder: ContentImageFolder;
   /** Crop aspect ratio (width / height). Defaults to the map ratio. */
@@ -68,15 +66,16 @@ async function cropToBlob(src: string, area: Area): Promise<Blob> {
   });
 }
 
-/** Image upload with an aspect-ratio crop step — used for district backgrounds. */
+/**
+ * Image upload with an aspect-ratio crop step — used for district backgrounds.
+ * The URL lives with the parent, which owns the form field it feeds.
+ */
 export default function ImageCropField({
-  name,
-  label,
-  defaultValue,
+  value: url,
+  onChange,
   folder,
   aspect = MAP_ASPECT,
 }: ImageCropFieldProps) {
-  const [url, setUrl] = useState<string>(defaultValue ?? "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -109,7 +108,7 @@ export default function ImageCropField({
     try {
       const blob = await cropToBlob(editSrc, areaRef.current);
       const publicUrl = await uploadContentImage(blob, folder, "jpg");
-      setUrl(publicUrl);
+      onChange(publicUrl);
       setEditSrc(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed.");
@@ -120,9 +119,6 @@ export default function ImageCropField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className={LABEL_CLASS}>{label}</span>
-      <input type="hidden" name={name} value={url} />
-
       <div
         className="relative w-full overflow-hidden rounded-xl border border-white/15 bg-white/5"
         style={{ aspectRatio: String(aspect) }}
@@ -150,7 +146,7 @@ export default function ImageCropField({
         {url && (
           <button
             type="button"
-            onClick={() => setUrl("")}
+            onClick={() => onChange("")}
             className="text-xs font-semibold text-neon-pink hover:underline"
           >
             Remove

@@ -49,7 +49,10 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
         <AdminHeader title={district.name} backHref="/admin/districts" />
 
-        <AdminDistrictHeader district={districtData} />
+        <AdminDistrictHeader
+          district={districtData}
+          locations={locationRows.map((loc) => ({ name: loc.name, description: loc.description }))}
+        />
 
         <h2 className="mb-2 text-label text-white/50">Locations ({locationRows.length})</h2>
         {locationRows.length === 0 ? (
