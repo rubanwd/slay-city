@@ -7,6 +7,8 @@ import { SlayButton } from "@/components/ui";
 import { WARDROBE_CATEGORIES, WARDROBE_CATEGORY_META } from "@/features/wardrobe/categories";
 
 import ImageUploadField from "./ImageUploadField";
+import { useAdminModalControls } from "./AdminModal";
+import { useAdminToast } from "./AdminToast";
 import { createWardrobeItem, updateWardrobeItem, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
@@ -73,12 +75,29 @@ export default function AdminWardrobeForm({
     mode === "create" ? createWardrobeItem : updateWardrobeItem,
     {}
   );
+  const modal = useAdminModalControls();
+  const toast = useAdminToast();
 
   // Collapse the inline editor once the save succeeds. `onSaved` is only
-  // supplied in edit mode; the persistent create form stays open.
+  // supplied in edit mode.
   useEffect(() => {
     if (state.success) onSaved?.();
   }, [state.success, onSaved]);
+
+  // In create mode the form lives in an AdminModal — report via toast and
+  // close on success instead of the inline Feedback paragraph.
+  useEffect(() => {
+    if (mode !== "create") return;
+    if (state.error) toast.error(state.error);
+  }, [mode, state.error, toast]);
+
+  useEffect(() => {
+    if (mode !== "create") return;
+    if (state.success) {
+      toast.success(state.success);
+      modal?.close();
+    }
+  }, [mode, state.success, toast, modal]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -166,12 +185,17 @@ export default function AdminWardrobeForm({
         />
       </label>
 
-      <Feedback state={state} />
+      {mode === "edit" && <Feedback state={state} />}
 
       <div className="flex gap-2">
         <SubmitButton label={mode === "create" ? "Create Item" : "Save"} />
         {mode === "edit" && (
           <SlayButton type="button" variant="ghost" size="md" onClick={onCancel}>
+            Cancel
+          </SlayButton>
+        )}
+        {mode === "create" && modal && (
+          <SlayButton type="button" variant="ghost" size="md" onClick={() => modal.close()}>
             Cancel
           </SlayButton>
         )}

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminDistrictHeader from "@/features/admin/AdminDistrictHeader";
 import type { AdminDistrictItemData } from "@/features/admin/AdminDistrictItem";
 import AdminHeader from "@/features/admin/AdminHeader";
@@ -67,10 +68,12 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
           </ul>
         )}
 
-        <AdminLocationForm
-          fixedDistrictId={districtId}
-          districtBackgroundUrl={district.background_image_url}
-        />
+        <AdminCreateModal triggerLabel="Add Location" title="New Location">
+          <AdminLocationForm
+            fixedDistrictId={districtId}
+            districtBackgroundUrl={district.background_image_url}
+          />
+        </AdminCreateModal>
       </div>
     </main>
   );

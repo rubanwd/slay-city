@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminLocationHeader from "@/features/admin/AdminLocationHeader";
 import type { AdminLocationItemData } from "@/features/admin/AdminLocationItem";
@@ -82,10 +83,9 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
           </ul>
         )}
 
-        <section className="rounded-2xl border border-white/10 bg-[#1a1a1a] p-5">
-          <h2 className="mb-4 text-h3 font-bold text-white">New Mission</h2>
+        <AdminCreateModal triggerLabel="Add Mission" title="New Mission">
           <AdminMissionForm locationId={locationId} nextOrder={missionRows.length} />
-        </section>
+        </AdminCreateModal>
       </div>
     </main>
   );

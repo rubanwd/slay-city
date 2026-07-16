@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminTaskForm from "@/features/admin/AdminTaskForm";
 import AdminTaskItem from "@/features/admin/AdminTaskItem";
@@ -57,10 +58,9 @@ export default async function MissionTasksPage({ params }: MissionTasksPageProps
         )}
 
         {/* ── Add task ───────────────────────────────────────────────────── */}
-        <section className="rounded-2xl border border-white/10 bg-[#1a1a1a] p-5">
-          <h2 className="mb-4 text-h3 font-bold text-white">Add Task</h2>
+        <AdminCreateModal triggerLabel="Add Task" title="Add Task">
           <AdminTaskForm missionId={missionId} nextOrder={rows.length} />
-        </section>
+        </AdminCreateModal>
       </div>
     </main>
   );

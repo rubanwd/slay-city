@@ -1,3 +1,4 @@
+import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminWardrobeForm from "@/features/admin/AdminWardrobeForm";
 import AdminWardrobeItem, { type AdminWardrobeItemData } from "@/features/admin/AdminWardrobeItem";
@@ -49,10 +50,9 @@ export default async function AdminWardrobePage() {
           })
         )}
 
-        <section className="rounded-2xl border border-white/10 bg-[#1a1a1a] p-5">
-          <h2 className="mb-4 text-h3 font-bold text-white">New Item</h2>
+        <AdminCreateModal triggerLabel="Add Item" title="New Item">
           <AdminWardrobeForm mode="create" />
-        </section>
+        </AdminCreateModal>
       </div>
     </main>
   );

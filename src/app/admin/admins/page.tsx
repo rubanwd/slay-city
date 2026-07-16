@@ -1,4 +1,5 @@
 import AdminAddAdminForm from "@/features/admin/AdminAddAdminForm";
+import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminHeader from "@/features/admin/AdminHeader";
 import { removeAdminEmail } from "@/features/admin/actions";
 import { requireAdminPage } from "@/features/admin/guard";
@@ -22,14 +23,11 @@ export default async function ManageAdminsPage() {
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
         <AdminHeader title="Manage Admins" backHref="/admin" />
 
-        <section className="mb-6 rounded-2xl border border-white/10 bg-[#1a1a1a] p-5">
-          <h2 className="mb-4 text-h3 font-bold text-white">Add Admin</h2>
-          <AdminAddAdminForm />
-          <p className="mt-3 text-xs text-white/40">
-            They become an admin the next time they sign in (or when they register
-            with this email).
-          </p>
-        </section>
+        <div className="mb-6">
+          <AdminCreateModal triggerLabel="Add Admin" title="Add Admin">
+            <AdminAddAdminForm />
+          </AdminCreateModal>
+        </div>
 
         <h2 className="mb-2 text-label text-white/50">Allow-listed ({rows.length})</h2>
         {rows.length === 0 ? (

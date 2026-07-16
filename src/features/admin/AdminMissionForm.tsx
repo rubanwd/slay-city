@@ -1,23 +1,25 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
+import { useAdminModalControls } from "./AdminModal";
+import { useAdminToast } from "./AdminToast";
 import { createMission, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <SlayButton type="submit" variant="green" size="md" loading={pending} className="w-full">
+    <SlayButton type="submit" variant="green" size="md" loading={pending} className="flex-1">
       Create Mission
     </SlayButton>
   );
 }
 
-/** Always-visible "New Mission" form on a location detail page — location is pre-set. */
+/** "New Mission" form, opened from a location detail page's Add Mission modal — location is pre-set. */
 export default function AdminMissionForm({
   locationId,
   nextOrder,
@@ -26,17 +28,22 @@ export default function AdminMissionForm({
   nextOrder: number;
 }) {
   const [state, formAction] = useActionState<AdminFormState, FormData>(createMission, {});
-  const [formKey, setFormKey] = useState(0);
+  const modal = useAdminModalControls();
+  const toast = useAdminToast();
 
-  // On a successful create, reset the form so another mission can be added fresh.
-  const [lastSuccess, setLastSuccess] = useState(state.success);
-  if (state.success !== lastSuccess) {
-    setLastSuccess(state.success);
-    if (state.success) setFormKey((k) => k + 1);
-  }
+  useEffect(() => {
+    if (state.error) toast.error(state.error);
+  }, [state.error, toast]);
+
+  useEffect(() => {
+    if (state.success) {
+      toast.success(state.success);
+      modal?.close();
+    }
+  }, [state.success, toast, modal]);
 
   return (
-    <form key={formKey} action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="location_id" value={locationId} />
       <label className="flex flex-col gap-1.5">
         <span className={LABEL_CLASS}>Title</span>
@@ -66,18 +73,14 @@ export default function AdminMissionForm({
         <input name="is_published" type="checkbox" className="h-5 w-5 shrink-0 accent-lime-green" />
       </label>
 
-      {state.error && (
-        <p role="alert" className="text-sm font-semibold text-neon-pink">
-          {state.error}
-        </p>
-      )}
-      {state.success && (
-        <p role="status" className="text-sm font-semibold text-lime-green">
-          {state.success}
-        </p>
-      )}
-
-      <SubmitButton />
+      <div className="flex gap-2">
+        <SubmitButton />
+        {modal && (
+          <SlayButton type="button" variant="ghost" size="md" onClick={() => modal.close()}>
+            Cancel
+          </SlayButton>
+        )}
+      </div>
     </form>
   );
 }

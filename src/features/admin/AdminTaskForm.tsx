@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 import type { Database } from "@/types/database";
 
 import AdminTaskContentFields from "./AdminTaskContentFields";
+import { useAdminModalControls } from "./AdminModal";
+import { useAdminToast } from "./AdminToast";
 import { createMissionTask, type AdminFormState } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
@@ -23,7 +25,7 @@ export interface AdminTaskFormProps {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <SlayButton type="submit" variant="green" size="md" loading={pending} className="w-full">
+    <SlayButton type="submit" variant="green" size="md" loading={pending} className="flex-1">
       Add Task
     </SlayButton>
   );
@@ -32,20 +34,22 @@ function SubmitButton() {
 export default function AdminTaskForm({ missionId, nextOrder }: AdminTaskFormProps) {
   const [state, formAction] = useActionState<AdminFormState, FormData>(createMissionTask, {});
   const [taskType, setTaskType] = useState<MissionTaskType>("vocabulary");
-  const [formKey, setFormKey] = useState(0);
+  const modal = useAdminModalControls();
+  const toast = useAdminToast();
 
-  // On a successful add, reset the form so the admin can add the next task fresh.
-  const [lastSuccess, setLastSuccess] = useState(state.success);
-  if (state.success !== lastSuccess) {
-    setLastSuccess(state.success);
+  useEffect(() => {
+    if (state.error) toast.error(state.error);
+  }, [state.error, toast]);
+
+  useEffect(() => {
     if (state.success) {
-      setTaskType("vocabulary");
-      setFormKey((k) => k + 1);
+      toast.success(state.success);
+      modal?.close();
     }
-  }
+  }, [state.success, toast, modal]);
 
   return (
-    <form key={formKey} action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="mission_id" value={missionId} />
 
       <div className="grid grid-cols-2 gap-3">
@@ -79,18 +83,14 @@ export default function AdminTaskForm({ missionId, nextOrder }: AdminTaskFormPro
 
       <AdminTaskContentFields key={taskType} taskType={taskType} />
 
-      {state.error && (
-        <p role="alert" className="text-sm font-semibold text-neon-pink">
-          {state.error}
-        </p>
-      )}
-      {state.success && (
-        <p role="status" className="text-sm font-semibold text-lime-green">
-          {state.success}
-        </p>
-      )}
-
-      <SubmitButton />
+      <div className="flex gap-2">
+        <SubmitButton />
+        {modal && (
+          <SlayButton type="button" variant="ghost" size="md" onClick={() => modal.close()}>
+            Cancel
+          </SlayButton>
+        )}
+      </div>
     </form>
   );
 }

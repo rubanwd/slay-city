@@ -1,3 +1,4 @@
+import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminDistrictForm from "@/features/admin/AdminDistrictForm";
 import AdminDistrictItem, { type AdminDistrictItemData } from "@/features/admin/AdminDistrictItem";
 import AdminHeader from "@/features/admin/AdminHeader";
@@ -40,7 +41,9 @@ export default async function AdminDistrictsPage() {
           </ul>
         )}
 
-        <AdminDistrictForm />
+        <AdminCreateModal triggerLabel="Add District" title="New District">
+          <AdminDistrictForm />
+        </AdminCreateModal>
       </div>
     </main>
   );
