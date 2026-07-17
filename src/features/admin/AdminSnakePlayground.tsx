@@ -69,6 +69,7 @@ export default function AdminSnakePlayground() {
               value={word}
               onChange={(e) => setWord(e.target.value.toUpperCase())}
               placeholder="CAT"
+              autoFocus
               className={INPUT_CLASS}
             />
             <span className="text-xs text-white/40">

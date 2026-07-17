@@ -35,22 +35,34 @@ export interface AdminModalProps {
 /** Generic centered modal for admin "add" forms — dark panel, backdrop, Escape/click-outside to close. */
 export default function AdminModal({ open, onClose, title, children }: AdminModalProps) {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Focus is moved only when the modal opens. Keeping `onClose` out of the deps
+  // matters: a parent that re-renders on every keystroke passes a fresh handler
+  // each time, and re-running this would yank focus out of the field being typed
+  // into. The panel check lets a child `autoFocus` its own input and keep it.
+  useEffect(() => {
+    if (!open) return;
+    if (panelRef.current?.contains(document.activeElement)) return;
+    closeBtnRef.current?.focus();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
-    closeBtnRef.current?.focus();
-
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = originalOverflow;
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
   const handleBackdrop = (e: MouseEvent<HTMLDivElement>) => {
@@ -67,7 +79,10 @@ export default function AdminModal({ open, onClose, title, children }: AdminModa
       onClick={handleBackdrop}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-5 py-10 backdrop-blur-sm"
     >
-      <div className="flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-2xl border border-white/10 bg-[#1a1a1a] p-5">
+      <div
+        ref={panelRef}
+        className="flex max-h-full w-full max-w-md flex-col overflow-y-auto rounded-2xl border border-white/10 bg-[#1a1a1a] p-5"
+      >
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-h3 font-bold text-white">{title}</h2>
           <button
