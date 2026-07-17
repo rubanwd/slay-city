@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 import { BottomNav } from "@/components/layout";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
@@ -8,9 +9,10 @@ import { useImageLoaded } from "@/hooks/useImageLoaded";
 
 import MapBackground from "./MapBackground";
 import { MAP_ASPECT } from "./mapConstants";
-import { MAX_VISIBLE_LOCATIONS, selectVisibleLocations } from "./mapState";
+import { defaultSelectedLocation, MAX_VISIBLE_LOCATIONS, selectVisibleLocations } from "./mapState";
 import type { MapDistrictViewModel } from "./mapState";
 import MapLocationNode from "./MapLocationNode";
+import MascotMarker from "./MascotMarker";
 
 export interface HudStats {
   xp: number;
@@ -20,23 +22,27 @@ export interface HudStats {
 }
 
 export interface CityMapProps {
-  districts: MapDistrictViewModel[];
+  /** The district the player is currently in (see selectActiveDistrict). */
+  district: MapDistrictViewModel | null;
   hud: HudStats;
-  /** Mascot image for the current-location marker (equipped item or default). */
+  /** Mascot image for the you-are-here marker (equipped item or default). */
   mascotImageUrl: string;
 }
 
-export default function CityMap({ districts, hud, mascotImageUrl }: CityMapProps) {
-  const locations = selectVisibleLocations(
-    districts.flatMap((d) => d.locations),
-    MAX_VISIBLE_LOCATIONS
+export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps) {
+  const locations = selectVisibleLocations(district?.locations ?? [], MAX_VISIBLE_LOCATIONS);
+
+  // The mascot starts on the earliest stop that still has a mission; tapping
+  // any node walks it there and retargets the Start button below the map.
+  const [selectedId, setSelectedId] = useState<string | null>(
+    () => defaultSelectedLocation(locations)?.id ?? null
   );
-  const current = locations.find((l) => l.state === "current");
-  // Which district the player is in right now — falls back to the closest
-  // visible stop if every location is already completed.
-  const activeLocation = current ?? locations[0];
-  const activeDistrictName = activeLocation?.districtName;
-  const activeBackgroundUrl = activeLocation?.districtBackgroundUrl ?? null;
+  // Falls back to the frontier when the picked stop disappears from the
+  // window (e.g. data refreshed underneath the open map).
+  const selected =
+    locations.find((l) => l.id === selectedId) ?? defaultSelectedLocation(locations);
+
+  const activeBackgroundUrl = district?.backgroundUrl ?? null;
 
   // Hold a loader over the map area until the (large, remote) district
   // background has decoded, so the player never sees a blank or half-painted
@@ -44,7 +50,7 @@ export default function CityMap({ districts, hud, mascotImageUrl }: CityMapProps
   const bgLoaded = useImageLoaded(activeBackgroundUrl);
 
   return (
-    <main className="h-dvh bg-black flex flex-col overflow-hidden">
+    <main className="h-dvh bg-black flex flex-col overflow-hidden mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-between gap-2 px-5 py-3 border-b border-white/10 shrink-0">
         <h1 className="text-lg font-black text-lime-green leading-tight uppercase">Slay City</h1>
         <div className="flex items-center gap-2">
@@ -97,12 +103,12 @@ export default function CityMap({ districts, hud, mascotImageUrl }: CityMapProps
               <MapBackground />
             )}
 
-            {activeDistrictName && (
+            {district && (
               <span
                 className="absolute top-3 left-1/2 -translate-x-1/2 z-0 rounded-full bg-black/55 backdrop-blur px-4 py-1.5 text-sm font-extrabold uppercase tracking-[0.15em] text-white shadow-[0_0_14px_rgba(255,255,255,0.35)] pointer-events-none"
                 aria-hidden="true"
               >
-                {activeDistrictName}
+                {district.name}
               </span>
             )}
 
@@ -113,11 +119,14 @@ export default function CityMap({ districts, hud, mascotImageUrl }: CityMapProps
                 mapX={loc.mapX}
                 mapY={loc.mapY}
                 state={loc.state}
-                missionId={loc.missionId}
-                iconUrl={loc.iconUrl}
-                mascotImageUrl={mascotImageUrl}
+                selected={loc.id === selected?.id}
+                onSelect={() => setSelectedId(loc.id)}
               />
             ))}
+
+            {selected && (
+              <MascotMarker mapX={selected.mapX} mapY={selected.mapY} imageUrl={mascotImageUrl} />
+            )}
           </div>
         </div>
 
@@ -126,19 +135,30 @@ export default function CityMap({ districts, hud, mascotImageUrl }: CityMapProps
         )}
       </div>
 
-      {current?.missionId && (
+      {selected && (
         <div className="px-5 pt-4 pb-24 border-t border-white/10 shrink-0">
-          <Link
-            href={`/mission/${current.missionId}`}
-            className={[
-              "flex items-center justify-center gap-2 w-full h-14 rounded-2xl",
-              "bg-lime-green text-black font-extrabold uppercase tracking-wide text-lg",
-              "hover:brightness-110 active:brightness-90 transition-all",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
-            ].join(" ")}
-          >
-            ▶ Start Today&apos;s Mission
-          </Link>
+          {selected.missionId ? (
+            <Link
+              href={`/mission/${selected.missionId}`}
+              className={[
+                "flex items-center justify-center gap-2 w-full h-14 rounded-2xl",
+                "bg-lime-green text-black font-extrabold uppercase tracking-wide text-lg",
+                "hover:brightness-110 active:brightness-90 transition-all",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+              ].join(" ")}
+            >
+              <span className="truncate">▶ Start {selected.name}</span>
+            </Link>
+          ) : (
+            <div
+              className="flex items-center justify-center gap-2 w-full h-14 rounded-2xl border-2 border-lime-green/40 text-lime-green/70 font-extrabold uppercase tracking-wide text-lg"
+              aria-disabled="true"
+            >
+              <span className="truncate">
+                {selected.state === "completed" ? `✓ ${selected.name} completed` : "Coming soon"}
+              </span>
+            </div>
+          )}
         </div>
       )}
 

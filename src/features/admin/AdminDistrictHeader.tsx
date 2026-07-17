@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
-import type { AdminDistrictItemData } from "./AdminDistrictItem";
+import type { AdminDistrictItemData } from "./AdminDistrictList";
 import MapBackgroundField from "./MapBackgroundField";
 import type { MapBackgroundLocation } from "./mapBackgroundPrompt";
 import { useAdminToast } from "./AdminToast";

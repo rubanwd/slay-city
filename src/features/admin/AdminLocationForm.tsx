@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
-import ImageUploadField from "./ImageUploadField";
+import LocationIconField from "./LocationIconField";
 import MapPositionPicker from "./MapPositionPicker";
 import { useAdminModalControls } from "./AdminModal";
 import { useAdminToast } from "./AdminToast";
@@ -33,12 +33,15 @@ export interface AdminLocationFormProps {
   fixedDistrictId?: string;
   /** The district's background, shown in the position picker to match the child's map. */
   districtBackgroundUrl?: string | null;
+  /** The district's name, fed to the AI icon prompt for scene context. */
+  districtName?: string;
 }
 
 export default function AdminLocationForm({
   districts = [],
   fixedDistrictId,
   districtBackgroundUrl,
+  districtName = "",
 }: AdminLocationFormProps) {
   const [state, formAction] = useActionState<AdminFormState, FormData>(createLocation, {});
   const modal = useAdminModalControls();
@@ -100,7 +103,7 @@ export default function AdminLocationForm({
         <span className={LABEL_CLASS}>Order</span>
         <input name="order_index" type="number" min={0} defaultValue={0} className={INPUT_CLASS} />
       </label>
-      <ImageUploadField name="icon_url" label="Map Icon" folder="locations" />
+      <LocationIconField name="icon_url" label="Map Icon" districtName={districtName} />
       <label className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3">
         <span className="text-body-strong text-white">Published</span>
         <input name="is_published" type="checkbox" className="h-5 w-5 shrink-0 accent-lime-green" />

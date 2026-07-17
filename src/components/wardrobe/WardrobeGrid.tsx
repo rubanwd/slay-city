@@ -68,7 +68,7 @@ export default function WardrobeGrid({ items, coins, level, mascotImageUrl }: Wa
   const categories = CATEGORY_ORDER.filter((cat) => items.some((item) => item.category === cat));
 
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <main className="min-h-screen bg-black flex flex-col mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <Link href="/map" className="text-white/40 text-sm hover:text-white transition-colors">
           ← Map

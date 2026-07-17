@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom";
 import { SlayButton } from "@/components/ui";
 
 import type { AdminLocationItemData } from "./AdminLocationItem";
-import ImageUploadField from "./ImageUploadField";
+import LocationIconField from "./LocationIconField";
 import MapPositionPicker from "./MapPositionPicker";
 import { useAdminToast } from "./AdminToast";
 import { deleteLocation, updateLocation, type AdminFormState } from "./actions";
@@ -25,12 +25,15 @@ export interface AdminLocationHeaderProps {
   location: AdminLocationItemData;
   /** The district's background, shown in the position picker to match the child's map. */
   districtBackgroundUrl?: string | null;
+  /** The district's name, fed to the AI icon prompt for scene context. */
+  districtName?: string;
 }
 
 /** Editable location card shown at the top of the location detail page. */
 export default function AdminLocationHeader({
   location,
   districtBackgroundUrl,
+  districtName = "",
 }: AdminLocationHeaderProps) {
   const [editing, setEditing] = useState(false);
   const toast = useAdminToast();
@@ -83,10 +86,10 @@ export default function AdminLocationHeader({
             backgroundUrl={districtBackgroundUrl}
             iconUrl={location.icon_url}
           />
-          <ImageUploadField
+          <LocationIconField
             name="icon_url"
             label="Map Icon"
-            folder="locations"
+            districtName={districtName}
             defaultValue={location.icon_url}
           />
           <label className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/5 px-4 py-3">

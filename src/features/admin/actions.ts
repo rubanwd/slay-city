@@ -458,6 +458,34 @@ export async function updateDistrict(
   return { success: `District "${name}" updated.` };
 }
 
+/**
+ * Rewrites every listed district's `order_index` to its position in `ids` —
+ * the admin drag-and-drop sends the full list in its new order. Positions are
+ * dense (0, 1, 2, …), so the edit forms show clean order numbers afterwards.
+ */
+export async function reorderDistricts(ids: string[]): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const cleanIds = (ids ?? []).map((id) => String(id).trim()).filter(Boolean);
+  if (cleanIds.length === 0) return { error: "Nothing to reorder." };
+  if (new Set(cleanIds).size !== cleanIds.length) return { error: "Duplicate district in order." };
+
+  const results = await Promise.all(
+    cleanIds.map((id, position) =>
+      supabase.from("districts").update({ order_index: position }).eq("id", id)
+    )
+  );
+
+  const failed = results.find((r) => r.error);
+  if (failed?.error) return { error: failed.error.message };
+
+  revalidatePath("/admin/districts", "layout");
+  revalidatePath("/map", "layout");
+  return { success: "District order saved." };
+}
+
 export async function createLocation(
   _prevState: AdminFormState,
   formData: FormData

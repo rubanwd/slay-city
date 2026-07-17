@@ -2,9 +2,10 @@ import { redirect } from "next/navigation";
 
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminDistrictHeader from "@/features/admin/AdminDistrictHeader";
-import type { AdminDistrictItemData } from "@/features/admin/AdminDistrictItem";
+import type { AdminDistrictItemData } from "@/features/admin/AdminDistrictList";
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminLocationForm from "@/features/admin/AdminLocationForm";
+import AdminDistrictMapPreview from "@/features/admin/AdminDistrictMapPreview";
 import AdminLocationItem, { type AdminLocationItemData } from "@/features/admin/AdminLocationItem";
 import { requireAdminPage } from "@/features/admin/guard";
 
@@ -54,6 +55,18 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
           locations={locationRows.map((loc) => ({ name: loc.name, description: loc.description }))}
         />
 
+        <AdminDistrictMapPreview
+          districtName={district.name}
+          backgroundUrl={district.background_image_url}
+          locations={locationRows.map((loc) => ({
+            id: loc.id,
+            name: loc.name,
+            mapX: Number(loc.map_x ?? 50),
+            mapY: Number(loc.map_y ?? 50),
+            isPublished: loc.is_published,
+          }))}
+        />
+
         <h2 className="mb-2 text-label text-white/50">Locations ({locationRows.length})</h2>
         {locationRows.length === 0 ? (
           <p className="mb-6 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
@@ -75,6 +88,7 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
           <AdminLocationForm
             fixedDistrictId={districtId}
             districtBackgroundUrl={district.background_image_url}
+            districtName={district.name}
           />
         </AdminCreateModal>
       </div>

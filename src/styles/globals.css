@@ -111,10 +111,29 @@ body {
   animation: loader-dot 1.4s ease-in-out infinite;
 }
 
+/* ── Map location labels ───────────────────────────────────────────────────
+   Gentle float for the location-name pills on the city map; staggered via
+   inline animation-delay so the labels don't bob in lockstep. */
+
+@keyframes label-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-label-float {
+  animation: label-float 3.2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-loader-bob,
   .animate-loader-shadow,
   .animate-loader-dot,
+  .animate-label-float,
   .logo-shimmer {
     animation: none;
   }

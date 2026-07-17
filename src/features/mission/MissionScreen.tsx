@@ -23,10 +23,12 @@ import {
 
 export interface MissionScreenProps {
   mission: MissionViewModel;
+  /** The location this mission belongs to — its icon and name head the screen. */
+  location?: { name: string; iconUrl: string | null } | null;
   tasks: MissionTaskViewModel[];
 }
 
-export default function MissionScreen({ mission, tasks }: MissionScreenProps) {
+export default function MissionScreen({ mission, location, tasks }: MissionScreenProps) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +78,25 @@ export default function MissionScreen({ mission, tasks }: MissionScreenProps) {
     <AppContainer>
       <Section pt="lg" pb="sm" className="gap-4">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-h3 font-black text-white">{mission.title}</h1>
+          <div className="flex min-w-0 items-center gap-3">
+            {location?.iconUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- admin-uploaded location icon
+              <img
+                src={location.iconUrl}
+                alt=""
+                aria-hidden="true"
+                className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-lime-green/60 shadow-[0_0_12px_rgba(157,255,0,0.35)]"
+              />
+            )}
+            <div className="flex min-w-0 flex-col">
+              {location && (
+                <span className="truncate text-[11px] font-bold uppercase tracking-[0.15em] text-white/50">
+                  {location.name}
+                </span>
+              )}
+              <h1 className="truncate text-h3 font-black text-white">{mission.title}</h1>
+            </div>
+          </div>
           <span className="text-sm font-bold text-white/50 whitespace-nowrap">
             {currentIndex + 1}/{total}
           </span>

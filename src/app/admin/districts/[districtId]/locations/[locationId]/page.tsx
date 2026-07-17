@@ -68,7 +68,11 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
           <span className="truncate text-white/60">{location.name}</span>
         </nav>
 
-        <AdminLocationHeader location={locationData} districtBackgroundUrl={districtBackgroundUrl} />
+        <AdminLocationHeader
+          location={locationData}
+          districtBackgroundUrl={districtBackgroundUrl}
+          districtName={districtName}
+        />
 
         <h2 className="mb-2 text-label text-white/50">Missions ({missionRows.length})</h2>
         {missionRows.length === 0 ? (

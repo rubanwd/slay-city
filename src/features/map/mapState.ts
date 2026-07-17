@@ -1,6 +1,6 @@
 import type { District, Location, Mission } from "@/types";
 
-export type LocationState = "locked" | "unlocked" | "current" | "completed";
+export type LocationState = "unlocked" | "completed";
 
 export interface LocationProgress {
   /** Locations where every published mission has been completed. */
@@ -52,29 +52,25 @@ export interface MapLocationViewModel {
   mapY: number;
   state: LocationState;
   missionId: string | null;
-  districtName: string;
   /** The location's own map icon, if uploaded. */
   iconUrl: string | null;
-  /** Background image of the district this location belongs to, if uploaded. */
-  districtBackgroundUrl: string | null;
 }
 
 export interface MapDistrictViewModel {
   id: string;
   name: string;
+  backgroundUrl: string | null;
   locations: MapLocationViewModel[];
 }
 
 /**
- * Builds the per-location unlock state for the whole map.
+ * Builds the map view for every district, in `order_index` order.
  *
- * A location is unlocked once every earlier location in the *same* district
- * (by order_index) has a completed user_progress row — districts themselves
- * aren't gated against each other, so more than one district's first location
- * can be independently unlocked at once. Only the single earliest unlocked,
- * not-yet-completed location across the whole map is flagged "current" (it
- * gets the mascot overlay); any other district's own frontier is "unlocked"
- * but not "current".
+ * Locations are not gated against each other: every stop in a district is
+ * freely playable ("unlocked") and the player picks which one to enter on the
+ * map. A location is "completed" once all of its missions are done. Which
+ * single district the player is in right now is decided by
+ * {@link selectActiveDistrict}.
  */
 export function buildMapViewModel(
   districts: Pick<District, "id" | "name" | "order_index" | "background_image_url">[],
@@ -83,51 +79,57 @@ export function buildMapViewModel(
   missionIdByLocation: ReadonlyMap<string, string>
 ): MapDistrictViewModel[] {
   const sortedDistricts = [...districts].sort((a, b) => a.order_index - b.order_index);
-  let currentAssigned = false;
 
   return sortedDistricts.map((district) => {
-    const districtLocations = locations
+    const viewLocations: MapLocationViewModel[] = locations
       .filter((loc) => loc.district_id === district.id)
-      .sort((a, b) => a.order_index - b.order_index);
-
-    let allPreviousCompleted = true;
-
-    const viewLocations: MapLocationViewModel[] = districtLocations.map((loc) => {
-      const isCompleted = completedLocationIds.has(loc.id);
-      const isUnlocked = allPreviousCompleted;
-
-      let state: LocationState;
-      if (isCompleted) {
-        state = "completed";
-      } else if (isUnlocked && !currentAssigned) {
-        state = "current";
-        currentAssigned = true;
-      } else if (isUnlocked) {
-        state = "unlocked";
-      } else {
-        state = "locked";
-      }
-
-      // Only a completed stop keeps the "all previous completed" streak alive
-      // for the next sibling in this district.
-      allPreviousCompleted = allPreviousCompleted && isCompleted;
-
-      return {
+      .sort((a, b) => a.order_index - b.order_index)
+      .map((loc) => ({
         id: loc.id,
         name: loc.name,
         description: loc.description,
         mapX: Number(loc.map_x ?? 50),
         mapY: Number(loc.map_y ?? 50),
-        state,
+        state: completedLocationIds.has(loc.id) ? "completed" : "unlocked",
         missionId: missionIdByLocation.get(loc.id) ?? null,
-        districtName: district.name,
         iconUrl: loc.icon_url ?? null,
-        districtBackgroundUrl: district.background_image_url ?? null,
-      };
-    });
+      }));
 
-    return { id: district.id, name: district.name, locations: viewLocations };
+    return {
+      id: district.id,
+      name: district.name,
+      backgroundUrl: district.background_image_url ?? null,
+      locations: viewLocations,
+    };
   });
+}
+
+/**
+ * Districts are played in sequence: the active one is the first (by
+ * `order_index` — `buildMapViewModel` returns them sorted) that still has a
+ * playable mission at any of its locations. Once every location in a district
+ * is done the next district takes over. When the whole city is finished the
+ * last district stays on screen so the map never goes blank.
+ */
+export function selectActiveDistrict(
+  districts: MapDistrictViewModel[]
+): MapDistrictViewModel | null {
+  return (
+    districts.find((district) => district.locations.some((loc) => loc.missionId !== null)) ??
+    districts[districts.length - 1] ??
+    null
+  );
+}
+
+/**
+ * Where the mascot stands when the map opens: the earliest stop that still has
+ * a mission to play. Falls back to the first location when everything in the
+ * district is completed.
+ */
+export function defaultSelectedLocation(
+  locations: MapLocationViewModel[]
+): MapLocationViewModel | null {
+  return locations.find((loc) => loc.missionId !== null) ?? locations[0] ?? null;
 }
 
 /**
@@ -139,9 +141,9 @@ export const MAX_VISIBLE_LOCATIONS = 6;
 
 /**
  * When there are more locations than the map can show at once, picks a
- * window of `max` consecutive stops centered on the current one — so the
- * player's frontier is always visible — instead of always showing the
- * earliest (or latest) stops.
+ * window of `max` consecutive stops centered on the player's frontier (the
+ * default-selected location) — so the next thing to play is always visible —
+ * instead of always showing the earliest (or latest) stops.
  */
 export function selectVisibleLocations(
   locations: MapLocationViewModel[],
@@ -149,8 +151,9 @@ export function selectVisibleLocations(
 ): MapLocationViewModel[] {
   if (locations.length <= max) return locations;
 
-  const currentIndex = locations.findIndex((loc) => loc.state === "current");
-  const anchor = currentIndex === -1 ? locations.length - 1 : currentIndex;
+  const frontier = defaultSelectedLocation(locations);
+  const anchorIndex = frontier ? locations.findIndex((loc) => loc.id === frontier.id) : -1;
+  const anchor = anchorIndex === -1 ? locations.length - 1 : anchorIndex;
   const start = Math.min(Math.max(0, anchor - Math.floor(max / 2)), locations.length - max);
 
   return locations.slice(start, start + max);

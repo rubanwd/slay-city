@@ -1,6 +1,4 @@
-import Link from "next/link";
-
-import UiSlayCharacter from "@/components/ui/SlayCharacter";
+"use client";
 
 import type { LocationState } from "./mapState";
 
@@ -11,119 +9,56 @@ export interface MapLocationNodeProps {
   /** Vertical position, as a percentage of the map area's height. */
   mapY: number;
   state: LocationState;
-  missionId: string | null;
-  /** Uploaded icon for this location; falls back to a themed emoji when absent. */
-  iconUrl?: string | null;
-  /** Mascot image shown on the current-location marker. */
-  mascotImageUrl?: string;
+  /** The mascot currently stands here; tapping Start plays this stop. */
+  selected: boolean;
+  onSelect: () => void;
 }
 
-const STATE_CLASSES: Record<LocationState, string> = {
-  locked: "bg-white/5 border-2 border-white/10 text-white/30",
-  unlocked:
-    "bg-black/40 border-2 border-lime-green text-white shadow-[0_0_18px_2px_rgba(157,255,0,0.4)]",
-  current: "bg-black/40 border-2 border-neon-pink text-white animate-glow",
-  completed: "bg-lime-green/10 border-2 border-lime-green/60 text-white",
-};
-
-/** Themed picture for each location, keyed by its name. */
-const LOCATION_EMOJI: Record<string, string> = {
-  "Market Square": "🛒",
-  "In the Kitchen": "🍳",
-  "Cozy Café": "☕",
-  Classroom: "📚",
-  "Art Studio": "🎨",
-};
-
-function nodeImage(name: string, state: LocationState): string {
-  if (state === "locked") return "🔒";
-  return LOCATION_EMOJI[name] ?? "📍";
-}
-
+/**
+ * A location on the map, drawn as just its name — the district background art
+ * already paints the building itself, so no marker or icon is layered on top.
+ * The label floats gently (staggered per-location so the map feels alive) and
+ * lights up pink when selected; the mascot hovers above the selected one.
+ */
 export default function MapLocationNode({
   name,
   mapX,
   mapY,
   state,
-  missionId,
-  iconUrl,
-  mascotImageUrl,
+  selected,
+  onSelect,
 }: MapLocationNodeProps) {
-  const interactive = missionId !== null && state !== "locked";
-  // A custom icon replaces the emoji for any non-locked state (locked always
-  // shows the 🔒 so it reads as unavailable).
-  const showIcon = iconUrl && state !== "locked";
-
-  const marker =
-    state === "current" ? (
-      <div className={interactive ? "transition-transform hover:scale-110 active:scale-95" : ""}>
-        <UiSlayCharacter
-          size="sm"
-          wiggle
-          src={mascotImageUrl}
-          aria-label={`${name} — you are here`}
-        />
-      </div>
-    ) : (
-      <div
-        className={[
-          "relative w-[clamp(3.25rem,11vmin,5rem)] h-[clamp(3.25rem,11vmin,5rem)] rounded-full flex items-center justify-center text-[clamp(1.5rem,5vmin,2.25rem)] transition-transform",
-          STATE_CLASSES[state],
-          interactive ? "hover:scale-110 active:scale-95" : "",
-        ].join(" ")}
-      >
-        {showIcon ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={iconUrl}
-            alt=""
-            aria-hidden="true"
-            className="h-full w-full rounded-full object-cover"
-          />
-        ) : (
-          <span aria-hidden="true" className={state === "locked" ? "opacity-70" : ""}>
-            {nodeImage(name, state)}
-          </span>
-        )}
-
-        {state === "completed" && (
-          <span
-            aria-hidden="true"
-            className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-lime-green text-black text-sm font-black flex items-center justify-center border-2 border-black"
-          >
-            ✓
-          </span>
-        )}
-      </div>
-    );
-
   return (
     <div
-      className="absolute z-10 flex flex-col items-center gap-1.5 -translate-x-1/2 -translate-y-1/2"
+      className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
       style={{ left: `${mapX}%`, top: `${mapY}%` }}
     >
-      {interactive && missionId ? (
-        <Link
-          href={`/mission/${missionId}`}
-          aria-label={`${name} — ${state}`}
-          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-pink focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-full"
-        >
-          {marker}
-        </Link>
-      ) : (
-        <div aria-label={`${name} — locked`} aria-disabled="true">
-          {marker}
-        </div>
-      )}
-
-      <span
-        className={[
-          "max-w-[26vw] text-center break-words text-[clamp(0.6rem,2.2vmin,0.75rem)] font-semibold uppercase leading-tight tracking-wide px-2 py-1 rounded-lg bg-black/60",
-          state === "locked" ? "text-white/30" : "text-white/80",
-        ].join(" ")}
+      {/* Float lives on a wrapper: its transform would otherwise clobber the
+          button's hover scale, and the centering translate above. */}
+      <div
+        className="animate-label-float"
+        style={{ animationDelay: `${((mapX + mapY) % 5) * 0.4}s` }}
       >
-        {name}
-      </span>
+        <button
+          type="button"
+          onClick={onSelect}
+          aria-pressed={selected}
+          aria-label={`${name}${state === "completed" ? " — completed" : ""}`}
+          className={[
+            "max-w-[38vw] break-words rounded-full px-3.5 py-1.5 text-center",
+            "text-[clamp(0.65rem,2.4vmin,0.85rem)] font-extrabold uppercase leading-tight tracking-wide",
+            "backdrop-blur-sm transition-transform hover:scale-110 active:scale-95",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-pink focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+            selected
+              ? "bg-black/70 border-2 border-neon-pink text-white animate-glow"
+              : state === "completed"
+                ? "bg-black/55 border-2 border-lime-green/50 text-lime-green"
+                : "bg-black/55 border-2 border-white/25 text-white shadow-[0_0_14px_rgba(157,255,0,0.35)]",
+          ].join(" ")}
+        >
+          {state === "completed" ? `✓ ${name}` : name}
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 
 import AuthGuard from "@/components/auth/AuthGuard";
-import { buildLocationProgress, buildMapViewModel } from "@/features/map/mapState";
+import {
+  buildLocationProgress,
+  buildMapViewModel,
+  defaultSelectedLocation,
+  selectActiveDistrict,
+} from "@/features/map/mapState";
 import RewardScreen from "@/features/reward/RewardScreen";
 import { createClient } from "@/lib/supabase/server";
 
@@ -93,9 +98,15 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
     nextMissionIdByLocation
   );
 
-  // The "current" location is the next frontier stop the player can now play.
-  const nextStop =
-    mapDistricts.flatMap((d) => d.locations).find((l) => l.state === "current")?.name ?? null;
+  // The frontier stop in the active district — where the mascot will stand
+  // when the player returns to the map.
+  const activeDistrict = selectActiveDistrict(mapDistricts);
+  const nextLocation = activeDistrict
+    ? defaultSelectedLocation(activeDistrict.locations)
+    : null;
+  const nextStop = nextLocation
+    ? { name: nextLocation.name, iconUrl: nextLocation.iconUrl }
+    : null;
 
   return (
     <AuthGuard>

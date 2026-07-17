@@ -59,9 +59,9 @@ export default function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md border-t border-white/10 bg-black/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:border-x"
     >
-      <ul className="mx-auto flex max-w-md items-stretch justify-around px-2 py-2">
+      <ul className="flex items-stretch justify-around px-2 py-2">
         {NAV_ITEMS.map((item, index) => {
           const Icon = item.icon;
           const active = index === activeIndex;

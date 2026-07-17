@@ -1,6 +1,8 @@
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminDistrictForm from "@/features/admin/AdminDistrictForm";
-import AdminDistrictItem, { type AdminDistrictItemData } from "@/features/admin/AdminDistrictItem";
+import AdminDistrictList, {
+  type AdminDistrictItemData,
+} from "@/features/admin/AdminDistrictList";
 import AdminHeader from "@/features/admin/AdminHeader";
 import { requireAdminPage } from "@/features/admin/guard";
 
@@ -18,9 +20,10 @@ export default async function AdminDistrictsPage() {
 
   const districtRows: AdminDistrictItemData[] = districts ?? [];
 
-  const locationCounts = new Map<string, number>();
+  // Plain object, not a Map — it crosses into a client component.
+  const locationCounts: Record<string, number> = {};
   for (const loc of locations ?? []) {
-    locationCounts.set(loc.district_id, (locationCounts.get(loc.district_id) ?? 0) + 1);
+    locationCounts[loc.district_id] = (locationCounts[loc.district_id] ?? 0) + 1;
   }
 
   return (
@@ -34,11 +37,7 @@ export default async function AdminDistrictsPage() {
             No districts yet. Create the first one below.
           </p>
         ) : (
-          <ul className="mb-6 flex flex-col gap-3">
-            {districtRows.map((d) => (
-              <AdminDistrictItem key={d.id} district={d} locationCount={locationCounts.get(d.id) ?? 0} />
-            ))}
-          </ul>
+          <AdminDistrictList districts={districtRows} locationCounts={locationCounts} />
         )}
 
         <AdminCreateModal triggerLabel="Add District" title="New District">

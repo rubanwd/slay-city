@@ -16,7 +16,7 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
   const [missionRes, tasksRes] = await Promise.all([
     supabase
       .from("missions")
-      .select("id, title, description, xp_reward, coin_reward")
+      .select("id, title, description, xp_reward, coin_reward, locations(name, icon_url)")
       .eq("id", missionId)
       .eq("is_published", true)
       .maybeSingle(),
@@ -40,6 +40,9 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
     content: task.content,
   }));
 
+  // The FK relationship comes back as a single related row (or null).
+  const location = mission.locations as { name: string; icon_url: string | null } | null;
+
   return (
     <AuthGuard>
       <MissionScreen
@@ -50,6 +53,7 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
           xpReward: mission.xp_reward,
           coinReward: mission.coin_reward,
         }}
+        location={location ? { name: location.name, iconUrl: location.icon_url } : null}
         tasks={tasks}
       />
     </AuthGuard>

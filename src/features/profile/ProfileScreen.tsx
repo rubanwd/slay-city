@@ -62,7 +62,7 @@ export default function ProfileScreen({ email, avatarUrl }: ProfileScreenProps) 
   const initial = (email ?? "?").charAt(0).toUpperCase();
 
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <main className="min-h-screen bg-black flex flex-col mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-center px-6 py-4 border-b border-white/10">
         <h1 className="text-xl font-bold text-white">Profile</h1>
       </header>

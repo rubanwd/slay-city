@@ -1,6 +1,10 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import CityMap from "@/features/map/CityMap";
-import { buildLocationProgress, buildMapViewModel } from "@/features/map/mapState";
+import {
+  buildLocationProgress,
+  buildMapViewModel,
+  selectActiveDistrict,
+} from "@/features/map/mapState";
 import { resolveMascotImage } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
 
@@ -68,6 +72,7 @@ export default async function MapPage() {
     completedLocationIds,
     nextMissionIdByLocation
   );
+  const activeDistrict = selectActiveDistrict(mapDistricts);
 
   const stats = statsRes.data;
 
@@ -91,7 +96,7 @@ export default async function MapPage() {
   return (
     <AuthGuard>
       <CityMap
-        districts={mapDistricts}
+        district={activeDistrict}
         hud={{
           xp: stats?.xp ?? 0,
           coins: stats?.coins ?? 0,
