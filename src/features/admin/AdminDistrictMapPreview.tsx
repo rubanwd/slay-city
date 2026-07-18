@@ -27,8 +27,8 @@ export interface AdminDistrictMapPreviewProps {
  * frame, nodes, mascot marker and Start bar the player sees on `/map`, fed
  * with this district's data. Nodes are tappable so the admin can walk the
  * mascot around and check positions; the Start bar is display-only (admins
- * can't enter missions). Draft locations — invisible to players — are shown
- * dimmed so their pins can still be checked before publishing.
+ * can't enter missions). Only published locations are shown, matching
+ * exactly what players see on `/map`.
  */
 export default function AdminDistrictMapPreview({
   districtName,
@@ -38,8 +38,9 @@ export default function AdminDistrictMapPreview({
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const selected = locations.find((loc) => loc.id === selectedId) ?? locations[0] ?? null;
-  const hasDrafts = locations.some((loc) => !loc.isPublished);
+  const publishedLocations = locations.filter((loc) => loc.isPublished);
+  const selected =
+    publishedLocations.find((loc) => loc.id === selectedId) ?? publishedLocations[0] ?? null;
 
   return (
     <div className="mb-6">
@@ -74,17 +75,16 @@ export default function AdminDistrictMapPreview({
               {districtName}
             </span>
 
-            {locations.map((loc) => (
-              <div key={loc.id} className={loc.isPublished ? undefined : "opacity-50"}>
-                <MapLocationNode
-                  name={loc.name}
-                  mapX={loc.mapX}
-                  mapY={loc.mapY}
-                  state="unlocked"
-                  selected={loc.id === selected?.id}
-                  onSelect={() => setSelectedId(loc.id)}
-                />
-              </div>
+            {publishedLocations.map((loc) => (
+              <MapLocationNode
+                key={loc.id}
+                name={loc.name}
+                mapX={loc.mapX}
+                mapY={loc.mapY}
+                state="unlocked"
+                selected={loc.id === selected?.id}
+                onSelect={() => setSelectedId(loc.id)}
+              />
             ))}
 
             {selected && (
@@ -106,12 +106,7 @@ export default function AdminDistrictMapPreview({
               </div>
             ) : (
               <p className="text-center text-small text-white/50">
-                No locations yet — add one below to see it on the map.
-              </p>
-            )}
-            {hasDrafts && (
-              <p className="mt-2 text-center text-[11px] text-white/40">
-                Dimmed pins are drafts — players don&apos;t see them until published.
+                No published locations yet — publish one to see it on the map.
               </p>
             )}
           </div>
