@@ -6,6 +6,7 @@ import {
   defaultSelectedLocation,
   selectActiveDistrict,
   selectVisibleLocations,
+  sumLocationRewards,
 } from "./mapState";
 
 const districts = [
@@ -215,5 +216,36 @@ describe("buildLocationProgress", () => {
     expect(nextMissionIdByLocation.has("l1")).toBe(false);
     // l2's mission is untouched — it should be unaffected by l1's completion.
     expect(nextMissionIdByLocation.get("l2")).toBe("m3");
+  });
+});
+
+describe("sumLocationRewards", () => {
+  it("sums xp and coins per location across all of its missions", () => {
+    const missions = [
+      { location_id: "l1", xp_reward: 10, coin_reward: 5 },
+      { location_id: "l1", xp_reward: 20, coin_reward: 15 },
+      { location_id: "l2", xp_reward: 7, coin_reward: 3 },
+    ];
+
+    const totals = sumLocationRewards(missions);
+
+    expect(totals.get("l1")).toEqual({ xp: 30, coins: 20 });
+    expect(totals.get("l2")).toEqual({ xp: 7, coins: 3 });
+  });
+
+  it("returns an empty map for no missions", () => {
+    expect(sumLocationRewards([]).size).toBe(0);
+  });
+});
+
+describe("buildMapViewModel reward totals", () => {
+  it("attaches each location's summed rewards, defaulting to zero when absent", () => {
+    const rewards = new Map([["l1", { xp: 30, coins: 20 }]]);
+    const [district] = buildMapViewModel(districts, locations, new Set(), new Map(), rewards);
+
+    expect(district.locations.map((l) => [l.id, l.totalXp, l.totalCoins])).toEqual([
+      ["l1", 30, 20],
+      ["l2", 0, 0],
+    ]);
   });
 });

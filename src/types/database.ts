@@ -654,6 +654,7 @@ export type Database = {
         }[]
       }
       reset_my_progress: { Args: never; Returns: undefined }
+      reset_location_progress: { Args: { p_location_id: string }; Returns: undefined }
       purchase_wardrobe_item: {
         Args: { p_item_id: string }
         Returns: {
