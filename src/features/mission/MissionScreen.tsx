@@ -119,7 +119,9 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
             {currentIndex + 1}/{total}
           </span>
         </div>
-        <ProgressBar completed={currentIndex} total={total} />
+        {currentTask.taskType !== "snake_game" && (
+          <ProgressBar completed={currentIndex} total={total} />
+        )}
       </Section>
 
       <Section py="sm" className="min-h-0 flex-1 overflow-y-auto">
