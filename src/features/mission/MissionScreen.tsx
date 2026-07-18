@@ -58,6 +58,12 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
     }
   };
 
+  const handleExit = () => {
+    if (window.confirm("Leave this mission? Your progress on this task will be lost.")) {
+      router.push("/map");
+    }
+  };
+
   if (total === 0) {
     return (
       <AppContainer className="justify-center">
@@ -79,6 +85,21 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
       <Section pt="lg" pb="sm" className="shrink-0 gap-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={handleExit}
+              aria-label="Exit mission"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path
+                  d="M2 2l12 12M14 2L2 14"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
             {location?.iconUrl && (
               // eslint-disable-next-line @next/next/no-img-element -- admin-uploaded location icon
               <img
