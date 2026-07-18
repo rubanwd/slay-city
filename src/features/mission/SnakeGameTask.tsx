@@ -185,14 +185,14 @@ export default function SnakeGameTask({
   const letterCells = new Map(game.letters.map((cell) => [key(cell), cell]));
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col items-center gap-1 text-center">
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <div className="shrink-0 flex flex-col items-center gap-1 text-center">
         <p className="font-semibold text-white">{prompt}</p>
         {translation && <p className="text-small text-white/60">{translation}</p>}
       </div>
 
       {/* Word progress: every letter starts visible, and each one clears as it's collected. */}
-      <div className="flex flex-wrap justify-center gap-1.5">
+      <div className="shrink-0 flex flex-wrap justify-center gap-1.5">
         {word.split("").map((char, index) => {
           const done = index < game.collected;
           return (
@@ -211,83 +211,86 @@ export default function SnakeGameTask({
         })}
       </div>
 
-      {/* Square play field */}
-      <div
-        className={[
-          "relative aspect-square w-full overflow-hidden rounded-2xl border bg-black/40 transition-colors",
-          game.flashTicks > 0 ? "border-neon-pink" : "border-white/15",
-        ].join(" ")}
-      >
+      {/* Square play field — sized to whatever height/width remains, so it
+          shrinks to fit rather than pushing the D-pad/button off-screen. */}
+      <div className="min-h-0 flex-1 flex items-center justify-center">
         <div
-          className="grid h-full w-full gap-px p-px"
-          style={{ gridTemplateColumns: `repeat(${GRID}, minmax(0, 1fr))` }}
+          className={[
+            "relative aspect-square h-full max-w-full overflow-hidden rounded-2xl border bg-black/40 transition-colors",
+            game.flashTicks > 0 ? "border-neon-pink" : "border-white/15",
+          ].join(" ")}
         >
-          {Array.from({ length: GRID * GRID }, (_, index) => {
-            const cellKey = `${index % GRID},${Math.floor(index / GRID)}`;
-            const snakeIndex = snakeCells.get(cellKey);
-            const letter = letterCells.get(cellKey);
+          <div
+            className="grid h-full w-full gap-px p-px"
+            style={{ gridTemplateColumns: `repeat(${GRID}, minmax(0, 1fr))` }}
+          >
+            {Array.from({ length: GRID * GRID }, (_, index) => {
+              const cellKey = `${index % GRID},${Math.floor(index / GRID)}`;
+              const snakeIndex = snakeCells.get(cellKey);
+              const letter = letterCells.get(cellKey);
 
-            if (snakeIndex !== undefined) {
-              return (
-                <div
-                  key={index}
-                  className={[
-                    "rounded-[3px]",
-                    snakeIndex === 0 ? "bg-lime-green" : "bg-lime-green/50",
-                  ].join(" ")}
-                />
-              );
-            }
+              if (snakeIndex !== undefined) {
+                return (
+                  <div
+                    key={index}
+                    className={[
+                      "rounded-[3px]",
+                      snakeIndex === 0 ? "bg-lime-green" : "bg-lime-green/50",
+                    ].join(" ")}
+                  />
+                );
+              }
 
-            if (letter) {
-              return (
-                <div
-                  key={index}
-                  className="flex items-center justify-center rounded-[3px] bg-white/15 text-[10px] leading-none font-black text-white"
-                >
-                  {letter.char}
-                </div>
-              );
-            }
+              if (letter) {
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-center rounded-[3px] bg-white/15 text-[10px] leading-none font-black text-white"
+                  >
+                    {letter.char}
+                  </div>
+                );
+              }
 
-            return <div key={index} className="rounded-[3px] bg-white/[0.03]" />;
-          })}
-        </div>
-
-        {game.status !== "playing" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/75 p-4 text-center">
-            {game.status === "idle" && (
-              <>
-                <p className="text-body-strong font-black text-white">Ready?</p>
-                <p className="text-small text-white/60">
-                  All the letters are on the board. Eat them in the word&apos;s order, avoid your
-                  own tail, and you can pass through the edges.
-                </p>
-                <SlayButton variant="green" size="md" onClick={() => reset("playing")}>
-                  Start
-                </SlayButton>
-              </>
-            )}
-            {game.status === "dead" && (
-              <>
-                <p className="text-body-strong font-black text-neon-pink">Oops! Game over.</p>
-                <SlayButton variant="pink" size="md" onClick={() => reset("playing")}>
-                  Try Again
-                </SlayButton>
-              </>
-            )}
-            {game.status === "won" && (
-              <>
-                <p className="text-h3 font-black text-lime-green">{word}</p>
-                <p className="text-small text-white/70">You collected every letter!</p>
-              </>
-            )}
+              return <div key={index} className="rounded-[3px] bg-white/[0.03]" />;
+            })}
           </div>
-        )}
+
+          {game.status !== "playing" && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/75 p-4 text-center">
+              {game.status === "idle" && (
+                <>
+                  <p className="text-body-strong font-black text-white">Ready?</p>
+                  <p className="text-small text-white/60">
+                    All the letters are on the board. Eat them in the word&apos;s order, avoid
+                    your own tail, and you can pass through the edges.
+                  </p>
+                  <SlayButton variant="green" size="md" onClick={() => reset("playing")}>
+                    Start
+                  </SlayButton>
+                </>
+              )}
+              {game.status === "dead" && (
+                <>
+                  <p className="text-body-strong font-black text-neon-pink">Oops! Game over.</p>
+                  <SlayButton variant="pink" size="md" onClick={() => reset("playing")}>
+                    Try Again
+                  </SlayButton>
+                </>
+              )}
+              {game.status === "won" && (
+                <>
+                  <p className="text-h3 font-black text-lime-green">{word}</p>
+                  <p className="text-small text-white/70">You collected every letter!</p>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* D-pad */}
-      <div className="mx-auto grid w-44 grid-cols-3 grid-rows-3 gap-2">
+      <div className="shrink-0 mx-auto grid w-44 grid-cols-3 grid-rows-3 gap-2">
         <DPadButton direction="up" label="▲" className="col-start-2 row-start-1" onPress={turn} />
         <DPadButton direction="left" label="◀" className="col-start-1 row-start-2" onPress={turn} />
         <DPadButton direction="right" label="▶" className="col-start-3 row-start-2" onPress={turn} />
@@ -297,7 +300,7 @@ export default function SnakeGameTask({
       <SlayButton
         variant="green"
         size="lg"
-        className="w-full"
+        className="w-full shrink-0"
         onClick={onComplete}
         disabled={game.status !== "won"}
       >

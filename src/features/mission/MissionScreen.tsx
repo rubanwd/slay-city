@@ -75,8 +75,8 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
   const actionLabel = isLastTask ? "Finish Mission" : "Next";
 
   return (
-    <AppContainer>
-      <Section pt="lg" pb="sm" className="gap-4">
+    <AppContainer fixedHeight>
+      <Section pt="lg" pb="sm" className="shrink-0 gap-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             {location?.iconUrl && (
@@ -104,7 +104,7 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
         <ProgressBar completed={currentIndex} total={total} />
       </Section>
 
-      <Section py="sm" className="flex-1">
+      <Section py="sm" className="min-h-0 flex-1 overflow-y-auto">
         <MissionTaskRenderer
           key={currentTask.id}
           task={currentTask}
@@ -114,7 +114,7 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
       </Section>
 
       {(error || isSubmitting) && (
-        <Section py="sm" className="items-center">
+        <Section py="sm" className="shrink-0 items-center">
           {isSubmitting && <p className="text-white/60 animate-pulse">Saving your rewards…</p>}
           {error && (
             <div className="flex flex-col items-center gap-3">
