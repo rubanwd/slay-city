@@ -17,13 +17,23 @@ export default async function MissionTasksPage({ params }: MissionTasksPageProps
 
   const { data: mission } = await supabase
     .from("missions")
-    .select("id, title, is_published")
+    .select("id, title, is_published, location_id")
     .eq("id", missionId)
     .maybeSingle();
 
   if (!mission) {
     redirect("/admin/missions");
   }
+
+  const { data: location } = await supabase
+    .from("locations")
+    .select("district_id")
+    .eq("id", mission.location_id)
+    .maybeSingle();
+
+  const backHref = location
+    ? `/admin/districts/${location.district_id}/locations/${mission.location_id}`
+    : "/admin/missions";
 
   const { data: tasks } = await supabase
     .from("mission_tasks")
@@ -36,7 +46,7 @@ export default async function MissionTasksPage({ params }: MissionTasksPageProps
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
-        <AdminHeader title="Mission Tasks" backHref="/admin/missions" />
+        <AdminHeader title="Mission Tasks" backHref={backHref} />
 
         <div className="mb-4 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3">
           <p className="text-small text-white/50">Mission</p>
