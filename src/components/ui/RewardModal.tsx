@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
   useEffect,
   useRef,
 } from "react";
 import { createPortal } from "react-dom";
+
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export interface RewardModalProps {
   open: boolean;
@@ -36,15 +37,14 @@ export default function RewardModal({
   const panelRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  /* ── Focus trap & scroll lock ─────────────────────────────────────────── */
+  useBodyScrollLock(open);
+
+  /* ── Focus trap ───────────────────────────────────────────────────────── */
   useEffect(() => {
     if (!open) return;
 
     const prev = document.activeElement as HTMLElement | null;
     closeBtnRef.current?.focus();
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
 
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -65,7 +65,6 @@ export default function RewardModal({
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = originalOverflow;
       prev?.focus();
     };
   }, [open, onClose]);

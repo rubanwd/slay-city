@@ -10,6 +10,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+
 interface AdminModalControls {
   close: () => void;
 }
@@ -47,14 +49,7 @@ export default function AdminModal({ open, onClose, title, children }: AdminModa
     closeBtnRef.current?.focus();
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, [open]);
+  useBodyScrollLock(open);
 
   useEffect(() => {
     if (!open) return;
