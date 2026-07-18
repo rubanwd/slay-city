@@ -1,6 +1,7 @@
-import type { Database } from "@/types/database";
+import type { MissionTaskType } from "@/features/mission/types";
 
-export type MissionTaskType = Database["public"]["Enums"]["mission_task_type"];
+export type { MissionTaskType };
+export { taskTypeLabel } from "@/features/mission/types";
 
 /** Selectable task types, in the order they appear in the admin dropdowns. */
 export const TASK_TYPES: MissionTaskType[] = [
@@ -10,15 +11,3 @@ export const TASK_TYPES: MissionTaskType[] = [
   "quiz",
   "snake_game",
 ];
-
-const TASK_TYPE_LABELS: Record<MissionTaskType, string> = {
-  vocabulary: "Vocabulary",
-  matching: "Matching",
-  listening: "Listening",
-  quiz: "Quiz",
-  snake_game: "Play Snake Game",
-};
-
-export function taskTypeLabel(taskType: MissionTaskType): string {
-  return TASK_TYPE_LABELS[taskType] ?? taskType;
-}

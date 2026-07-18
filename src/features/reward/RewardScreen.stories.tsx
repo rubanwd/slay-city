@@ -13,14 +13,13 @@ const meta: Meta<typeof RewardScreen> = {
   argTypes: {
     coins: { control: { type: "number", min: 0 } },
     xp: { control: { type: "number", min: 0 } },
-    streak: { control: { type: "number", min: 0 } },
-    nextStop: { control: "text" },
+    missionTitle: { control: "text" },
   },
   args: {
     coins: 50,
     xp: 100,
-    streak: 2,
-    nextStop: "Central Park",
+    missionTitle: "On Guard",
+    taskNames: ["Play Snake Game"],
   },
 };
 
@@ -29,10 +28,14 @@ type Story = StoryObj<typeof RewardScreen>;
 
 export const Default: Story = {};
 
-export const NoNextStop: Story = {
-  args: { nextStop: null },
+export const NoTasks: Story = {
+  args: { taskNames: [] },
+};
+
+export const MultipleTasks: Story = {
+  args: { taskNames: ["Vocabulary", "Matching", "Quiz"] },
 };
 
 export const BigRewards: Story = {
-  args: { coins: 500, xp: 1200, streak: 30, nextStop: "Times Square" },
+  args: { coins: 500, xp: 1200, missionTitle: "Central Plaza Grand Tour" },
 };
