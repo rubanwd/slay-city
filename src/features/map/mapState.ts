@@ -44,6 +44,30 @@ export function buildLocationProgress(
   return { completedLocationIds, nextMissionIdByLocation };
 }
 
+export interface LocationRewardTotals {
+  xp: number;
+  coins: number;
+}
+
+/**
+ * Sums the XP/coins every published mission at each location is worth,
+ * regardless of completion — used to show what a location paid out once
+ * every one of its missions is done.
+ */
+export function sumLocationRewards(
+  missions: Pick<Mission, "location_id" | "xp_reward" | "coin_reward">[]
+): Map<string, LocationRewardTotals> {
+  const totals = new Map<string, LocationRewardTotals>();
+  for (const mission of missions) {
+    const current = totals.get(mission.location_id) ?? { xp: 0, coins: 0 };
+    totals.set(mission.location_id, {
+      xp: current.xp + mission.xp_reward,
+      coins: current.coins + mission.coin_reward,
+    });
+  }
+  return totals;
+}
+
 export interface MapLocationViewModel {
   id: string;
   name: string;
@@ -54,6 +78,10 @@ export interface MapLocationViewModel {
   missionId: string | null;
   /** The location's own map icon, if uploaded. */
   iconUrl: string | null;
+  /** Total XP every mission at this location grants, once completed. */
+  totalXp: number;
+  /** Total coins every mission at this location grants, once completed. */
+  totalCoins: number;
 }
 
 export interface MapDistrictViewModel {
@@ -76,7 +104,8 @@ export function buildMapViewModel(
   districts: Pick<District, "id" | "name" | "order_index" | "background_image_url">[],
   locations: Pick<Location, "id" | "district_id" | "name" | "description" | "order_index" | "map_x" | "map_y" | "icon_url">[],
   completedLocationIds: ReadonlySet<string>,
-  missionIdByLocation: ReadonlyMap<string, string>
+  missionIdByLocation: ReadonlyMap<string, string>,
+  rewardsByLocation: ReadonlyMap<string, LocationRewardTotals> = new Map()
 ): MapDistrictViewModel[] {
   const sortedDistricts = [...districts].sort((a, b) => a.order_index - b.order_index);
 
@@ -93,6 +122,8 @@ export function buildMapViewModel(
         state: completedLocationIds.has(loc.id) ? "completed" : "unlocked",
         missionId: missionIdByLocation.get(loc.id) ?? null,
         iconUrl: loc.icon_url ?? null,
+        totalXp: rewardsByLocation.get(loc.id)?.xp ?? 0,
+        totalCoins: rewardsByLocation.get(loc.id)?.coins ?? 0,
       }));
 
     return {

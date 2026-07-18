@@ -141,3 +141,33 @@ export async function resetMissionProgress(): Promise<{ ok: true } | { ok: false
   revalidatePath("/", "layout");
   return { ok: true };
 }
+
+/**
+ * Lets a player replay every mission at a location they've already completed.
+ * Wipes only that location's own progress rows for the caller — every other
+ * location, and the caller's overall XP/coins/streak, are untouched. Rewards
+ * are re-granted the next time each mission is completed (the same mechanism
+ * `resetMissionProgress` relies on), so replaying pays out again.
+ */
+export async function resetLocationProgress(
+  locationId: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to restart this location." };
+  }
+
+  const { error } = await supabase.rpc("reset_location_progress", {
+    p_location_id: locationId,
+  });
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/map", "layout");
+  return { ok: true };
+}

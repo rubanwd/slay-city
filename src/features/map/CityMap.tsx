@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useFormStatus } from "react-dom";
 
 import { BottomNav } from "@/components/layout";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
 import { useImageLoaded } from "@/hooks/useImageLoaded";
+import { resetLocationProgress } from "@/features/mission/actions";
 
 import MapBackground from "./MapBackground";
 import { MAP_ASPECT } from "./mapConstants";
@@ -13,6 +15,33 @@ import { defaultSelectedLocation, MAX_VISIBLE_LOCATIONS, selectVisibleLocations 
 import type { MapDistrictViewModel } from "./mapState";
 import MapLocationNode from "./MapLocationNode";
 import MascotMarker from "./MascotMarker";
+
+function RestartLocationButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-label="Restart location"
+      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-white/20 text-white/70 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
+    >
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 12a9 9 0 1 1 2.6 6.4" />
+        <polyline points="3 17 3 12 8 12" />
+      </svg>
+    </button>
+  );
+}
 
 export interface HudStats {
   xp: number;
@@ -149,14 +178,43 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
             >
               <span className="truncate">▶ Start {selected.name}</span>
             </Link>
+          ) : selected.state === "completed" ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-center text-sm font-bold text-white/60">
+                🪙 +{selected.totalCoins} · ⭐ +{selected.totalXp} earned
+              </p>
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex flex-1 min-w-0 items-center justify-center gap-2 h-14 rounded-2xl border-2 border-lime-green/40 text-lime-green/70 font-extrabold uppercase tracking-wide text-lg"
+                  aria-disabled="true"
+                >
+                  <span className="truncate">✓ {selected.name} completed</span>
+                </div>
+                <form
+                  action={async () => {
+                    const result = await resetLocationProgress(selected.id);
+                    if (!result.ok) window.alert(result.error);
+                  }}
+                  onSubmit={(event) => {
+                    if (
+                      !window.confirm(
+                        `Restart ${selected.name}? You'll replay every mission here from the start.`
+                      )
+                    ) {
+                      event.preventDefault();
+                    }
+                  }}
+                >
+                  <RestartLocationButton />
+                </form>
+              </div>
+            </div>
           ) : (
             <div
               className="flex items-center justify-center gap-2 w-full h-14 rounded-2xl border-2 border-lime-green/40 text-lime-green/70 font-extrabold uppercase tracking-wide text-lg"
               aria-disabled="true"
             >
-              <span className="truncate">
-                {selected.state === "completed" ? `✓ ${selected.name} completed` : "Coming soon"}
-              </span>
+              <span className="truncate">Coming soon</span>
             </div>
           )}
         </div>

@@ -4,6 +4,7 @@ import {
   buildLocationProgress,
   buildMapViewModel,
   selectActiveDistrict,
+  sumLocationRewards,
 } from "@/features/map/mapState";
 import { resolveMascotImage } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
@@ -35,7 +36,7 @@ export default async function MapPage() {
         .order("order_index"),
       supabase
         .from("missions")
-        .select("id, location_id, order_index")
+        .select("id, location_id, order_index, xp_reward, coin_reward")
         .eq("is_published", true)
         .order("order_index"),
       supabase.from("user_progress").select("mission_id, completed_at").eq("profile_id", user.id),
@@ -66,11 +67,14 @@ export default async function MapPage() {
     completedMissionIds
   );
 
+  const rewardsByLocation = sumLocationRewards(missionsRes.data ?? []);
+
   const mapDistricts = buildMapViewModel(
     districts,
     locations,
     completedLocationIds,
-    nextMissionIdByLocation
+    nextMissionIdByLocation,
+    rewardsByLocation
   );
   const activeDistrict = selectActiveDistrict(mapDistricts);
 
