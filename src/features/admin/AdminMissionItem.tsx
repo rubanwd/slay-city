@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import NavLink from "@/components/ui/NavLink";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -210,12 +210,12 @@ export default function AdminMissionItem({ mission, locations }: AdminMissionIte
             {mission.is_published ? "Unpublish" : "Publish"}
           </button>
         </form>
-        <Link
+        <NavLink
           href={`/admin/missions/${mission.id}/tasks`}
           className="flex items-center justify-center rounded-full border border-cyan/50 px-2 py-1 text-center text-[11px] font-bold uppercase tracking-wide text-cyan transition-colors hover:bg-cyan/10"
         >
           Tasks
-        </Link>
+        </NavLink>
       </div>
     </li>
   );

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import NavLink from "@/components/ui/NavLink";
 
 export interface AdminLocationItemData {
   id: string;
@@ -21,7 +21,7 @@ export interface AdminLocationItemProps {
 export default function AdminLocationItem({ location, missionCount }: AdminLocationItemProps) {
   return (
     <li>
-      <Link
+      <NavLink
         href={`/admin/districts/${location.district_id}/locations/${location.id}`}
         className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 p-3 transition-colors hover:border-white/30 hover:bg-white/10"
       >
@@ -55,7 +55,7 @@ export default function AdminLocationItem({ location, missionCount }: AdminLocat
         >
           <path d="M9 6l6 6-6 6" />
         </svg>
-      </Link>
+      </NavLink>
     </li>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import NavLink from "@/components/ui/NavLink";
 import { useRouter } from "next/navigation";
 import { useState, type DragEvent } from "react";
 
@@ -111,7 +111,7 @@ export default function AdminDistrictList({ districts, locationCounts }: AdminDi
                 : "",
             ].join(" ")}
           >
-            <Link
+            <NavLink
               href={`/admin/districts/${district.id}`}
               className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] p-4 transition-colors hover:border-white/30 hover:bg-white/5"
             >
@@ -174,7 +174,7 @@ export default function AdminDistrictList({ districts, locationCounts }: AdminDi
               >
                 <path d="M9 6l6 6-6 6" />
               </svg>
-            </Link>
+            </NavLink>
           </li>
         ))}
       </ul>

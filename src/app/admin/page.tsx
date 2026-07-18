@@ -1,4 +1,4 @@
-import Link from "next/link";
+import NavLink from "@/components/ui/NavLink";
 
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminSnakePlayground from "@/features/admin/AdminSnakePlayground";
@@ -62,7 +62,7 @@ export default async function AdminPage() {
 
         <nav className="flex flex-col gap-3">
           {cards.map((card) => (
-            <Link
+            <NavLink
               key={card.href}
               href={card.href}
               className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] p-5 transition-colors hover:border-white/30 hover:bg-white/5"
@@ -87,7 +87,7 @@ export default async function AdminPage() {
                   <path d="M9 6l6 6-6 6" />
                 </svg>
               </span>
-            </Link>
+            </NavLink>
           ))}
         </nav>
       </div>

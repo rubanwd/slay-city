@@ -1,4 +1,4 @@
-import Link from "next/link";
+import NavLink from "@/components/ui/NavLink";
 
 import AdminHeader from "@/features/admin/AdminHeader";
 import { publishMission, unpublishMission } from "@/features/admin/actions";
@@ -30,7 +30,7 @@ export default async function AdminMissionsPage() {
           <p className="text-small text-white/50">
             {rows.length} mission{rows.length === 1 ? "" : "s"}
           </p>
-          <Link
+          <NavLink
             href="/admin/missions/new"
             className="flex items-center gap-1.5 rounded-full border border-lime-green/50 px-3.5 py-2 text-xs font-bold uppercase tracking-wide text-lime-green transition-colors hover:bg-lime-green/10"
           >
@@ -38,7 +38,7 @@ export default async function AdminMissionsPage() {
               <path d="M12 5v14M5 12h14" />
             </svg>
             New
-          </Link>
+          </NavLink>
         </div>
 
         {rows.length === 0 ? (
@@ -59,12 +59,12 @@ export default async function AdminMissionsPage() {
                   </div>
                   <p className="truncate text-small text-white/50">
                     {m.locations ? (
-                      <Link
+                      <NavLink
                         href={`/admin/districts/${m.locations.district_id}/locations/${m.locations.id}`}
                         className="underline decoration-white/20 underline-offset-2 hover:text-white"
                       >
                         {m.locations.districts?.name ?? "—"} • {m.locations.name}
-                      </Link>
+                      </NavLink>
                     ) : (
                       "—"
                     )}
@@ -75,12 +75,12 @@ export default async function AdminMissionsPage() {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Link
+                  <NavLink
                     href={`/admin/missions/${m.id}/tasks`}
                     className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white/70 transition-colors hover:bg-white/10"
                   >
                     Tasks
-                  </Link>
+                  </NavLink>
                   <form action={m.is_published ? unpublishMission : publishMission}>
                     <input type="hidden" name="id" value={m.id} />
                     <button

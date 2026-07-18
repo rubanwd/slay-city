@@ -1,4 +1,4 @@
-import Link from "next/link";
+import NavLink from "@/components/ui/NavLink";
 
 import { signOut } from "@/features/auth/actions";
 
@@ -12,7 +12,7 @@ export default function AdminHeader({ title, backHref }: AdminHeaderProps) {
   return (
     <header className="flex items-center gap-3 py-5">
       {backHref && (
-        <Link
+        <NavLink
           href={backHref}
           aria-label="Back"
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:bg-white/5 hover:text-white"
@@ -30,7 +30,7 @@ export default function AdminHeader({ title, backHref }: AdminHeaderProps) {
           >
             <path d="M15 18l-6-6 6-6" />
           </svg>
-        </Link>
+        </NavLink>
       )}
       <h1 className="min-w-0 truncate text-h2 font-black text-white">{title}</h1>
       <span className="ml-auto shrink-0 rounded-full border border-lime-green/50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-lime-green">

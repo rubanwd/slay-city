@@ -1,4 +1,4 @@
-import Link from "next/link";
+import NavLink from "@/components/ui/NavLink";
 import { redirect } from "next/navigation";
 
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
@@ -57,13 +57,13 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
         <AdminHeader title={location.name} backHref={`/admin/districts/${districtId}`} />
 
         <nav className="mb-3 flex items-center gap-1.5 text-xs text-white/40">
-          <Link href="/admin/districts" className="hover:text-white/70">
+          <NavLink href="/admin/districts" className="hover:text-white/70">
             Districts
-          </Link>
+          </NavLink>
           <span>›</span>
-          <Link href={`/admin/districts/${districtId}`} className="hover:text-white/70">
+          <NavLink href={`/admin/districts/${districtId}`} className="hover:text-white/70">
             {districtName}
-          </Link>
+          </NavLink>
           <span>›</span>
           <span className="truncate text-white/60">{location.name}</span>
         </nav>
