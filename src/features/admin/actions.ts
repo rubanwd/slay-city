@@ -8,6 +8,7 @@ import { isWardrobeCategory } from "@/features/wardrobe/categories";
 import type { Database } from "@/types/database";
 
 import { requireAdmin } from "./requireAdmin";
+import { TASK_TYPES } from "./taskTypes";
 
 /** State returned to admin forms via useActionState. */
 export type AdminFormState = {
@@ -17,7 +18,7 @@ export type AdminFormState = {
 
 type MissionTaskType = Database["public"]["Enums"]["mission_task_type"];
 
-const MISSION_TASK_TYPES: MissionTaskType[] = ["vocabulary", "matching", "listening", "quiz"];
+const MISSION_TASK_TYPES: MissionTaskType[] = TASK_TYPES;
 
 /** Parses a non-negative integer from a form field, defaulting to `fallback`. */
 function parseNonNegativeInt(raw: FormDataEntryValue | null, fallback = 0): number | null {
