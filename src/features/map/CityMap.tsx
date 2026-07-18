@@ -83,9 +83,6 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
       <header className="flex items-center justify-between gap-2 px-5 py-3 border-b border-white/10 shrink-0">
         <h1 className="text-lg font-black text-lime-green leading-tight uppercase">Slay City</h1>
         <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-neon-pink">
-            🔥 {hud.currentStreak}
-          </span>
           <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-white whitespace-nowrap">
             Lvl {hud.level} · {hud.xp} XP
           </span>
