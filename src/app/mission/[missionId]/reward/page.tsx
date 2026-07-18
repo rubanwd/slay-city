@@ -104,9 +104,7 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
   const nextLocation = activeDistrict
     ? defaultSelectedLocation(activeDistrict.locations)
     : null;
-  const nextStop = nextLocation
-    ? { name: nextLocation.name, iconUrl: nextLocation.iconUrl }
-    : null;
+  const nextStop = nextLocation?.name ?? null;
 
   return (
     <AuthGuard>
