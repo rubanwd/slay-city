@@ -92,7 +92,6 @@ export async function createMission(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/missions");
   revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `Mission "${title}" created.` };
@@ -138,7 +137,6 @@ export async function updateMission(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/missions");
   revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
   return { success: `Mission "${title}" updated.` };
@@ -156,7 +154,7 @@ async function setMissionPublished(missionId: string, isPublished: boolean): Pro
     .eq("id", missionId);
 
   if (!error) {
-    revalidatePath("/admin/missions");
+    revalidatePath("/admin/districts", "layout");
     // Published state changes what appears on the player-facing map.
     revalidatePath("/map", "layout");
   }
@@ -187,7 +185,6 @@ export async function deleteMission(formData: FormData): Promise<void> {
   const { error } = await supabase.from("missions").delete().eq("id", id);
   if (error) return;
 
-  revalidatePath("/admin/missions");
   revalidatePath("/admin/districts", "layout");
   revalidatePath("/map", "layout");
 }

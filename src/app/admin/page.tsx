@@ -20,15 +20,8 @@ export default async function AdminPage() {
 
   const cards = [
     {
-      href: "/admin/missions",
-      title: "Missions",
-      count: missionsRes.count ?? 0,
-      description: "Create, publish, and manage missions.",
-      accent: "text-lime-green",
-    },
-    {
       href: "/admin/districts",
-      title: "Districts & Locations",
+      title: "Districts, Locations, Missions",
       count: districtsRes.count ?? 0,
       description: "Districts, their locations, and the missions inside them.",
       accent: "text-cyan",
