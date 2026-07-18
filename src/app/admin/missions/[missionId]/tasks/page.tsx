@@ -22,7 +22,7 @@ export default async function MissionTasksPage({ params }: MissionTasksPageProps
     .maybeSingle();
 
   if (!mission) {
-    redirect("/admin/missions");
+    redirect("/admin/districts");
   }
 
   const { data: location } = await supabase
@@ -33,7 +33,7 @@ export default async function MissionTasksPage({ params }: MissionTasksPageProps
 
   const backHref = location
     ? `/admin/districts/${location.district_id}/locations/${mission.location_id}`
-    : "/admin/missions";
+    : "/admin/districts";
 
   const { data: tasks } = await supabase
     .from("mission_tasks")
