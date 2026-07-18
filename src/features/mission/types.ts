@@ -22,6 +22,18 @@ export interface MissionViewModel {
   coinReward: number;
 }
 
+const TASK_TYPE_LABELS: Record<MissionTaskType, string> = {
+  vocabulary: "Vocabulary",
+  matching: "Matching",
+  listening: "Listening",
+  quiz: "Quiz",
+  snake_game: "Play Snake Game",
+};
+
+export function taskTypeLabel(taskType: MissionTaskType): string {
+  return TASK_TYPE_LABELS[taskType] ?? taskType;
+}
+
 /* ── Task content shapes (parsed from `mission_tasks.content` JSONB) ───────── */
 
 export interface VocabularyContent {

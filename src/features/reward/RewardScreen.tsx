@@ -11,10 +11,10 @@ export interface RewardScreenProps {
   coins: number;
   /** XP granted for completing the mission */
   xp: number;
-  /** Streak value after this completion */
-  streak: number;
-  /** Name of the next location the player just unlocked, if any */
-  nextStop?: string | null;
+  /** Title of the mission just completed */
+  missionTitle: string;
+  /** Names of the tasks completed as part of this mission */
+  taskNames: string[];
   /** Where the Continue button sends the player */
   continueHref?: string;
 }
@@ -53,8 +53,8 @@ function buildRainDrops(count: number): RainDrop[] {
 export default function RewardScreen({
   coins,
   xp,
-  streak,
-  nextStop,
+  missionTitle,
+  taskNames,
   continueHref = "/map",
 }: RewardScreenProps) {
   const router = useRouter();
@@ -178,24 +178,23 @@ export default function RewardScreen({
           </div>
         </div>
 
-        {/* Streak badge */}
+        {/* Mission recap */}
         <div
-          className="inline-flex items-center gap-2 rounded-full border border-neon-pink px-4 py-1.5"
+          className="flex flex-col items-center gap-1"
           style={{ animation: "reward-rise 0.5s ease-out 0.35s both" }}
         >
-          <span aria-hidden="true">🔥</span>
-          <span className="text-small font-black uppercase tracking-wide text-neon-pink">
-            {streak} Day Streak
+          <span className="text-small font-bold uppercase tracking-wide text-white/50">
+            Mission Complete
           </span>
+          <p className="text-h3 font-black leading-tight text-white">{missionTitle}</p>
         </div>
 
-        {/* Next stop */}
-        {nextStop && (
+        {taskNames.length > 0 && (
           <p
-            className="text-h3 font-black leading-tight text-white"
+            className="text-body text-white/60"
             style={{ animation: "reward-rise 0.5s ease-out 0.45s both" }}
           >
-            Next Stop: <span className="text-cyan">{nextStop}</span> unlocked!
+            {taskNames.join(" · ")}
           </p>
         )}
 
