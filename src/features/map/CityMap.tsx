@@ -109,7 +109,7 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
           />
         )}
 
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-start justify-center">
           <div
             className="relative w-full max-h-full overflow-hidden"
             style={{ aspectRatio: String(MAP_ASPECT) }}
