@@ -8,46 +8,9 @@ import { SlayButton } from "@/components/ui";
 
 import { submitMissionCompletion } from "./actions";
 import HowToPlayButton from "./HowToPlayButton";
-import BubblePopTask from "./BubblePopTask";
-import CategorySortTask from "./CategorySortTask";
-import CrosswordTask from "./CrosswordTask";
-import EmojiDecodeTask from "./EmojiDecodeTask";
-import FillBlankTask from "./FillBlankTask";
-import FlashcardsTask from "./FlashcardsTask";
-import HangmanTask from "./HangmanTask";
-import MatchingTask from "./MatchingTask";
-import MemoryCardsTask from "./MemoryCardsTask";
-import OddOneOutTask from "./OddOneOutTask";
 import ProgressBar from "./ProgressBar";
-import QuizTask from "./QuizTask";
-import SentenceBuilderTask from "./SentenceBuilderTask";
-import SnakeGameTask from "./SnakeGameTask";
-import SpellingBeeTask from "./SpellingBeeTask";
-import StorySequencingTask from "./StorySequencingTask";
-import TrueFalseTask from "./TrueFalseTask";
-import VocabularyTask from "./VocabularyTask";
-import WordScrambleTask from "./WordScrambleTask";
-import WordSearchTask from "./WordSearchTask";
+import TaskRunner from "./TaskRunner";
 import {
-  parseBubblePopContent,
-  parseCategorySortContent,
-  parseCrosswordContent,
-  parseEmojiDecodeContent,
-  parseFillBlankContent,
-  parseFlashcardsContent,
-  parseHangmanContent,
-  parseMatchingContent,
-  parseMemoryCardsContent,
-  parseOddOneOutContent,
-  parseQuizContent,
-  parseSentenceBuilderContent,
-  parseSnakeGameContent,
-  parseSpellingBeeContent,
-  parseStorySequencingContent,
-  parseTrueFalseContent,
-  parseVocabularyContent,
-  parseWordScrambleContent,
-  parseWordSearchContent,
   taskTypeInstructions,
   type MissionTaskType,
   type MissionTaskViewModel,
@@ -164,9 +127,10 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
       </Section>
 
       <Section py="sm" className="min-h-0 flex-1 overflow-y-auto">
-        <MissionTaskRenderer
+        <TaskRunner
           key={currentTask.id}
-          task={currentTask}
+          taskType={currentTask.taskType}
+          content={currentTask.content}
           actionLabel={actionLabel}
           onComplete={handleTaskComplete}
         />
@@ -189,131 +153,3 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
   );
 }
 
-/* ── Task dispatcher ───────────────────────────────────────────────────────
- * Parses the task's JSONB content and renders the matching task component.
- * Unsupported task types or malformed content fall back to a skip card so a
- * single bad task never blocks the whole mission run.
- * ───────────────────────────────────────────────────────────────────────── */
-function MissionTaskRenderer({
-  task,
-  onComplete,
-  actionLabel,
-}: {
-  task: MissionTaskViewModel;
-  onComplete: () => void;
-  actionLabel: string;
-}) {
-  const rendered = renderTaskByType(task, onComplete, actionLabel);
-  return rendered ?? <UnsupportedTask onComplete={onComplete} actionLabel={actionLabel} />;
-}
-
-/**
- * Parses a task's JSONB content and returns its gameplay component, or `null`
- * when the type is unknown or the content is malformed (the caller then shows a
- * skip card). Each branch narrows on `taskType` and bails on a failed parse so a
- * single bad task never blocks the whole mission run.
- */
-function renderTaskByType(
-  task: MissionTaskViewModel,
-  onComplete: () => void,
-  actionLabel: string
-): React.ReactElement | null {
-  const props = { onComplete, actionLabel };
-  switch (task.taskType) {
-    case "vocabulary": {
-      const content = parseVocabularyContent(task.content);
-      return content ? <VocabularyTask content={content} {...props} /> : null;
-    }
-    case "matching": {
-      const content = parseMatchingContent(task.content);
-      return content ? <MatchingTask content={content} {...props} /> : null;
-    }
-    case "quiz": {
-      const content = parseQuizContent(task.content);
-      return content ? <QuizTask content={content} {...props} /> : null;
-    }
-    case "snake_game": {
-      const content = parseSnakeGameContent(task.content);
-      return content ? <SnakeGameTask content={content} {...props} /> : null;
-    }
-    case "word_scramble": {
-      const content = parseWordScrambleContent(task.content);
-      return content ? <WordScrambleTask content={content} {...props} /> : null;
-    }
-    case "hangman": {
-      const content = parseHangmanContent(task.content);
-      return content ? <HangmanTask content={content} {...props} /> : null;
-    }
-    case "bubble_pop": {
-      const content = parseBubblePopContent(task.content);
-      return content ? <BubblePopTask content={content} {...props} /> : null;
-    }
-    case "memory_cards": {
-      const content = parseMemoryCardsContent(task.content);
-      return content ? <MemoryCardsTask content={content} {...props} /> : null;
-    }
-    case "emoji_decode": {
-      const content = parseEmojiDecodeContent(task.content);
-      return content ? <EmojiDecodeTask content={content} {...props} /> : null;
-    }
-    case "word_search": {
-      const content = parseWordSearchContent(task.content);
-      return content ? <WordSearchTask content={content} {...props} /> : null;
-    }
-    case "crossword": {
-      const content = parseCrosswordContent(task.content);
-      return content ? <CrosswordTask content={content} {...props} /> : null;
-    }
-    case "category_sort": {
-      const content = parseCategorySortContent(task.content);
-      return content ? <CategorySortTask content={content} {...props} /> : null;
-    }
-    case "odd_one_out": {
-      const content = parseOddOneOutContent(task.content);
-      return content ? <OddOneOutTask content={content} {...props} /> : null;
-    }
-    case "sentence_builder": {
-      const content = parseSentenceBuilderContent(task.content);
-      return content ? <SentenceBuilderTask content={content} {...props} /> : null;
-    }
-    case "fill_blank": {
-      const content = parseFillBlankContent(task.content);
-      return content ? <FillBlankTask content={content} {...props} /> : null;
-    }
-    case "spelling_bee": {
-      const content = parseSpellingBeeContent(task.content);
-      return content ? <SpellingBeeTask content={content} {...props} /> : null;
-    }
-    case "true_false": {
-      const content = parseTrueFalseContent(task.content);
-      return content ? <TrueFalseTask content={content} {...props} /> : null;
-    }
-    case "flashcards": {
-      const content = parseFlashcardsContent(task.content);
-      return content ? <FlashcardsTask content={content} {...props} /> : null;
-    }
-    case "story_sequencing": {
-      const content = parseStorySequencingContent(task.content);
-      return content ? <StorySequencingTask content={content} {...props} /> : null;
-    }
-    default:
-      return null;
-  }
-}
-
-function UnsupportedTask({
-  onComplete,
-  actionLabel,
-}: {
-  onComplete: () => void;
-  actionLabel: string;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-6 text-center">
-      <p className="text-white/60">This task type isn&apos;t available yet — skip ahead.</p>
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete}>
-        {actionLabel}
-      </SlayButton>
-    </div>
-  );
-}

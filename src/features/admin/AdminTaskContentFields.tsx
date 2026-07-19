@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { Json } from "@/types/database";
 
@@ -12,6 +12,12 @@ export interface AdminTaskContentFieldsProps {
   taskType: MissionTaskType;
   /** Existing content when editing a task of this same type. Omit for a new task. */
   initialContent?: Json;
+  /**
+   * Notified with the current content (guided object or parsed raw JSON, `null`
+   * when the raw JSON is malformed) whenever it changes. Lets a parent preview or
+   * test-run the task with exactly what's in the form.
+   */
+  onContentChange?: (content: Json | null) => void;
 }
 
 function isRecord(value: Json | undefined): value is { [key: string]: Json } {
@@ -30,6 +36,7 @@ function isRecord(value: Json | undefined): value is { [key: string]: Json } {
 export default function AdminTaskContentFields({
   taskType,
   initialContent,
+  onContentChange,
 }: AdminTaskContentFieldsProps) {
   const entry = TASK_EDITORS[taskType];
   const supportsGuided = Boolean(entry);
@@ -53,6 +60,19 @@ export default function AdminTaskContentFields({
   // seed on raw→guided lets the editor re-seed its fields from edited JSON.
   const [editorSeed, setEditorSeed] = useState(0);
   const [editorInitial, setEditorInitial] = useState<Json | undefined>(initialContent);
+
+  // Mirror the active content to an optional observer (guided object, or parsed
+  // raw JSON — `null` when the raw JSON is malformed). The string snapshot is the
+  // real dep so a new-but-equal object doesn't re-fire.
+  const activeContent = mode === "raw" ? rawJson : JSON.stringify(guided);
+  useEffect(() => {
+    if (!onContentChange) return;
+    try {
+      onContentChange(JSON.parse(activeContent || "{}") as Json);
+    } catch {
+      onContentChange(null);
+    }
+  }, [activeContent, onContentChange]);
 
   function switchToRaw() {
     setRawJson(JSON.stringify(guided, null, 2));

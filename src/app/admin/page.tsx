@@ -11,12 +11,17 @@ import { requireAdminPage } from "@/features/admin/guard";
 export default async function AdminPage() {
   const { supabase } = await requireAdminPage();
 
-  const [missionsRes, districtsRes, locationsRes, wardrobeRes] = await Promise.all([
-    supabase.from("missions").select("id", { count: "exact", head: true }),
-    supabase.from("districts").select("id", { count: "exact", head: true }),
-    supabase.from("locations").select("id", { count: "exact", head: true }),
-    supabase.from("wardrobe_items").select("id", { count: "exact", head: true }),
-  ]);
+  const [missionsRes, districtsRes, locationsRes, wardrobeRes, publishedTaskTypesRes] =
+    await Promise.all([
+      supabase.from("missions").select("id", { count: "exact", head: true }),
+      supabase.from("districts").select("id", { count: "exact", head: true }),
+      supabase.from("locations").select("id", { count: "exact", head: true }),
+      supabase.from("wardrobe_items").select("id", { count: "exact", head: true }),
+      supabase
+        .from("task_type_templates")
+        .select("task_type", { count: "exact", head: true })
+        .eq("is_published", true),
+    ]);
 
   const cards = [
     {
@@ -25,6 +30,13 @@ export default async function AdminPage() {
       count: districtsRes.count ?? 0,
       description: "Districts, their locations, and the missions inside them.",
       accent: "text-cyan",
+    },
+    {
+      href: "/admin/task-types",
+      title: "Task Types",
+      count: publishedTaskTypesRes.count ?? 0,
+      description: "Configure, test, and publish the task types used in missions.",
+      accent: "text-lime-green",
     },
     {
       href: "/admin/wardrobe",
