@@ -45,23 +45,30 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Profile", href: "/profile", icon: ProfileIcon },
 ];
 
+export interface BottomNavProps {
+  /**
+   * Optional strip rendered directly *below* the tab bar, at the very bottom of
+   * the screen (the map uses it for a watermark). Pages passing this must add
+   * its height to their own bottom padding on top of the usual `pb-24`.
+   */
+  footer?: React.ReactNode;
+}
+
 /**
  * Fixed bottom navigation shown on the main in-app screens (map, wardrobe,
  * profile). Add `pb-24` to a page's scrollable content so this bar doesn't
  * cover it. Active tab is the first item whose href matches the current path.
  */
-export default function BottomNav() {
+export default function BottomNav({ footer }: BottomNavProps = {}) {
   const pathname = usePathname();
   const activeIndex = NAV_ITEMS.findIndex(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
   );
 
   return (
-    <nav
-      aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md border-t border-white/10 bg-black/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:border-x"
-    >
-      <ul className="flex items-stretch justify-around px-2 py-2">
+    <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md border-t border-white/10 bg-black/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:border-x">
+      <nav aria-label="Primary">
+        <ul className="flex items-stretch justify-around px-2 py-2">
         {NAV_ITEMS.map((item, index) => {
           const Icon = item.icon;
           const active = index === activeIndex;
@@ -95,7 +102,9 @@ export default function BottomNav() {
             </li>
           );
         })}
-      </ul>
-    </nav>
+        </ul>
+      </nav>
+      {footer}
+    </div>
   );
 }
