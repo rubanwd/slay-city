@@ -92,13 +92,19 @@ export default function AdminTaskTypeConfigurator({
         title={`Test — ${taskTypeLabel(taskType)}`}
       >
         <div className="flex flex-col gap-3">
-          <TaskRunner
-            key={testKey ?? 0}
-            taskType={taskType}
-            content={content ?? {}}
-            onComplete={() => setTestKey(null)}
-            actionLabel="Done"
-          />
+          {/* Full-height games (Snake, Word Search, …) size themselves with
+              `h-full`/`flex-1`, so the tester must give them a definite, bounded
+              height the way the live mission screen does — otherwise the play
+              field collapses and the overlay text spills over it. */}
+          <div className="flex h-[70vh] min-h-0 flex-col overflow-y-auto">
+            <TaskRunner
+              key={testKey ?? 0}
+              taskType={taskType}
+              content={content ?? {}}
+              onComplete={() => setTestKey(null)}
+              actionLabel="Done"
+            />
+          </div>
           <div className="flex gap-2">
             <SlayButton
               type="button"
