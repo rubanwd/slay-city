@@ -667,7 +667,27 @@ export type Database = {
     }
     Enums: {
       ai_content_draft_status: "pending" | "approved" | "rejected"
-      mission_task_type: "vocabulary" | "matching" | "listening" | "quiz" | "snake_game"
+      mission_task_type:
+        | "vocabulary"
+        | "matching"
+        | "listening"
+        | "quiz"
+        | "snake_game"
+        | "word_scramble"
+        | "hangman"
+        | "bubble_pop"
+        | "memory_cards"
+        | "emoji_decode"
+        | "word_search"
+        | "crossword"
+        | "category_sort"
+        | "odd_one_out"
+        | "sentence_builder"
+        | "fill_blank"
+        | "spelling_bee"
+        | "true_false"
+        | "flashcards"
+        | "story_sequencing"
       user_role: "child" | "parent" | "admin"
     }
     CompositeTypes: {
@@ -800,7 +820,28 @@ export const Constants = {
   public: {
     Enums: {
       ai_content_draft_status: ["pending", "approved", "rejected"],
-      mission_task_type: ["vocabulary", "matching", "listening", "quiz"],
+      mission_task_type: [
+        "vocabulary",
+        "matching",
+        "listening",
+        "quiz",
+        "snake_game",
+        "word_scramble",
+        "hangman",
+        "bubble_pop",
+        "memory_cards",
+        "emoji_decode",
+        "word_search",
+        "crossword",
+        "category_sort",
+        "odd_one_out",
+        "sentence_builder",
+        "fill_blank",
+        "spelling_bee",
+        "true_false",
+        "flashcards",
+        "story_sequencing",
+      ],
       user_role: ["child", "parent", "admin"],
     },
   },
