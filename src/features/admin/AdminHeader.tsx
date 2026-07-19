@@ -1,5 +1,6 @@
 import NavLink from "@/components/ui/NavLink";
 
+import AdminSidebar from "@/features/admin/AdminSidebar";
 import { signOut } from "@/features/auth/actions";
 
 export interface AdminHeaderProps {
@@ -11,6 +12,7 @@ export interface AdminHeaderProps {
 export default function AdminHeader({ title, backHref }: AdminHeaderProps) {
   return (
     <header className="flex items-center gap-3 py-5">
+      <AdminSidebar />
       {backHref && (
         <NavLink
           href={backHref}
