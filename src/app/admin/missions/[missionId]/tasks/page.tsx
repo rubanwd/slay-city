@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 
+import NavLink from "@/components/ui/NavLink";
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminTaskForm from "@/features/admin/AdminTaskForm";
 import AdminTaskItem from "@/features/admin/AdminTaskItem";
 import { requireAdminPage } from "@/features/admin/guard";
+import { TASK_TYPES } from "@/features/admin/taskTypes";
 
 interface MissionTasksPageProps {
   params: Promise<{ missionId: string }>;
@@ -43,6 +45,15 @@ export default async function MissionTasksPage({ params }: MissionTasksPageProps
 
   const rows = tasks ?? [];
 
+  // Only published task types can be picked when authoring a task. Kept in the
+  // canonical TASK_TYPES order so the dropdown reads consistently everywhere.
+  const { data: publishedTemplates } = await supabase
+    .from("task_type_templates")
+    .select("task_type")
+    .eq("is_published", true);
+  const publishedSet = new Set((publishedTemplates ?? []).map((t) => t.task_type));
+  const availableTypes = TASK_TYPES.filter((t) => publishedSet.has(t));
+
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
@@ -62,15 +73,34 @@ export default async function MissionTasksPage({ params }: MissionTasksPageProps
         ) : (
           <ul className="mb-6 flex flex-col gap-2">
             {rows.map((task) => (
-              <AdminTaskItem key={task.id} missionId={missionId} task={task} />
+              <AdminTaskItem
+                key={task.id}
+                missionId={missionId}
+                task={task}
+                availableTypes={availableTypes}
+              />
             ))}
           </ul>
         )}
 
         {/* ── Add task ───────────────────────────────────────────────────── */}
-        <AdminCreateModal triggerLabel="Add Task" title="Add Task">
-          <AdminTaskForm missionId={missionId} nextOrder={rows.length} />
-        </AdminCreateModal>
+        {availableTypes.length === 0 ? (
+          <p className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
+            No published task types yet.{" "}
+            <NavLink href="/admin/task-types" className="font-bold text-lime-green hover:underline">
+              Publish a task type
+            </NavLink>{" "}
+            before adding tasks.
+          </p>
+        ) : (
+          <AdminCreateModal triggerLabel="Add Task" title="Add Task">
+            <AdminTaskForm
+              missionId={missionId}
+              nextOrder={rows.length}
+              availableTypes={availableTypes}
+            />
+          </AdminCreateModal>
+        )}
       </div>
     </main>
   );

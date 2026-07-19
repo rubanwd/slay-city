@@ -354,6 +354,30 @@ export type Database = {
         }
         Relationships: []
       }
+      task_type_templates: {
+        Row: {
+          content: Json
+          created_at: string
+          is_published: boolean
+          task_type: Database["public"]["Enums"]["mission_task_type"]
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          is_published?: boolean
+          task_type: Database["public"]["Enums"]["mission_task_type"]
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          is_published?: boolean
+          task_type?: Database["public"]["Enums"]["mission_task_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string

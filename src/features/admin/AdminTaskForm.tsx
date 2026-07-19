@@ -16,6 +16,8 @@ export interface AdminTaskFormProps {
   missionId: string;
   /** Suggested order for the next task (usually current task count). */
   nextOrder: number;
+  /** Task types offered in the dropdown — only published types. Defaults to all. */
+  availableTypes?: MissionTaskType[];
 }
 
 function SubmitButton() {
@@ -27,9 +29,13 @@ function SubmitButton() {
   );
 }
 
-export default function AdminTaskForm({ missionId, nextOrder }: AdminTaskFormProps) {
+export default function AdminTaskForm({
+  missionId,
+  nextOrder,
+  availableTypes = TASK_TYPES,
+}: AdminTaskFormProps) {
   const [state, formAction] = useActionState<AdminFormState, FormData>(createMissionTask, {});
-  const [taskType, setTaskType] = useState<MissionTaskType>("vocabulary");
+  const [taskType, setTaskType] = useState<MissionTaskType>(availableTypes[0] ?? TASK_TYPES[0]);
   const modal = useAdminModalControls();
   const toast = useAdminToast();
 
@@ -58,7 +64,7 @@ export default function AdminTaskForm({ missionId, nextOrder }: AdminTaskFormPro
             onChange={(e) => setTaskType(e.target.value as MissionTaskType)}
             className={`${INPUT_CLASS} [&>option]:bg-[#1a1a1a] [&>option]:text-white`}
           >
-            {TASK_TYPES.map((t) => (
+            {availableTypes.map((t) => (
               <option key={t} value={t}>
                 {taskTypeLabel(t)}
               </option>

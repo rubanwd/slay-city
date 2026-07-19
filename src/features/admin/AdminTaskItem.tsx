@@ -26,6 +26,10 @@ export interface AdminTaskItemProps {
     content: Json;
     is_published: boolean;
   };
+  /** Task types offered in the dropdown — only published types. Defaults to all.
+   * The task's own type is always included so an existing task stays editable
+   * even if its type was later unpublished. */
+  availableTypes?: MissionTaskType[];
 }
 
 function SaveButton() {
@@ -37,10 +41,19 @@ function SaveButton() {
   );
 }
 
-export default function AdminTaskItem({ missionId, task }: AdminTaskItemProps) {
+export default function AdminTaskItem({
+  missionId,
+  task,
+  availableTypes = TASK_TYPES,
+}: AdminTaskItemProps) {
   const [editing, setEditing] = useState(false);
   const [editTaskType, setEditTaskType] = useState<MissionTaskType>(task.task_type);
   const [state, formAction] = useActionState<AdminFormState, FormData>(updateMissionTask, {});
+
+  // Keep the task's own type selectable even if it's no longer published.
+  const typeOptions = availableTypes.includes(task.task_type)
+    ? availableTypes
+    : [task.task_type, ...availableTypes];
 
   if (editing) {
     return (
@@ -59,7 +72,7 @@ export default function AdminTaskItem({ missionId, task }: AdminTaskItemProps) {
                 onChange={(e) => setEditTaskType(e.target.value as MissionTaskType)}
                 className={`${INPUT_CLASS} [&>option]:bg-[#1a1a1a] [&>option]:text-white`}
               >
-                {TASK_TYPES.map((t) => (
+                {typeOptions.map((t) => (
                   <option key={t} value={t}>
                     {taskTypeLabel(t)}
                   </option>

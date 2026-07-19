@@ -331,6 +331,81 @@ export async function unpublishMissionTask(formData: FormData): Promise<void> {
   if (id && missionId) await setTaskPublished(id, missionId, false);
 }
 
+/* ── Task type templates ───────────────────────────────────────────────────── */
+
+/**
+ * Upserts the example content for a task type's template. `content` arrives as a
+ * JSON string (same convention as mission tasks). The template row is keyed by
+ * `task_type`, so this creates the row on first save and updates it thereafter.
+ */
+export async function updateTaskTypeTemplate(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const taskType = String(formData.get("task_type") ?? "").trim() as MissionTaskType;
+  const contentRaw = String(formData.get("content") ?? "").trim();
+
+  if (!MISSION_TASK_TYPES.includes(taskType)) {
+    return { error: "Choose a valid task type." };
+  }
+
+  let content: Database["public"]["Tables"]["task_type_templates"]["Insert"]["content"] = {};
+  if (contentRaw) {
+    try {
+      content = JSON.parse(contentRaw);
+    } catch {
+      return { error: "Content must be valid JSON." };
+    }
+  }
+
+  const { error } = await supabase
+    .from("task_type_templates")
+    .upsert({ task_type: taskType, content }, { onConflict: "task_type" });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/task-types");
+  revalidatePath(`/admin/task-types/${taskType}`);
+  return { success: "Template saved." };
+}
+
+/** Flips a task type's published flag. Only published types appear in the mission
+ * task-type dropdown. Creates the row (unpublished content default) if missing so
+ * publishing works even before the template has been saved. */
+async function setTaskTypePublished(
+  taskType: MissionTaskType,
+  isPublished: boolean
+): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const { error } = await supabase
+    .from("task_type_templates")
+    .upsert({ task_type: taskType, is_published: isPublished }, { onConflict: "task_type" });
+
+  if (!error) {
+    revalidatePath("/admin/task-types");
+    revalidatePath(`/admin/task-types/${taskType}`);
+    // Published types are what admins can pick when authoring mission tasks.
+    revalidatePath("/admin/missions", "layout");
+  }
+}
+
+export async function publishTaskType(formData: FormData): Promise<void> {
+  const taskType = String(formData.get("task_type") ?? "").trim() as MissionTaskType;
+  if (MISSION_TASK_TYPES.includes(taskType)) await setTaskTypePublished(taskType, true);
+}
+
+export async function unpublishTaskType(formData: FormData): Promise<void> {
+  const taskType = String(formData.get("task_type") ?? "").trim() as MissionTaskType;
+  if (MISSION_TASK_TYPES.includes(taskType)) await setTaskTypePublished(taskType, false);
+}
+
 /* ── Admin allow-list ──────────────────────────────────────────────────────── */
 
 /** Loose email shape check — real validation happens at auth time. */
