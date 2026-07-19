@@ -161,9 +161,9 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
         )}
       </div>
 
-      {/* pb = the usual pb-24 nav clearance + the 50px watermark strip below it. */}
+      {/* pb = the usual pb-24 nav clearance + the 38px watermark strip below it. */}
       {selected && (
-        <div className="px-5 pt-4 pb-[146px] border-t border-white/10 shrink-0">
+        <div className="px-5 pt-4 pb-[134px] border-t border-white/10 shrink-0">
           {selected.missionId ? (
             <Link
               href={`/mission/${selected.missionId}`}
@@ -225,7 +225,7 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
       */}
       <BottomNav
         footer={
-          <div className="h-[50px] flex items-center justify-center bg-white/[0.06] pointer-events-none">
+          <div className="h-[38px] flex items-center justify-center bg-white/[0.06] pointer-events-none">
             <svg
               viewBox="0 0 700 100"
               preserveAspectRatio="xMidYMid meet"
