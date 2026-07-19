@@ -28,6 +28,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  // Required for env(safe-area-inset-*) to report real values. Without it iOS
+  // reports 0 while `black-translucent` still renders the app full-bleed, so
+  // BottomNav's safe-area padding was a no-op and the watermark strip ran under
+  // the home indicator (clipped on iPhone).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
