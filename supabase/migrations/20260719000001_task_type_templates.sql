@@ -8,7 +8,11 @@
 -- `content` mirrors the shape a `mission_tasks.content` of that type would hold,
 -- so the same parsers/editors/gameplay used by real tasks drive this catalog.
 
-create table public.task_type_templates (
+-- Idempotent throughout: production already had this table created outside the
+-- tracked migration history, so a bare `create table` errored on re-apply. Every
+-- statement below is now safe to run whether or not the objects already exist,
+-- letting `supabase db push` reconcile the history without failing.
+create table if not exists public.task_type_templates (
   task_type public.mission_task_type primary key,
   content jsonb not null default '{}'::jsonb,
   is_published boolean not null default false,
@@ -16,7 +20,7 @@ create table public.task_type_templates (
   updated_at timestamptz not null default now()
 );
 
-create trigger task_type_templates_set_updated_at before update on public.task_type_templates
+create or replace trigger task_type_templates_set_updated_at before update on public.task_type_templates
   for each row execute function public.set_updated_at();
 
 -- =========================================================================
@@ -25,9 +29,12 @@ create trigger task_type_templates_set_updated_at before update on public.task_t
 -- =========================================================================
 alter table public.task_type_templates enable row level security;
 
+drop policy if exists "task_type_templates_select_published_or_admin" on public.task_type_templates;
 create policy "task_type_templates_select_published_or_admin" on public.task_type_templates
   for select using (is_published or public.is_admin());
+drop policy if exists "task_type_templates_insert_admin" on public.task_type_templates;
 create policy "task_type_templates_insert_admin" on public.task_type_templates
   for insert with check (public.is_admin());
+drop policy if exists "task_type_templates_update_admin" on public.task_type_templates;
 create policy "task_type_templates_update_admin" on public.task_type_templates
   for update using (public.is_admin()) with check (public.is_admin());
