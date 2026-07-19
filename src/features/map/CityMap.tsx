@@ -71,6 +71,11 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
   const selected =
     locations.find((l) => l.id === selectedId) ?? defaultSelectedLocation(locations);
 
+  // "Nothing left to play here" — drives the reward line and the restart
+  // button. A stop that still has a mission always shows Start, even if some of
+  // its missions are already done.
+  const isCompleted = Boolean(selected && !selected.missionId && selected.state === "completed");
+
   const activeBackgroundUrl = district?.backgroundUrl ?? null;
 
   // Hold a loader over the map area until the (large, remote) district
@@ -162,60 +167,79 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
       </div>
 
       {selected && (
-        <div
-          className={`px-5 pt-4 ${BOTTOM_NAV_CLEARANCE} border-t border-white/10 shrink-0`}
-        >
-          {selected.missionId ? (
-            <Link
-              href={`/mission/${selected.missionId}`}
-              className={[
-                "flex items-center justify-center gap-2 w-full h-14 rounded-2xl",
-                "bg-lime-green text-black font-extrabold uppercase tracking-wide text-lg",
-                "hover:brightness-110 active:brightness-90 transition-all",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
-              ].join(" ")}
-            >
-              <span className="truncate">▶ Start {selected.name}</span>
-            </Link>
-          ) : selected.state === "completed" ? (
-            <div className="flex flex-col gap-2">
-              <p className="text-center text-sm font-bold text-white/60">
+        <div className={`px-5 pt-4 ${BOTTOM_NAV_CLEARANCE} border-t border-white/10 shrink-0`}>
+          {/*
+            The reward line and the restart button exist only for completed
+            stops, so tapping between stops used to snap this panel — and with
+            it the flex-1 map above — to a new height. Both are always mounted
+            now and collapse instead: grid-template-rows 0fr→1fr for the line,
+            width for the button. The map resizes along with the animation for
+            free, since it just takes the leftover flex space each frame.
+          */}
+          <div
+            className={[
+              "grid transition-all duration-300 ease-out motion-reduce:transition-none",
+              isCompleted ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+            ].join(" ")}
+            aria-hidden={!isCompleted}
+          >
+            <div className="overflow-hidden">
+              <p className="pb-2 text-center text-sm font-bold text-white/60">
                 🪙 +{selected.totalCoins} · ⭐ +{selected.totalXp} earned
               </p>
-              <div className="flex items-center gap-2">
-                <div
-                  className="flex flex-1 min-w-0 items-center justify-center gap-2 h-14 rounded-2xl border-2 border-lime-green/40 text-lime-green/70 font-extrabold uppercase tracking-wide text-lg"
-                  aria-disabled="true"
-                >
-                  <span className="truncate">✓ {selected.name} completed</span>
-                </div>
-                <form
-                  action={async () => {
-                    const result = await resetLocationProgress(selected.id);
-                    if (!result.ok) window.alert(result.error);
-                  }}
-                  onSubmit={(event) => {
-                    if (
-                      !window.confirm(
-                        `Restart ${selected.name}? You'll replay every mission here from the start.`
-                      )
-                    ) {
-                      event.preventDefault();
-                    }
-                  }}
-                >
-                  <RestartLocationButton />
-                </form>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            {selected.missionId ? (
+              <Link
+                href={`/mission/${selected.missionId}`}
+                className={[
+                  "flex flex-1 min-w-0 items-center justify-center gap-2 h-14 rounded-2xl",
+                  "bg-lime-green text-black font-extrabold uppercase tracking-wide text-lg",
+                  "hover:brightness-110 active:brightness-90 transition-all",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+                ].join(" ")}
+              >
+                <span className="truncate">▶ Start {selected.name}</span>
+              </Link>
+            ) : (
+              <div
+                className="flex flex-1 min-w-0 items-center justify-center gap-2 h-14 rounded-2xl border-2 border-lime-green/40 text-lime-green/70 font-extrabold uppercase tracking-wide text-lg"
+                aria-disabled="true"
+              >
+                <span className="truncate">
+                  {isCompleted ? `✓ ${selected.name} completed` : "Coming soon"}
+                </span>
               </div>
-            </div>
-          ) : (
+            )}
+
             <div
-              className="flex items-center justify-center gap-2 w-full h-14 rounded-2xl border-2 border-lime-green/40 text-lime-green/70 font-extrabold uppercase tracking-wide text-lg"
-              aria-disabled="true"
+              className={[
+                "shrink-0 overflow-hidden transition-all duration-300 ease-out motion-reduce:transition-none",
+                isCompleted ? "w-14 ml-2 opacity-100" : "w-0 ml-0 opacity-0",
+              ].join(" ")}
+              inert={!isCompleted}
             >
-              <span className="truncate">Coming soon</span>
+              <form
+                action={async () => {
+                  const result = await resetLocationProgress(selected.id);
+                  if (!result.ok) window.alert(result.error);
+                }}
+                onSubmit={(event) => {
+                  if (
+                    !window.confirm(
+                      `Restart ${selected.name}? You'll replay every mission here from the start.`
+                    )
+                  ) {
+                    event.preventDefault();
+                  }
+                }}
+              >
+                <RestartLocationButton />
+              </form>
             </div>
-          )}
+          </div>
         </div>
       )}
 
