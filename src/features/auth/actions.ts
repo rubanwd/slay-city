@@ -93,6 +93,39 @@ export async function signIn(email: string, password: string): Promise<AuthState
   redirect(destination);
 }
 
+/**
+ * Start the Google OAuth flow. Supabase returns the provider's consent URL,
+ * which we redirect the browser to; Google then sends the user back to
+ * `/auth/callback`, where the code is exchanged for a session and the user is
+ * routed by role. Google users carry no role flag, so they land on `/map` and
+ * middleware forwards first-timers into onboarding — the same as a child signup.
+ *
+ * Requires the Google provider to be enabled in the Supabase project, and
+ * `${siteUrl}/auth/callback` to be in its redirect allow-list.
+ */
+export async function signInWithGoogle(): Promise<AuthState> {
+  const supabase = await createClient();
+  const siteUrl = await resolveSiteUrl();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: siteUrl ? `${siteUrl}/auth/callback` : undefined,
+    },
+  });
+
+  if (error || !data.url) {
+    return { error: error?.message ?? "Could not start Google sign-in." };
+  }
+
+  redirect(data.url);
+}
+
+/** Form-bound wrapper so a submit button can kick off the Google flow. */
+export async function googleFormAction(): Promise<void> {
+  await signInWithGoogle();
+}
+
 /** Clear the session and return to the login page. */
 export async function signOut(): Promise<void> {
   const supabase = await createClient();

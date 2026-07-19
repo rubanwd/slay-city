@@ -2,10 +2,11 @@
  * Resolves which image represents the player's mascot given their currently
  * equipped wardrobe items.
  *
- * The mascot is a single image, but items span several categories (hat,
- * glasses, accessory, color). Rather than compositing, we show the preview of
- * the item the player equipped most recently — "what I just put on shows" — and
- * fall back to the default snake when nothing equipped has artwork.
+ * Every item ships a full "mascot wearing this item" image rather than a layer
+ * to composite, so only one item can be worn at a time — the DB enforces a
+ * single equipped row per player. The sort below is defensive: it keeps the
+ * most recently equipped item winning if a stale extra row ever shows up.
+ * Falls back to the default snake when nothing equipped has artwork.
  */
 
 /** Default mascot art shown when no equipped item provides its own preview. */

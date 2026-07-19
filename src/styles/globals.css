@@ -129,11 +129,36 @@ body {
   animation: label-float 3.2s ease-in-out infinite;
 }
 
+/* ── Bottom-bar watermark ──────────────────────────────────────────────────
+   The "Slay School" wordmark under the tab bar. Mostly it just sits there at
+   its resting opacity; once per cycle it brightens quickly and falls straight
+   back, so the strip has a faint sign of life without pulling focus. The base
+   fill-opacity lives on the class (not only in the keyframes) so the wordmark
+   still looks right when the animation is off. */
+
+@keyframes watermark-breathe {
+  0%,
+  10%,
+  100% {
+    fill-opacity: 0.2;
+  }
+  3% {
+    fill-opacity: 0.4;
+  }
+}
+
+.watermark-breathe {
+  fill: #fff;
+  fill-opacity: 0.2;
+  animation: watermark-breathe 7s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-loader-bob,
   .animate-loader-shadow,
   .animate-loader-dot,
   .animate-label-float,
+  .watermark-breathe,
   .logo-shimmer {
     animation: none;
   }

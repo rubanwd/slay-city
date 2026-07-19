@@ -5,16 +5,14 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { AVATAR_OPTIONS } from "./avatars";
-
 export type OnboardingState = {
   /** Present when the action failed — shown to the user. */
   error?: string;
 };
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_ ]+$/;
-const MIN_AGE = 7;
-const MAX_AGE = 14;
+const MIN_AGE = 5;
+const MAX_AGE = 20;
 
 export async function createProfile(
   _prevState: OnboardingState,
@@ -22,7 +20,6 @@ export async function createProfile(
 ): Promise<OnboardingState> {
   const username = String(formData.get("username") ?? "").trim();
   const ageRaw = String(formData.get("age") ?? "").trim();
-  const avatarUrl = String(formData.get("avatarUrl") ?? "");
 
   if (username.length < 2 || username.length > 20) {
     return { error: "Username must be 2-20 characters." };
@@ -39,10 +36,6 @@ export async function createProfile(
     }
   }
 
-  if (!AVATAR_OPTIONS.some((option) => option.url === avatarUrl)) {
-    return { error: "Choose an avatar." };
-  }
-
   const supabase = await createClient();
   const {
     data: { user },
@@ -52,11 +45,12 @@ export async function createProfile(
     return { error: "Your session expired. Please log in again." };
   }
 
+  // No avatar_url: the player's avatar everywhere is their mascot wearing the
+  // wardrobe item they have equipped, so there is nothing to pick at signup.
   const { error: profileError } = await supabase.from("profiles").insert({
     id: user.id,
     username,
     age,
-    avatar_url: avatarUrl,
     role: "child",
   });
 

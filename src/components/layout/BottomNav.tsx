@@ -52,10 +52,21 @@ const NAV_ITEMS: NavItem[] = [
  */
 export const BOTTOM_NAV_CLEARANCE = "pb-[150px]";
 
+const WATERMARK_TEXT = "Slay School";
+
+/** How far each letter's flash trails the one before it — the sweep speed. */
+const WATERMARK_STAGGER_MS = 55;
+
 /**
  * Watermark strip pinned below the tab bar, at the very bottom of the screen.
  * The wordmark is drawn as SVG so it stretches to exactly 70% of the screen
  * width regardless of font size or viewport.
+ *
+ * Each letter is its own tspan running the same 7s brighten-and-fade, offset by
+ * a growing animation-delay, so the highlight reads as a beam of light sweeping
+ * left to right rather than the whole word blinking at once. The space is a
+ * non-breaking space because SVG would otherwise collapse a lone whitespace
+ * tspan.
  */
 function BrandWatermark() {
   return (
@@ -76,9 +87,18 @@ function BrandWatermark() {
           fontSize="80"
           fontWeight="900"
           letterSpacing="4"
-          className="fill-white/20"
+          fill="#fff"
+          fillOpacity={0.2}
         >
-          Slay School
+          {[...WATERMARK_TEXT].map((char, index) => (
+            <tspan
+              key={`${char}-${index}`}
+              className="watermark-breathe"
+              style={{ animationDelay: `${index * WATERMARK_STAGGER_MS}ms` }}
+            >
+              {char === " " ? " " : char}
+            </tspan>
+          ))}
         </text>
       </svg>
     </div>

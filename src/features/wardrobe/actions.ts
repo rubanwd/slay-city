@@ -46,7 +46,7 @@ export async function purchaseWardrobeItem(itemId: string): Promise<PurchaseResu
   return { ok: true, coinsRemaining: result.coins_remaining };
 }
 
-/** Equips an owned (or default) item, replacing any equipped item in its category. */
+/** Equips an owned (or default) item, taking off whatever was worn before. */
 export async function equipWardrobeItem(itemId: string): Promise<EquipResult> {
   const supabase = await createClient();
 
@@ -66,7 +66,7 @@ export async function equipWardrobeItem(itemId: string): Promise<EquipResult> {
   return { ok: true };
 }
 
-/** Takes an item off, leaving its category slot empty. */
+/** Takes the item off, leaving the mascot in its default look. */
 export async function unequipWardrobeItem(itemId: string): Promise<EquipResult> {
   const supabase = await createClient();
 

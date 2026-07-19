@@ -3,6 +3,7 @@
 import { useFormStatus } from "react-dom";
 
 import { BOTTOM_NAV_CLEARANCE } from "@/components/layout";
+import SlayCharacter from "@/components/ui/SlayCharacter";
 import { signOut } from "@/features/auth/actions";
 import { resetMissionProgress } from "@/features/mission/actions";
 
@@ -55,13 +56,14 @@ function ResetProgressButton() {
 }
 
 export interface ProfileScreenProps {
+  /** Display name chosen at signup; null only for profiles predating onboarding. */
+  username: string | null;
   email: string | null;
-  avatarUrl?: string | null;
+  /** The player's snake wearing their currently equipped wardrobe item. */
+  mascotImageUrl: string;
 }
 
-export default function ProfileScreen({ email, avatarUrl }: ProfileScreenProps) {
-  const initial = (email ?? "?").charAt(0).toUpperCase();
-
+export default function ProfileScreen({ username, email, mascotImageUrl }: ProfileScreenProps) {
   return (
     <main className="min-h-screen bg-black flex flex-col mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-center px-6 py-4 border-b border-white/10">
@@ -70,21 +72,15 @@ export default function ProfileScreen({ email, avatarUrl }: ProfileScreenProps) 
 
       <section className={`flex flex-1 flex-col gap-8 px-6 py-8 ${BOTTOM_NAV_CLEARANCE}`}>
         <div className="flex flex-col items-center gap-3">
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- user avatar, remote or static
-            <img
-              src={avatarUrl}
-              alt=""
-              className="h-24 w-24 rounded-full object-cover ring-2 ring-lime-green"
-            />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-lime-green text-3xl font-black text-black">
-              {initial}
-            </div>
-          )}
-          <p className="text-base font-semibold text-white break-all text-center">
-            {email ?? "Signed in"}
-          </p>
+          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-white/5 p-2 ring-2 ring-lime-green">
+            <SlayCharacter size="full" src={mascotImageUrl} aria-label="Your character" />
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            {username && (
+              <p className="text-xl font-black text-white break-words text-center">{username}</p>
+            )}
+            <p className="text-sm text-white/50 break-all text-center">{email ?? "Signed in"}</p>
+          </div>
         </div>
 
         <div className="mt-auto flex flex-col gap-3">
