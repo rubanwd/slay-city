@@ -7,6 +7,7 @@ import { AppContainer, Section } from "@/components/layout";
 import { SlayButton } from "@/components/ui";
 
 import { submitMissionCompletion } from "./actions";
+import HowToPlayButton from "./HowToPlayButton";
 import BubblePopTask from "./BubblePopTask";
 import CategorySortTask from "./CategorySortTask";
 import CrosswordTask from "./CrosswordTask";
@@ -47,6 +48,7 @@ import {
   parseVocabularyContent,
   parseWordScrambleContent,
   parseWordSearchContent,
+  taskTypeInstructions,
   type MissionTaskType,
   type MissionTaskViewModel,
   type MissionViewModel,
@@ -149,9 +151,12 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
               </span>
             )}
           </div>
-          <span className="text-sm font-bold text-white/50 whitespace-nowrap">
-            {currentIndex + 1}/{total}
-          </span>
+          <div className="flex shrink-0 items-center gap-2">
+            <HowToPlayButton text={taskTypeInstructions(currentTask.taskType)} />
+            <span className="text-sm font-bold text-white/50 whitespace-nowrap">
+              {currentIndex + 1}/{total}
+            </span>
+          </div>
         </div>
         {!IMMERSIVE_TASK_TYPES.includes(currentTask.taskType) && (
           <ProgressBar completed={currentIndex} total={total} />
