@@ -9,7 +9,6 @@ import NavLink from "@/components/ui/NavLink";
 type SidebarItem = {
   href: string;
   title: string;
-  description: string;
   accent: string;
 };
 
@@ -19,30 +18,10 @@ type SidebarItem = {
  * complete shortcut list to every top-level admin area.
  */
 const ITEMS: SidebarItem[] = [
-  {
-    href: "/admin/districts",
-    title: "Districts, Locations, Missions",
-    description: "Districts, their locations, and the missions inside them.",
-    accent: "text-cyan",
-  },
-  {
-    href: "/admin/task-types",
-    title: "Task Types",
-    description: "Configure, test, and publish the task types used in missions.",
-    accent: "text-lime-green",
-  },
-  {
-    href: "/admin/wardrobe",
-    title: "Wardrobe",
-    description: "Upload item art, set prices, and publish outfits for kids.",
-    accent: "text-neon-pink",
-  },
-  {
-    href: "/admin/admins",
-    title: "Manage Admins",
-    description: "Add or remove admin access by email.",
-    accent: "text-purple",
-  },
+  { href: "/admin/districts", title: "Districts, Locations, Missions", accent: "text-cyan" },
+  { href: "/admin/task-types", title: "Task Types", accent: "text-lime-green" },
+  { href: "/admin/wardrobe", title: "Wardrobe", accent: "text-neon-pink" },
+  { href: "/admin/admins", title: "Manage Admins", accent: "text-purple" },
 ];
 
 /**
@@ -157,7 +136,7 @@ export default function AdminSidebar() {
                 </button>
               </div>
 
-              <nav className="flex flex-col gap-2">
+              <nav className="flex flex-col gap-1">
                 {ITEMS.map((item) => {
                   const active =
                     pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -167,16 +146,11 @@ export default function AdminSidebar() {
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       onClick={close}
-                      className={`flex flex-col gap-0.5 rounded-2xl border p-4 transition-colors ${
-                        active
-                          ? "border-white/30 bg-white/10"
-                          : "border-white/10 bg-[#1a1a1a] hover:border-white/30 hover:bg-white/5"
-                      }`}
+                      className={`rounded-xl px-4 py-3 text-body-strong font-bold transition-colors ${
+                        item.accent
+                      } ${active ? "bg-white/10" : "hover:bg-white/5"}`}
                     >
-                      <span className={`text-body-strong font-bold ${item.accent}`}>
-                        {item.title}
-                      </span>
-                      <span className="text-small text-white/50">{item.description}</span>
+                      {item.title}
                     </NavLink>
                   );
                 })}
