@@ -79,7 +79,7 @@ function BrandWatermark() {
       <svg
         viewBox="0 0 700 100"
         preserveAspectRatio="xMidYMid meet"
-        className="w-[70%] h-full translate-y-[2px] overflow-visible"
+        className="w-[70%] h-full translate-y-[6px] overflow-visible"
         aria-hidden="true"
       >
         <text
