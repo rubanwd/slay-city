@@ -47,10 +47,11 @@ const NAV_ITEMS: NavItem[] = [
 
 /**
  * Bottom padding a page's scrollable content needs so the fixed nav — tab row
- * (~79px) plus the watermark strip (38px) — never covers it. Kept here so the
- * child screens stay in sync when the bar's height changes.
+ * (~79px) plus the watermark strip (38px of text + 20px of reserved space) —
+ * never covers it. Kept here so the child screens stay in sync when the bar's
+ * height changes.
  */
-export const BOTTOM_NAV_CLEARANCE = "pb-[150px]";
+export const BOTTOM_NAV_CLEARANCE = "pb-[170px]";
 
 const WATERMARK_TEXT = "Slay School";
 
@@ -67,10 +68,16 @@ const WATERMARK_STAGGER_MS = 55;
  * left to right rather than the whole word blinking at once. The space is a
  * non-breaking space because SVG would otherwise collapse a lone whitespace
  * tspan.
+ *
+ * The 20px of reserved space below the text is what keeps the wordmark clear of
+ * the iPhone home indicator. `env(safe-area-inset-bottom)` alone can't do that
+ * job here: it only reports a real value under `viewport-fit=cover`, and turning
+ * that on made the rest of the layout worse on device — so we take the max of
+ * the two and always keep a floor.
  */
 function BrandWatermark() {
   return (
-    <div className="h-[38px] flex items-center justify-center bg-white/[0.06] pointer-events-none">
+    <div className="h-[38px] pb-[max(env(safe-area-inset-bottom),20px)] box-content flex items-center justify-center bg-white/[0.06] pointer-events-none">
       <svg
         viewBox="0 0 700 100"
         preserveAspectRatio="xMidYMid meet"
