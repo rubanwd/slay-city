@@ -49,6 +49,43 @@ export function taskTypeLabel(taskType: MissionTaskType): string {
   return TASK_TYPE_LABELS[taskType] ?? taskType;
 }
 
+/** Short "how to play" text shown in the mission header's info tooltip, per type. */
+const TASK_INSTRUCTIONS: Record<MissionTaskType, string> = {
+  vocabulary: "Read the word, its translation, and the example sentence. Tap Next when you're ready.",
+  matching: "Tap a word, then tap the picture or translation that goes with it. Match every pair to finish.",
+  listening: "Listen to the audio, then answer the prompt. Tap Next to continue.",
+  quiz: "Read the question and tap the answer you think is correct.",
+  snake_game:
+    "Use the arrows to steer the snake. Eat the letters in the word's order and avoid your own tail — you can pass through the edges.",
+  word_scramble:
+    "Tap the letters in the right order to spell the word. Tap a placed letter to send it back.",
+  hangman:
+    "Tap letters to guess the hidden word. Six wrong guesses ends the round and restarts it.",
+  bubble_pop: "Tap every correct bubble and avoid the wrong ones. Pop them all to finish.",
+  memory_cards:
+    "Flip two cards at a time to find matching pairs. Matched pairs stay face-up until you find them all.",
+  emoji_decode: "Read the emoji clue and tap the word it spells out.",
+  word_search:
+    "Find each word from the list. Tap its first letter, then its last letter — words run across, down, or diagonally, in any direction.",
+  crossword:
+    "Read the Across and Down clues and type a letter into each square, then tap Check.",
+  category_sort:
+    "Tap a word to pick it up, then tap the group it belongs to. Sort every word to finish.",
+  odd_one_out: "Tap the one word that doesn't belong with the others.",
+  sentence_builder:
+    "Tap the words in the right order to build the sentence. Tap a placed word to send it back.",
+  fill_blank: "Fill the gap in the sentence — tap the right word or type it — then tap Check.",
+  spelling_bee: "Tap the speaker to hear the word, then type its spelling and tap Check.",
+  true_false: "Decide whether the statement is true or false, then tap your answer.",
+  flashcards: "Tap a card to flip it and see the answer. Step through every card to finish.",
+  story_sequencing:
+    "Use the up and down arrows to put the steps in the right order, then tap Check.",
+};
+
+export function taskTypeInstructions(taskType: MissionTaskType): string {
+  return TASK_INSTRUCTIONS[taskType] ?? "";
+}
+
 /* ── Task content shapes (parsed from `mission_tasks.content` JSONB) ───────── */
 
 export interface VocabularyContent {
