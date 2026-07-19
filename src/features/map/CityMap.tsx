@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import { BottomNav } from "@/components/layout";
+import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
 import { useImageLoaded } from "@/hooks/useImageLoaded";
 import { resetLocationProgress } from "@/features/mission/actions";
@@ -161,9 +161,10 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
         )}
       </div>
 
-      {/* pb = the usual pb-24 nav clearance + the 38px watermark strip below it. */}
       {selected && (
-        <div className="px-5 pt-4 pb-[134px] border-t border-white/10 shrink-0">
+        <div
+          className={`px-5 pt-4 ${BOTTOM_NAV_CLEARANCE} border-t border-white/10 shrink-0`}
+        >
           {selected.missionId ? (
             <Link
               href={`/mission/${selected.missionId}`}
@@ -218,38 +219,7 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
         </div>
       )}
 
-      {/*
-        Watermark strip pinned below the tab bar, at the very bottom of the
-        screen. The text is drawn as SVG so it can be stretched to exactly 70%
-        of the screen width regardless of font size.
-      */}
-      <BottomNav
-        footer={
-          <div className="h-[38px] flex items-center justify-center bg-white/[0.06] pointer-events-none">
-            <svg
-              viewBox="0 0 700 100"
-              preserveAspectRatio="xMidYMid meet"
-              className="w-[70%] h-full"
-              aria-hidden="true"
-            >
-              <text
-                x="350"
-                y="50"
-                textAnchor="middle"
-                dominantBaseline="central"
-                textLength="700"
-                lengthAdjust="spacingAndGlyphs"
-                fontSize="80"
-                fontWeight="900"
-                letterSpacing="4"
-                className="fill-white/20"
-              >
-                Slay School
-              </text>
-            </svg>
-          </div>
-        }
-      />
+      <BottomNav />
     </main>
   );
 }

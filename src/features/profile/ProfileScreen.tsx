@@ -2,6 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 
+import { BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import { signOut } from "@/features/auth/actions";
 import { resetMissionProgress } from "@/features/mission/actions";
 
@@ -67,7 +68,7 @@ export default function ProfileScreen({ email, avatarUrl }: ProfileScreenProps) 
         <h1 className="text-xl font-bold text-white">Profile</h1>
       </header>
 
-      <section className="flex flex-1 flex-col gap-8 px-6 py-8 pb-28">
+      <section className={`flex flex-1 flex-col gap-8 px-6 py-8 ${BOTTOM_NAV_CLEARANCE}`}>
         <div className="flex flex-col items-center gap-3">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- user avatar, remote or static

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { BottomNav } from "@/components/layout";
+import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import { SlayCharacter } from "@/components/ui";
 import {
   equipWardrobeItem,
@@ -106,7 +106,7 @@ export default function WardrobeGrid({ items, coins, level, mascotImageUrl }: Wa
         </p>
       )}
 
-      <section className="flex-1 px-6 py-6 pb-28">
+      <section className={`flex-1 px-6 py-6 ${BOTTOM_NAV_CLEARANCE}`}>
         {items.length === 0 ? (
           <p className="mt-16 text-center text-sm text-white/40">
             No items in the shop yet. Check back soon!

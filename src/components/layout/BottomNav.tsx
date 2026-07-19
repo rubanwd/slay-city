@@ -45,21 +45,54 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Profile", href: "/profile", icon: ProfileIcon },
 ];
 
-export interface BottomNavProps {
-  /**
-   * Optional strip rendered directly *below* the tab bar, at the very bottom of
-   * the screen (the map uses it for a watermark). Pages passing this must add
-   * its height to their own bottom padding on top of the usual `pb-24`.
-   */
-  footer?: React.ReactNode;
+/**
+ * Bottom padding a page's scrollable content needs so the fixed nav — tab row
+ * (~79px) plus the watermark strip (38px) — never covers it. Kept here so the
+ * child screens stay in sync when the bar's height changes.
+ */
+export const BOTTOM_NAV_CLEARANCE = "pb-[150px]";
+
+/**
+ * Watermark strip pinned below the tab bar, at the very bottom of the screen.
+ * The wordmark is drawn as SVG so it stretches to exactly 70% of the screen
+ * width regardless of font size or viewport.
+ */
+function BrandWatermark() {
+  return (
+    <div className="h-[38px] flex items-center justify-center bg-white/[0.06] pointer-events-none">
+      <svg
+        viewBox="0 0 700 100"
+        preserveAspectRatio="xMidYMid meet"
+        className="w-[70%] h-full"
+        aria-hidden="true"
+      >
+        <text
+          x="350"
+          y="50"
+          textAnchor="middle"
+          dominantBaseline="central"
+          textLength="700"
+          lengthAdjust="spacingAndGlyphs"
+          fontSize="80"
+          fontWeight="900"
+          letterSpacing="4"
+          className="fill-white/20"
+        >
+          Slay School
+        </text>
+      </svg>
+    </div>
+  );
 }
 
 /**
- * Fixed bottom navigation shown on the main in-app screens (map, wardrobe,
- * profile). Add `pb-24` to a page's scrollable content so this bar doesn't
- * cover it. Active tab is the first item whose href matches the current path.
+ * Fixed bottom navigation shown on the main in-app (child) screens: map,
+ * wardrobe, profile. Includes the Slay School watermark strip beneath the tabs,
+ * so pages need `BOTTOM_NAV_CLEARANCE` worth of bottom padding on their
+ * scrollable content to stay clear of the whole bar. Active tab is the first
+ * item whose href matches the current path.
  */
-export default function BottomNav({ footer }: BottomNavProps = {}) {
+export default function BottomNav() {
   const pathname = usePathname();
   const activeIndex = NAV_ITEMS.findIndex(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
@@ -104,7 +137,7 @@ export default function BottomNav({ footer }: BottomNavProps = {}) {
         })}
         </ul>
       </nav>
-      {footer}
+      <BrandWatermark />
     </div>
   );
 }
