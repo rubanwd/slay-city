@@ -1,5 +1,6 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import { BottomNav } from "@/components/layout";
+import { hasAnyGroup } from "@/features/homework/queries";
 import ProfileScreen from "@/features/profile/ProfileScreen";
 import { loadMascotImage } from "@/features/wardrobe/loadMascot";
 import { DEFAULT_MASCOT_IMAGE } from "@/features/wardrobe/mascot";
@@ -13,12 +14,13 @@ export default async function ProfilePage() {
 
   // The avatar is always the player's snake wearing whatever they equipped in
   // the wardrobe — never an uploaded picture or a letter placeholder.
-  const [mascotImageUrl, profileRes] = user
+  const [mascotImageUrl, profileRes, showHomework] = user
     ? await Promise.all([
         loadMascotImage(supabase, user.id),
         supabase.from("profiles").select("username").eq("id", user.id).maybeSingle(),
+        hasAnyGroup(supabase),
       ])
-    : [DEFAULT_MASCOT_IMAGE, null];
+    : [DEFAULT_MASCOT_IMAGE, null, false];
 
   return (
     <AuthGuard>
@@ -27,7 +29,7 @@ export default async function ProfilePage() {
         email={user?.email ?? null}
         mascotImageUrl={mascotImageUrl}
       />
-      <BottomNav />
+      <BottomNav showHomework={showHomework} />
     </AuthGuard>
   );
 }

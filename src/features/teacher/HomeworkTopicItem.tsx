@@ -1,0 +1,122 @@
+"use client";
+
+import { useActionState, useState } from "react";
+import { useFormStatus } from "react-dom";
+
+import { SlayButton } from "@/components/ui";
+import NavLink from "@/components/ui/NavLink";
+import { INPUT_CLASS, LABEL_CLASS } from "@/features/admin/formStyles";
+
+import { deleteHomeworkTopic, updateHomeworkTopic, type TeacherFormState } from "./actions";
+
+export interface HomeworkTopicItemProps {
+  groupId: string;
+  topic: {
+    id: string;
+    title: string;
+    description: string | null;
+    order_index: number;
+  };
+  taskCount: number;
+}
+
+function SaveButton() {
+  const { pending } = useFormStatus();
+  return (
+    <SlayButton type="submit" variant="green" size="sm" loading={pending}>
+      Save
+    </SlayButton>
+  );
+}
+
+/** One lesson topic row: edit (inline) or delete, and a link into its tasks. */
+export default function HomeworkTopicItem({ groupId, topic, taskCount }: HomeworkTopicItemProps) {
+  const [editing, setEditing] = useState(false);
+  const [state, formAction] = useActionState<TeacherFormState, FormData>(updateHomeworkTopic, {});
+
+  if (editing) {
+    return (
+      <li className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3">
+        <form action={formAction} className="flex flex-col gap-3">
+          <input type="hidden" name="id" value={topic.id} />
+          <input type="hidden" name="group_id" value={groupId} />
+          <input type="hidden" name="order_index" value={topic.order_index} />
+
+          <label className="flex flex-col gap-1.5">
+            <span className={LABEL_CLASS}>Topic Title</span>
+            <input
+              name="title"
+              type="text"
+              required
+              defaultValue={topic.title}
+              className={INPUT_CLASS}
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className={LABEL_CLASS}>Description (optional)</span>
+            <textarea
+              name="description"
+              rows={3}
+              defaultValue={topic.description ?? ""}
+              className={INPUT_CLASS}
+            />
+          </label>
+
+          {state.error && (
+            <p role="alert" className="text-sm font-semibold text-neon-pink">
+              {state.error}
+            </p>
+          )}
+
+          <div className="flex gap-2">
+            <SaveButton />
+            <SlayButton type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
+              Cancel
+            </SlayButton>
+          </div>
+        </form>
+      </li>
+    );
+  }
+
+  return (
+    <li className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4">
+      <NavLink href={`/teacher/groups/${groupId}/topics/${topic.id}`} className="block">
+        <p className="truncate text-body-strong text-white">{topic.title}</p>
+        {topic.description && (
+          <p className="mt-0.5 truncate text-small text-white/50">{topic.description}</p>
+        )}
+        <p className="mt-1 text-xs font-bold uppercase tracking-wide text-cyan">
+          {taskCount} {taskCount === 1 ? "task" : "tasks"}
+        </p>
+      </NavLink>
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white/60 transition-colors hover:bg-white/10"
+        >
+          Edit
+        </button>
+        <form
+          action={deleteHomeworkTopic}
+          onSubmit={(e) => {
+            if (!window.confirm("Delete this topic and all its tasks? This cannot be undone.")) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <input type="hidden" name="id" value={topic.id} />
+          <input type="hidden" name="group_id" value={groupId} />
+          <button
+            type="submit"
+            className="w-full rounded-full border border-neon-pink/50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
+          >
+            Delete
+          </button>
+        </form>
+      </div>
+    </li>
+  );
+}

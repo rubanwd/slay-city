@@ -33,17 +33,30 @@ function ProfileIcon() {
   );
 }
 
+function HomeworkIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
+      <path d="M14 2v6h6" />
+      <path d="M8 13h8M8 17h5" />
+    </svg>
+  );
+}
+
 type NavItem = {
   label: string;
   href: string;
   icon: () => React.ReactElement;
 };
 
-const NAV_ITEMS: NavItem[] = [
+const BASE_NAV_ITEMS: NavItem[] = [
   { label: "Map", href: "/map", icon: MapIcon },
   { label: "Wardrobe", href: "/wardrobe", icon: WardrobeIcon },
-  { label: "Profile", href: "/profile", icon: ProfileIcon },
 ];
+
+const HOMEWORK_NAV_ITEM: NavItem = { label: "Homework", href: "/homework", icon: HomeworkIcon };
+
+const PROFILE_NAV_ITEM: NavItem = { label: "Profile", href: "/profile", icon: ProfileIcon };
 
 /**
  * Bottom padding a page's scrollable content needs so the fixed nav — tab row
@@ -110,16 +123,24 @@ function BrandWatermark() {
   );
 }
 
+export interface BottomNavProps {
+  /** Shows the Homework tab — only true for a child who belongs to a teacher group. */
+  showHomework?: boolean;
+}
+
 /**
  * Fixed bottom navigation shown on the main in-app (child) screens: map,
- * wardrobe, profile. Includes the Slay School watermark strip beneath the tabs,
- * so pages need `BOTTOM_NAV_CLEARANCE` worth of bottom padding on their
- * scrollable content to stay clear of the whole bar. Active tab is the first
- * item whose href matches the current path.
+ * wardrobe, homework (conditional), profile. Includes the Slay School
+ * watermark strip beneath the tabs, so pages need `BOTTOM_NAV_CLEARANCE`
+ * worth of bottom padding on their scrollable content to stay clear of the
+ * whole bar. Active tab is the first item whose href matches the current path.
  */
-export default function BottomNav() {
+export default function BottomNav({ showHomework = false }: BottomNavProps) {
   const pathname = usePathname();
-  const activeIndex = NAV_ITEMS.findIndex(
+  const navItems: NavItem[] = showHomework
+    ? [...BASE_NAV_ITEMS, HOMEWORK_NAV_ITEM, PROFILE_NAV_ITEM]
+    : [...BASE_NAV_ITEMS, PROFILE_NAV_ITEM];
+  const activeIndex = navItems.findIndex(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
   );
 
@@ -127,7 +148,7 @@ export default function BottomNav() {
     <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md border-t border-white/10 bg-black/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:border-x">
       <nav aria-label="Primary">
         <ul className="flex items-stretch justify-around px-2 py-2">
-        {NAV_ITEMS.map((item, index) => {
+        {navItems.map((item, index) => {
           const Icon = item.icon;
           const active = index === activeIndex;
           return (

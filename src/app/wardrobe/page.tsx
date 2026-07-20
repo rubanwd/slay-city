@@ -1,5 +1,6 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import WardrobeGrid, { type WardrobeItemVM } from "@/components/wardrobe/WardrobeGrid";
+import { hasAnyGroup } from "@/features/homework/queries";
 import { resolveMascotImage } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,7 +16,7 @@ export default async function WardrobePage() {
     return null;
   }
 
-  const [itemsRes, ownedRes, statsRes] = await Promise.all([
+  const [itemsRes, ownedRes, statsRes, showHomework] = await Promise.all([
     supabase
       .from("wardrobe_items")
       .select(
@@ -29,6 +30,7 @@ export default async function WardrobePage() {
       .select("wardrobe_item_id, equipped, equipped_at")
       .eq("profile_id", user.id),
     supabase.from("user_stats").select("coins, level").eq("profile_id", user.id).maybeSingle(),
+    hasAnyGroup(supabase),
   ]);
 
   const ownedRows = ownedRes.data ?? [];
@@ -70,6 +72,7 @@ export default async function WardrobePage() {
         coins={statsRes.data?.coins ?? 0}
         level={statsRes.data?.level ?? 1}
         mascotImageUrl={mascotImageUrl}
+        showHomework={showHomework}
       />
     </AuthGuard>
   );

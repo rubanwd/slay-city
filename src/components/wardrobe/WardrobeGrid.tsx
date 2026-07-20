@@ -36,12 +36,20 @@ type WardrobeGridProps = {
   level: number;
   /** Resolved mascot preview image reflecting the currently equipped items. */
   mascotImageUrl: string;
+  /** Shows the bottom nav's Homework tab — true when the child is in a teacher group. */
+  showHomework?: boolean;
 };
 
 /** Slot order shown in the grid — the shared category set (no more "color"). */
 const CATEGORY_ORDER: readonly string[] = WARDROBE_CATEGORIES;
 
-export default function WardrobeGrid({ items, coins, level, mascotImageUrl }: WardrobeGridProps) {
+export default function WardrobeGrid({
+  items,
+  coins,
+  level,
+  mascotImageUrl,
+  showHomework,
+}: WardrobeGridProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   // Id of the item whose action is currently running, so only its card shows a
@@ -139,7 +147,7 @@ export default function WardrobeGrid({ items, coins, level, mascotImageUrl }: Wa
         )}
       </section>
 
-      <BottomNav />
+      <BottomNav showHomework={showHomework} />
     </main>
   );
 }

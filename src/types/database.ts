@@ -133,6 +133,118 @@ export type Database = {
         }
         Relationships: []
       }
+      homework_task_completions: {
+        Row: {
+          child_id: string
+          completed_at: string
+          id: string
+          task_id: string
+        }
+        Insert: {
+          child_id: string
+          completed_at?: string
+          id?: string
+          task_id: string
+        }
+        Update: {
+          child_id?: string
+          completed_at?: string
+          id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_task_completions_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "homework_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_tasks: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          order_index: number
+          task_type: Database["public"]["Enums"]["mission_task_type"]
+          topic_id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          task_type: Database["public"]["Enums"]["mission_task_type"]
+          topic_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          task_type?: Database["public"]["Enums"]["mission_task_type"]
+          topic_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_tasks_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "homework_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_topics: {
+        Row: {
+          created_at: string
+          description: string | null
+          group_id: string
+          id: string
+          order_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          group_id: string
+          id?: string
+          order_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          group_id?: string
+          id?: string
+          order_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_topics_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           created_at: string
@@ -714,6 +826,7 @@ export type Database = {
       }
       equip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
+      is_group_member: { Args: { p_group_id: string }; Returns: boolean }
       is_linked_child: { Args: { p_child_id: string }; Returns: boolean }
       link_child_by_email: {
         Args: { p_child_email: string }
@@ -721,6 +834,14 @@ export type Database = {
           child_id: string
           linked: boolean
           reason: string
+        }[]
+      }
+      my_groups: {
+        Args: never
+        Returns: {
+          group_id: string
+          group_name: string
+          teacher_id: string
         }[]
       }
       promote_teacher: {
