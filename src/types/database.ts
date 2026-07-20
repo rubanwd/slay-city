@@ -842,6 +842,7 @@ export type Database = {
           group_id: string
           group_name: string
           teacher_id: string
+          teacher_username: string
         }[]
       }
       promote_teacher: {

@@ -16,12 +16,13 @@ export default async function HomeworkPage() {
   }
 
   const groups = await getMyGroups(supabase);
-  const groupNameById = new Map(groups.map((g) => [g.groupId, g.groupName]));
+  const groupNames = groups.map((g) => g.groupName);
+  const teacherByGroup = new Map(groups.map((g) => [g.groupId, g.teacherUsername]));
 
   if (groups.length === 0) {
     return (
       <AuthGuard>
-        <HomeworkScreen topics={[]} />
+        <HomeworkScreen groupNames={[]} topics={[]} />
       </AuthGuard>
     );
   }
@@ -60,7 +61,7 @@ export default async function HomeworkPage() {
       id: topic.id,
       title: topic.title,
       description: topic.description,
-      groupName: groupNameById.get(topic.group_id) ?? "Class",
+      teacherUsername: teacherByGroup.get(topic.group_id) ?? "your teacher",
       totalTasks: taskIds.length,
       completedTasks: taskIds.filter((id) => completedTaskIds.has(id)).length,
     };
@@ -68,7 +69,7 @@ export default async function HomeworkPage() {
 
   return (
     <AuthGuard>
-      <HomeworkScreen topics={topicSummaries} />
+      <HomeworkScreen groupNames={groupNames} topics={topicSummaries} />
     </AuthGuard>
   );
 }
