@@ -722,6 +722,16 @@ export type Database = {
         | "compare_size"
         | "letter_fill"
         | "dialogue_choice"
+        | "shape_match"
+        | "color_mixing"
+        | "digit_span"
+        | "emotion_match"
+        | "cause_effect"
+        | "analogy"
+        | "antonym_match"
+        | "size_order"
+        | "spot_the_difference"
+        | "clock_reading"
       user_role: "child" | "parent" | "admin"
     }
     CompositeTypes: {
@@ -885,6 +895,16 @@ export const Constants = {
         "compare_size",
         "letter_fill",
         "dialogue_choice",
+        "shape_match",
+        "color_mixing",
+        "digit_span",
+        "emotion_match",
+        "cause_effect",
+        "analogy",
+        "antonym_match",
+        "size_order",
+        "spot_the_difference",
+        "clock_reading",
       ],
       user_role: ["child", "parent", "admin"],
     },

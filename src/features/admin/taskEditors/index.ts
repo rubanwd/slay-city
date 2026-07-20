@@ -1,11 +1,18 @@
 import {
+  parseAnalogyContent,
+  parseAntonymMatchContent,
   parseBubblePopContent,
   parseCategorySortContent,
+  parseCauseEffectContent,
+  parseClockReadingContent,
+  parseColorMixingContent,
   parseCompareSizeContent,
   parseCountingGameContent,
   parseCrosswordContent,
   parseDialogueChoiceContent,
+  parseDigitSpanContent,
   parseEmojiDecodeContent,
+  parseEmotionMatchContent,
   parseFillBlankContent,
   parseFlashcardsContent,
   parseHangmanContent,
@@ -20,9 +27,12 @@ import {
   parseReactionTapContent,
   parseRhymeMatchContent,
   parseSentenceBuilderContent,
+  parseShapeMatchContent,
   parseSimonSequenceContent,
+  parseSizeOrderContent,
   parseSnakeGameContent,
   parseSpellingBeeContent,
+  parseSpotTheDifferenceContent,
   parseStorySequencingContent,
   parseTrueFalseContent,
   parseVocabularyContent,
@@ -44,6 +54,18 @@ import {
   OddOneOutEditor,
   TrueFalseEditor,
 } from "./choiceEditors";
+import {
+  AnalogyEditor,
+  AntonymMatchEditor,
+  CauseEffectEditor,
+  ClockReadingEditor,
+  ColorMixingEditor,
+  DigitSpanEditor,
+  EmotionMatchEditor,
+  ShapeMatchEditor,
+  SizeOrderEditor,
+  SpotTheDifferenceEditor,
+} from "./cognitiveEditors";
 import type { TaskEditorProps } from "./fields";
 import {
   CompareSizeEditor,
@@ -113,6 +135,16 @@ export const TASK_EDITORS: Partial<Record<MissionTaskType, TaskEditorEntry>> = {
   compare_size: { Editor: CompareSizeEditor, parse: parseCompareSizeContent },
   letter_fill: { Editor: LetterFillEditor, parse: parseLetterFillContent },
   dialogue_choice: { Editor: DialogueChoiceEditor, parse: parseDialogueChoiceContent },
+  shape_match: { Editor: ShapeMatchEditor, parse: parseShapeMatchContent },
+  color_mixing: { Editor: ColorMixingEditor, parse: parseColorMixingContent },
+  digit_span: { Editor: DigitSpanEditor, parse: parseDigitSpanContent },
+  emotion_match: { Editor: EmotionMatchEditor, parse: parseEmotionMatchContent },
+  cause_effect: { Editor: CauseEffectEditor, parse: parseCauseEffectContent },
+  analogy: { Editor: AnalogyEditor, parse: parseAnalogyContent },
+  antonym_match: { Editor: AntonymMatchEditor, parse: parseAntonymMatchContent },
+  size_order: { Editor: SizeOrderEditor, parse: parseSizeOrderContent },
+  spot_the_difference: { Editor: SpotTheDifferenceEditor, parse: parseSpotTheDifferenceContent },
+  clock_reading: { Editor: ClockReadingEditor, parse: parseClockReadingContent },
 };
 
 export type { TaskEditorProps };

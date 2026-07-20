@@ -53,6 +53,16 @@ const TASK_TYPE_LABELS: Record<MissionTaskType, string> = {
   compare_size: "Bigger or Smaller",
   letter_fill: "Missing Letters",
   dialogue_choice: "Pick the Reply",
+  shape_match: "Shape Match",
+  color_mixing: "Color Mixing",
+  digit_span: "Digit Span",
+  emotion_match: "Emotion Match",
+  cause_effect: "Cause & Effect",
+  analogy: "Analogies",
+  antonym_match: "Antonym Match",
+  size_order: "Size Order",
+  spot_the_difference: "Spot the Difference",
+  clock_reading: "Clock Reading",
 };
 
 export function taskTypeLabel(taskType: MissionTaskType): string {
@@ -100,6 +110,16 @@ const TASK_INSTRUCTIONS: Record<MissionTaskType, string> = {
   compare_size: "Read the prompt and tap the correct one of the two.",
   letter_fill: "Tap the missing letters, in order, to complete the word.",
   dialogue_choice: "Read the line, then tap the best reply.",
+  shape_match: "Tap the shape that matches the one shown.",
+  color_mixing: "Guess what color the two colors make when mixed.",
+  digit_span: "Watch the numbers, then tap them back in the same order.",
+  emotion_match: "Tap the word that names the feeling shown.",
+  cause_effect: "Read the cause, then tap what happens next.",
+  analogy: "Figure out the relationship, then tap the matching word.",
+  antonym_match: "Tap the word that means the opposite.",
+  size_order: "Tap the items in order, from smallest to largest.",
+  spot_the_difference: "Tap the one item in the grid that's different from the rest.",
+  clock_reading: "Read the clock, then tap the matching time.",
 };
 
 export function taskTypeInstructions(taskType: MissionTaskType): string {
@@ -834,5 +854,237 @@ export function parseDialogueChoiceContent(content: Json): DialogueChoiceContent
     options,
     correctIndex,
     translation: asString(content.translation),
+  };
+}
+
+/* ── Third wave of new task type content shapes & parsers ──────────────────── */
+
+export interface ShapeMatchContent {
+  prompt: string;
+  targetShape: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseShapeMatchContent(content: Json): ShapeMatchContent | null {
+  if (!isRecord(content)) return null;
+  const targetShape = asString(content.targetShape ?? content.target_shape);
+  const options = asStringArray(content.options);
+  if (!targetShape || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return {
+    prompt: asString(content.prompt) ?? "Tap the shape that matches",
+    targetShape,
+    options,
+    correctIndex,
+  };
+}
+
+export interface ColorMixingContent {
+  prompt: string;
+  colorA: string;
+  colorB: string;
+  hexA: string;
+  hexB: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseColorMixingContent(content: Json): ColorMixingContent | null {
+  if (!isRecord(content)) return null;
+  const colorA = asString(content.colorA ?? content.color_a);
+  const colorB = asString(content.colorB ?? content.color_b);
+  const hexA = asString(content.hexA ?? content.hex_a) ?? "#FF3B3B";
+  const hexB = asString(content.hexB ?? content.hex_b) ?? "#3B82F6";
+  const options = asStringArray(content.options);
+  if (!colorA || !colorB || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return {
+    prompt: asString(content.prompt) ?? "What color do these make together?",
+    colorA,
+    colorB,
+    hexA,
+    hexB,
+    options,
+    correctIndex,
+  };
+}
+
+export interface DigitSpanContent {
+  prompt: string;
+  digits: number[];
+}
+
+export function parseDigitSpanContent(content: Json): DigitSpanContent | null {
+  if (!isRecord(content)) return null;
+  const digits = asNumberArray(content.digits)
+    .map((n) => Math.round(n))
+    .filter((n) => n >= 0 && n <= 9);
+  if (digits.length < 3) return null;
+
+  return { prompt: asString(content.prompt) ?? "Watch the numbers…", digits };
+}
+
+export interface EmotionMatchContent {
+  prompt: string;
+  emoji: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseEmotionMatchContent(content: Json): EmotionMatchContent | null {
+  if (!isRecord(content)) return null;
+  const emoji = asString(content.emoji);
+  const options = asStringArray(content.options);
+  if (!emoji || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return {
+    prompt: asString(content.prompt) ?? "How does this feel?",
+    emoji,
+    options,
+    correctIndex,
+  };
+}
+
+export interface CauseEffectContent {
+  cause: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseCauseEffectContent(content: Json): CauseEffectContent | null {
+  if (!isRecord(content)) return null;
+  const cause = asString(content.cause);
+  const options = asStringArray(content.options);
+  if (!cause || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return { cause, options, correctIndex };
+}
+
+export interface AnalogyContent {
+  wordA: string;
+  wordB: string;
+  wordC: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseAnalogyContent(content: Json): AnalogyContent | null {
+  if (!isRecord(content)) return null;
+  const wordA = asString(content.wordA ?? content.word_a)?.trim();
+  const wordB = asString(content.wordB ?? content.word_b)?.trim();
+  const wordC = asString(content.wordC ?? content.word_c)?.trim();
+  const options = asStringArray(content.options);
+  if (!wordA || !wordB || !wordC || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return { wordA, wordB, wordC, options, correctIndex };
+}
+
+export interface AntonymMatchContent {
+  word: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseAntonymMatchContent(content: Json): AntonymMatchContent | null {
+  if (!isRecord(content)) return null;
+  const word = asString(content.word)?.trim();
+  const options = asStringArray(content.options);
+  if (!word || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return { word, options, correctIndex };
+}
+
+export interface SizeOrderContent {
+  prompt: string;
+  items: string[];
+}
+
+export function parseSizeOrderContent(content: Json): SizeOrderContent | null {
+  if (!isRecord(content)) return null;
+  const items = asStringArray(content.items);
+  if (items.length < 3) return null;
+
+  return { prompt: asString(content.prompt) ?? "Tap in order, smallest to largest", items };
+}
+
+export interface SpotTheDifferenceContent {
+  prompt: string;
+  emoji: string;
+  oddEmoji: string;
+  gridSize: number;
+  oddIndex: number;
+}
+
+export function parseSpotTheDifferenceContent(content: Json): SpotTheDifferenceContent | null {
+  if (!isRecord(content)) return null;
+  const emoji = asString(content.emoji);
+  const oddEmoji = asString(content.oddEmoji ?? content.odd_emoji);
+  if (!emoji || !oddEmoji) return null;
+
+  const rawGridSize = asNumber(content.gridSize ?? content.grid_size) ?? 9;
+  const gridSize = Math.min(30, Math.max(4, Math.round(rawGridSize)));
+
+  const rawOddIndex = asNumber(content.oddIndex ?? content.odd_index);
+  if (rawOddIndex === null) return null;
+  const oddIndex = Math.round(rawOddIndex);
+  if (oddIndex < 0 || oddIndex >= gridSize) return null;
+
+  return {
+    prompt: asString(content.prompt) ?? "Find the one that's different",
+    emoji,
+    oddEmoji,
+    gridSize,
+    oddIndex,
+  };
+}
+
+export interface ClockReadingContent {
+  prompt: string;
+  hour: number;
+  minute: number;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseClockReadingContent(content: Json): ClockReadingContent | null {
+  if (!isRecord(content)) return null;
+  const rawHour = asNumber(content.hour);
+  const rawMinute = asNumber(content.minute);
+  if (rawHour === null || rawMinute === null) return null;
+  const hour = Math.round(rawHour);
+  const minute = Math.round(rawMinute);
+  if (hour < 1 || hour > 12 || minute < 0 || minute > 59) return null;
+
+  const options = asStringArray(content.options);
+  if (options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return {
+    prompt: asString(content.prompt) ?? "What time is it?",
+    hour,
+    minute,
+    options,
+    correctIndex,
   };
 }

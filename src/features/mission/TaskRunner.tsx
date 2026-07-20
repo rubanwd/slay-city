@@ -3,13 +3,20 @@
 import { SlayButton } from "@/components/ui";
 import type { Json } from "@/types/database";
 
+import AnalogyTask from "./AnalogyTask";
+import AntonymMatchTask from "./AntonymMatchTask";
 import BubblePopTask from "./BubblePopTask";
 import CategorySortTask from "./CategorySortTask";
+import CauseEffectTask from "./CauseEffectTask";
+import ClockReadingTask from "./ClockReadingTask";
+import ColorMixingTask from "./ColorMixingTask";
 import CompareSizeTask from "./CompareSizeTask";
 import CountingGameTask from "./CountingGameTask";
 import CrosswordTask from "./CrosswordTask";
 import DialogueChoiceTask from "./DialogueChoiceTask";
+import DigitSpanTask from "./DigitSpanTask";
 import EmojiDecodeTask from "./EmojiDecodeTask";
+import EmotionMatchTask from "./EmotionMatchTask";
 import FillBlankTask from "./FillBlankTask";
 import FlashcardsTask from "./FlashcardsTask";
 import HangmanTask from "./HangmanTask";
@@ -24,22 +31,32 @@ import QuizTask from "./QuizTask";
 import ReactionTapTask from "./ReactionTapTask";
 import RhymeMatchTask from "./RhymeMatchTask";
 import SentenceBuilderTask from "./SentenceBuilderTask";
+import ShapeMatchTask from "./ShapeMatchTask";
 import SimonSequenceTask from "./SimonSequenceTask";
+import SizeOrderTask from "./SizeOrderTask";
 import SnakeGameTask from "./SnakeGameTask";
 import SpellingBeeTask from "./SpellingBeeTask";
+import SpotTheDifferenceTask from "./SpotTheDifferenceTask";
 import StorySequencingTask from "./StorySequencingTask";
 import TrueFalseTask from "./TrueFalseTask";
 import VocabularyTask from "./VocabularyTask";
 import WordScrambleTask from "./WordScrambleTask";
 import WordSearchTask from "./WordSearchTask";
 import {
+  parseAnalogyContent,
+  parseAntonymMatchContent,
   parseBubblePopContent,
   parseCategorySortContent,
+  parseCauseEffectContent,
+  parseClockReadingContent,
+  parseColorMixingContent,
   parseCompareSizeContent,
   parseCountingGameContent,
   parseCrosswordContent,
   parseDialogueChoiceContent,
+  parseDigitSpanContent,
   parseEmojiDecodeContent,
+  parseEmotionMatchContent,
   parseFillBlankContent,
   parseFlashcardsContent,
   parseHangmanContent,
@@ -54,9 +71,12 @@ import {
   parseReactionTapContent,
   parseRhymeMatchContent,
   parseSentenceBuilderContent,
+  parseShapeMatchContent,
   parseSimonSequenceContent,
+  parseSizeOrderContent,
   parseSnakeGameContent,
   parseSpellingBeeContent,
+  parseSpotTheDifferenceContent,
   parseStorySequencingContent,
   parseTrueFalseContent,
   parseVocabularyContent,
@@ -213,6 +233,46 @@ function renderTaskByType(
     case "dialogue_choice": {
       const content = parseDialogueChoiceContent(rawContent);
       return content ? <DialogueChoiceTask content={content} {...props} /> : null;
+    }
+    case "shape_match": {
+      const content = parseShapeMatchContent(rawContent);
+      return content ? <ShapeMatchTask content={content} {...props} /> : null;
+    }
+    case "color_mixing": {
+      const content = parseColorMixingContent(rawContent);
+      return content ? <ColorMixingTask content={content} {...props} /> : null;
+    }
+    case "digit_span": {
+      const content = parseDigitSpanContent(rawContent);
+      return content ? <DigitSpanTask content={content} {...props} /> : null;
+    }
+    case "emotion_match": {
+      const content = parseEmotionMatchContent(rawContent);
+      return content ? <EmotionMatchTask content={content} {...props} /> : null;
+    }
+    case "cause_effect": {
+      const content = parseCauseEffectContent(rawContent);
+      return content ? <CauseEffectTask content={content} {...props} /> : null;
+    }
+    case "analogy": {
+      const content = parseAnalogyContent(rawContent);
+      return content ? <AnalogyTask content={content} {...props} /> : null;
+    }
+    case "antonym_match": {
+      const content = parseAntonymMatchContent(rawContent);
+      return content ? <AntonymMatchTask content={content} {...props} /> : null;
+    }
+    case "size_order": {
+      const content = parseSizeOrderContent(rawContent);
+      return content ? <SizeOrderTask content={content} {...props} /> : null;
+    }
+    case "spot_the_difference": {
+      const content = parseSpotTheDifferenceContent(rawContent);
+      return content ? <SpotTheDifferenceTask content={content} {...props} /> : null;
+    }
+    case "clock_reading": {
+      const content = parseClockReadingContent(rawContent);
+      return content ? <ClockReadingTask content={content} {...props} /> : null;
     }
     default:
       return null;
