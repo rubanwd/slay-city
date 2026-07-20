@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 
 import { AppContainer, Section } from "@/components/layout";
 import { SlayButton } from "@/components/ui";
+import NavLink from "@/components/ui/NavLink";
 import HowToPlayButton from "@/features/mission/HowToPlayButton";
 import ProgressBar from "@/features/mission/ProgressBar";
 import TaskRunner from "@/features/mission/TaskRunner";
@@ -77,6 +78,9 @@ export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskI
   const [mode, setMode] = useState<ScreenMode>("intro");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, startSave] = useTransition();
+  const [isNavigating, startNav] = useTransition();
+
+  const goToHomework = () => startNav(() => router.push("/homework"));
 
   const total = tasks.length;
   const currentTask = tasks[currentIndex];
@@ -103,7 +107,7 @@ export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskI
 
   const handleExit = () => {
     if (window.confirm("Leave this topic? Your progress on this task will be lost.")) {
-      router.push("/homework");
+      goToHomework();
     }
   };
 
@@ -118,7 +122,7 @@ export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskI
         <Section className="items-center gap-4 text-center">
           <h1 className="text-h2 font-black text-white">{topic.title}</h1>
           <p className="text-white/60">This topic has no tasks yet.</p>
-          <SlayButton variant="ghost" onClick={() => router.push("/homework")}>
+          <SlayButton variant="ghost" loading={isNavigating} onClick={goToHomework}>
             Back to Homework
           </SlayButton>
         </Section>
@@ -130,13 +134,12 @@ export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskI
     return (
       <AppContainer>
         <Section pt="lg" pb="sm">
-          <button
-            type="button"
-            onClick={() => router.push("/homework")}
-            className="mb-2 text-left text-small text-white/50 hover:text-white"
+          <NavLink
+            href="/homework"
+            className="mb-2 inline-block text-left text-small text-white/50 hover:text-white"
           >
             ← Homework
-          </button>
+          </NavLink>
           <h1 className="text-h2 font-black text-white">{topic.title}</h1>
           {topic.description && <p className="mt-1 text-small text-white/60">{topic.description}</p>}
         </Section>
@@ -169,7 +172,7 @@ export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskI
             <SlayButton variant="green" onClick={() => startPractice(true)}>
               Practice Again
             </SlayButton>
-            <SlayButton variant="ghost" onClick={() => router.push("/homework")}>
+            <SlayButton variant="ghost" loading={isNavigating} onClick={goToHomework}>
               Back to Homework
             </SlayButton>
           </div>
