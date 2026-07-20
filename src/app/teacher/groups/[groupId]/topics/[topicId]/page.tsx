@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import HomeworkTaskForm from "@/features/teacher/HomeworkTaskForm";
 import HomeworkTaskItem from "@/features/teacher/HomeworkTaskItem";
+import HomeworkTopicItem from "@/features/teacher/HomeworkTopicItem";
 import TeacherHeader from "@/features/teacher/TeacherHeader";
 import { requireTeacherPage } from "@/features/teacher/guard";
 
@@ -32,7 +33,7 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
 
   const { data: topic } = await supabase
     .from("homework_topics")
-    .select("id, title, group_id")
+    .select("id, title, group_id, description, order_index, note_text, note_link_url, note_image_url")
     .eq("id", topicId)
     .eq("group_id", groupId)
     .maybeSingle();
@@ -53,6 +54,16 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
         <TeacherHeader title={topic.title} backHref={`/teacher/groups/${groupId}`} />
+
+        <h2 className="mb-2 text-label text-white/50">Topic Info</h2>
+        <ul className="mb-6">
+          <HomeworkTopicItem
+            groupId={groupId}
+            topic={topic}
+            taskCount={rows.length}
+            linkToTasks={false}
+          />
+        </ul>
 
         <h2 className="mb-2 text-label text-white/50">Tasks ({rows.length})</h2>
         {rows.length === 0 ? (
