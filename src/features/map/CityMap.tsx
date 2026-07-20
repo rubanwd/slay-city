@@ -56,9 +56,11 @@ export interface CityMapProps {
   hud: HudStats;
   /** Mascot image for the you-are-here marker (equipped item or default). */
   mascotImageUrl: string;
+  /** Shows the bottom nav's Homework tab — true when the child is in a teacher group. */
+  showHomework?: boolean;
 }
 
-export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps) {
+export default function CityMap({ district, hud, mascotImageUrl, showHomework }: CityMapProps) {
   const locations = selectVisibleLocations(district?.locations ?? [], MAX_VISIBLE_LOCATIONS);
 
   // The mascot starts on the earliest stop that still has a mission; tapping
@@ -243,7 +245,7 @@ export default function CityMap({ district, hud, mascotImageUrl }: CityMapProps)
         </div>
       )}
 
-      <BottomNav />
+      <BottomNav showHomework={showHomework} />
     </main>
   );
 }

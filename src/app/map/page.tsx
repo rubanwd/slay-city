@@ -6,6 +6,7 @@ import {
   selectActiveDistrict,
   sumLocationRewards,
 } from "@/features/map/mapState";
+import { hasAnyGroup } from "@/features/homework/queries";
 import { resolveMascotImage } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
 
@@ -22,7 +23,7 @@ export default async function MapPage() {
     return null;
   }
 
-  const [districtsRes, locationsRes, missionsRes, progressRes, statsRes, equippedRes] =
+  const [districtsRes, locationsRes, missionsRes, progressRes, statsRes, equippedRes, showHomework] =
     await Promise.all([
       supabase
         .from("districts")
@@ -50,6 +51,7 @@ export default async function MapPage() {
         .select("equipped_at, wardrobe_items(preview_url, image_url)")
         .eq("profile_id", user.id)
         .eq("equipped", true),
+      hasAnyGroup(supabase),
     ]);
 
   const districts = districtsRes.data ?? [];
@@ -108,6 +110,7 @@ export default async function MapPage() {
           currentStreak: stats?.current_streak ?? 0,
         }}
         mascotImageUrl={mascotImageUrl}
+        showHomework={showHomework}
       />
     </AuthGuard>
   );

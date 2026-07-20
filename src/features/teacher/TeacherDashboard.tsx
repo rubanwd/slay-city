@@ -1,3 +1,4 @@
+import NavLink from "@/components/ui/NavLink";
 import { signOut } from "@/features/auth/actions";
 
 import type { TeacherGroup } from "./queries";
@@ -100,11 +101,19 @@ export default function TeacherDashboard({ groups }: TeacherDashboardProps) {
         <div className="flex flex-col gap-6">
           {groups.map((group) => (
             <section key={group.id} aria-label={group.name}>
-              <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-label text-white/50">{group.name}</h2>
-                <span className="text-small font-bold text-white/40">
-                  {group.children.length} {group.children.length === 1 ? "student" : "students"}
-                </span>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <h2 className="min-w-0 truncate text-label text-white/50">{group.name}</h2>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="text-small font-bold text-white/40">
+                    {group.children.length} {group.children.length === 1 ? "student" : "students"}
+                  </span>
+                  <NavLink
+                    href={`/teacher/groups/${group.id}`}
+                    className="rounded-full border border-lime-green/50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-lime-green transition-colors hover:bg-lime-green/10"
+                  >
+                    Homework
+                  </NavLink>
+                </div>
               </div>
               {group.children.length === 0 ? (
                 <p className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
