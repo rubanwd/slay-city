@@ -25,6 +25,19 @@ function parseNonNegativeInt(raw: FormDataEntryValue | null, fallback = 0): numb
   return n;
 }
 
+/** Parses an optional http(s) URL. Empty means "none" (`null`); present-but-invalid is rejected. */
+function parseOptionalUrl(raw: FormDataEntryValue | null): string | null | undefined {
+  const value = String(raw ?? "").trim();
+  if (value === "") return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return undefined;
+  } catch {
+    return undefined;
+  }
+  return value;
+}
+
 function revalidateGroup(groupId: string): void {
   revalidatePath(`/teacher/groups/${groupId}`);
   // Homework pages are per-child server components — bust them too so a child
@@ -46,16 +59,24 @@ export async function createHomeworkTopic(
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
+  const noteText = String(formData.get("note_text") ?? "").trim();
+  const noteLinkUrl = parseOptionalUrl(formData.get("note_link_url"));
+  const noteImageUrl = parseOptionalUrl(formData.get("note_image_url"));
 
   if (!groupId) return { error: "A group is required." };
   if (!title) return { error: "Title is required." };
   if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
+  if (noteLinkUrl === undefined) return { error: "Link must be a valid http(s) URL." };
+  if (noteImageUrl === undefined) return { error: "Image URL must be valid." };
 
   const { error } = await supabase.from("homework_topics").insert({
     group_id: groupId,
     title,
     description: description || null,
     order_index: orderIndex,
+    note_text: noteText || null,
+    note_link_url: noteLinkUrl,
+    note_image_url: noteImageUrl,
   });
 
   if (error) return { error: error.message };
@@ -77,14 +98,26 @@ export async function updateHomeworkTopic(
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
+  const noteText = String(formData.get("note_text") ?? "").trim();
+  const noteLinkUrl = parseOptionalUrl(formData.get("note_link_url"));
+  const noteImageUrl = parseOptionalUrl(formData.get("note_image_url"));
 
   if (!id) return { error: "A topic is required." };
   if (!title) return { error: "Title is required." };
   if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
+  if (noteLinkUrl === undefined) return { error: "Link must be a valid http(s) URL." };
+  if (noteImageUrl === undefined) return { error: "Image URL must be valid." };
 
   const { error } = await supabase
     .from("homework_topics")
-    .update({ title, description: description || null, order_index: orderIndex })
+    .update({
+      title,
+      description: description || null,
+      order_index: orderIndex,
+      note_text: noteText || null,
+      note_link_url: noteLinkUrl,
+      note_image_url: noteImageUrl,
+    })
     .eq("id", id);
 
   if (error) return { error: error.message };

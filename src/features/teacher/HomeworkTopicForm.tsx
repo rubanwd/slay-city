@@ -7,6 +7,7 @@ import { SlayButton } from "@/components/ui";
 import { INPUT_CLASS, LABEL_CLASS } from "@/features/admin/formStyles";
 import { useAdminModalControls } from "@/features/admin/AdminModal";
 import { useAdminToast } from "@/features/admin/AdminToast";
+import ImageUploadField from "@/features/admin/ImageUploadField";
 
 import { createHomeworkTopic, type TeacherFormState } from "./actions";
 
@@ -25,7 +26,7 @@ function SubmitButton() {
   );
 }
 
-/** Create form for a lesson topic — title + optional description. */
+/** Create form for a lesson topic — title, optional description, and optional note (text/link/image). */
 export default function HomeworkTopicForm({ groupId, nextOrder }: HomeworkTopicFormProps) {
   const [state, formAction] = useActionState<TeacherFormState, FormData>(createHomeworkTopic, {});
   const modal = useAdminModalControls();
@@ -56,6 +57,28 @@ export default function HomeworkTopicForm({ groupId, nextOrder }: HomeworkTopicF
         <span className={LABEL_CLASS}>Description (optional)</span>
         <textarea name="description" rows={3} className={INPUT_CLASS} />
       </label>
+
+      <label className="flex flex-col gap-1.5">
+        <span className={LABEL_CLASS}>Extra Info (optional)</span>
+        <textarea
+          name="note_text"
+          rows={3}
+          placeholder="Anything else the student should know before starting"
+          className={INPUT_CLASS}
+        />
+      </label>
+
+      <label className="flex flex-col gap-1.5">
+        <span className={LABEL_CLASS}>Link (optional)</span>
+        <input
+          name="note_link_url"
+          type="url"
+          placeholder="https://..."
+          className={INPUT_CLASS}
+        />
+      </label>
+
+      <ImageUploadField name="note_image_url" label="Image (optional)" folder="homework" />
 
       <div className="flex gap-2">
         <SubmitButton />

@@ -25,7 +25,11 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
   // RLS (`homework_topics_select`) already restricts this to a topic in one of
   // the child's own groups — a topic from another group simply comes back null.
   const [topicRes, tasksRes, completionsRes] = await Promise.all([
-    supabase.from("homework_topics").select("id, title, description").eq("id", topicId).maybeSingle(),
+    supabase
+      .from("homework_topics")
+      .select("id, title, description, note_text, note_link_url, note_image_url")
+      .eq("id", topicId)
+      .maybeSingle(),
     supabase
       .from("homework_tasks")
       .select("id, task_type, order_index, content")
@@ -55,6 +59,11 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
     <AuthGuard>
       <HomeworkTopicScreen
         topic={{ id: topic.id, title: topic.title, description: topic.description }}
+        note={{
+          text: topic.note_text,
+          linkUrl: topic.note_link_url,
+          imageUrl: topic.note_image_url,
+        }}
         tasks={tasks}
         completedTaskIds={completedTaskIds}
       />

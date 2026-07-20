@@ -28,7 +28,7 @@ export default async function GroupHomeworkPage({ params }: GroupHomeworkPagePro
 
   const { data: topics } = await supabase
     .from("homework_topics")
-    .select("id, title, description, order_index")
+    .select("id, title, description, order_index, note_text, note_link_url, note_image_url")
     .eq("group_id", groupId)
     .order("order_index");
 

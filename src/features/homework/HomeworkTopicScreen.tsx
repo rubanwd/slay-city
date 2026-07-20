@@ -15,37 +15,73 @@ import { completeHomeworkTask } from "./actions";
 /** Task types that take over the whole panel and manage their own layout/progress. */
 const IMMERSIVE_TASK_TYPES: MissionTaskType[] = ["snake_game", "bubble_pop"];
 
+export interface HomeworkTopicNote {
+  text: string | null;
+  linkUrl: string | null;
+  imageUrl: string | null;
+}
+
 export interface HomeworkTopicScreenProps {
   topic: { id: string; title: string; description: string | null };
+  /** Extra context the teacher attached — text, a link, and/or an image, all optional. */
+  note: HomeworkTopicNote;
   tasks: MissionTaskViewModel[];
   /** Task ids the child has already completed, so a resumed topic picks up where they left off. */
   completedTaskIds: string[];
 }
+
+type ScreenMode = "intro" | "running" | "finished";
 
 function firstIncompleteIndex(tasks: MissionTaskViewModel[], completed: Set<string>): number {
   const index = tasks.findIndex((task) => !completed.has(task.id));
   return index === -1 ? 0 : index;
 }
 
+function TopicNoteCard({ note }: { note: HomeworkTopicNote }) {
+  if (!note.text && !note.linkUrl && !note.imageUrl) return null;
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4">
+      {note.imageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element -- teacher-uploaded topic note image
+        <img src={note.imageUrl} alt="" className="w-full rounded-xl object-cover" />
+      )}
+      {note.text && <p className="whitespace-pre-wrap text-small text-white/70">{note.text}</p>}
+      {note.linkUrl && (
+        <a
+          href={note.linkUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="truncate text-small font-bold text-cyan hover:underline"
+        >
+          {note.linkUrl}
+        </a>
+      )}
+    </div>
+  );
+}
+
 /**
  * Runs a homework topic's tasks one at a time, mirroring `MissionScreen`, but
- * with two deliberate differences: completion is saved after *every* task
- * (not just the last one), so leaving mid-topic keeps progress; and finishing
+ * with three deliberate differences: it opens on an intro screen (teacher's
+ * note plus progress and a Start/Continue button) rather than jumping
+ * straight into the first task; completion is saved after *every* task (not
+ * just the last one), so leaving mid-topic keeps progress; and finishing
  * grants no XP/coins — homework sits outside the map's reward loop.
  */
-export default function HomeworkTopicScreen({ topic, tasks, completedTaskIds }: HomeworkTopicScreenProps) {
+export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskIds }: HomeworkTopicScreenProps) {
   const router = useRouter();
   const [completed, setCompleted] = useState<Set<string>>(() => new Set(completedTaskIds));
   const [currentIndex, setCurrentIndex] = useState(() =>
     firstIncompleteIndex(tasks, new Set(completedTaskIds))
   );
-  const [finished, setFinished] = useState(tasks.length > 0 && completedTaskIds.length >= tasks.length);
+  const [mode, setMode] = useState<ScreenMode>("intro");
   const [error, setError] = useState<string | null>(null);
   const [isSaving, startSave] = useTransition();
 
   const total = tasks.length;
   const currentTask = tasks[currentIndex];
   const isLastTask = currentIndex === total - 1;
+  const allDone = total > 0 && completed.size >= total;
 
   const handleTaskComplete = () => {
     if (!currentTask) return;
@@ -58,7 +94,7 @@ export default function HomeworkTopicScreen({ topic, tasks, completedTaskIds }: 
       }
       setCompleted((prev) => new Set(prev).add(currentTask.id));
       if (isLastTask) {
-        setFinished(true);
+        setMode("finished");
       } else {
         setCurrentIndex((index) => index + 1);
       }
@@ -69,6 +105,11 @@ export default function HomeworkTopicScreen({ topic, tasks, completedTaskIds }: 
     if (window.confirm("Leave this topic? Your progress on this task will be lost.")) {
       router.push("/homework");
     }
+  };
+
+  const startPractice = (fromScratch: boolean) => {
+    if (fromScratch) setCurrentIndex(0);
+    setMode("running");
   };
 
   if (total === 0) {
@@ -85,7 +126,37 @@ export default function HomeworkTopicScreen({ topic, tasks, completedTaskIds }: 
     );
   }
 
-  if (finished) {
+  if (mode === "intro") {
+    return (
+      <AppContainer>
+        <Section pt="lg" pb="sm">
+          <button
+            type="button"
+            onClick={() => router.push("/homework")}
+            className="mb-2 text-left text-small text-white/50 hover:text-white"
+          >
+            ← Homework
+          </button>
+          <h1 className="text-h2 font-black text-white">{topic.title}</h1>
+          {topic.description && <p className="mt-1 text-small text-white/60">{topic.description}</p>}
+        </Section>
+
+        <Section py="sm" className="gap-4">
+          <TopicNoteCard note={note} />
+
+          <div className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4">
+            <ProgressBar completed={completed.size} total={total} />
+          </div>
+
+          <SlayButton variant="green" size="lg" onClick={() => startPractice(allDone)}>
+            {allDone ? "Practice Again" : completed.size > 0 ? "Continue" : "Start"}
+          </SlayButton>
+        </Section>
+      </AppContainer>
+    );
+  }
+
+  if (mode === "finished") {
     return (
       <AppContainer className="justify-center">
         <Section className="items-center gap-4 text-center">
@@ -95,13 +166,7 @@ export default function HomeworkTopicScreen({ topic, tasks, completedTaskIds }: 
           <h1 className="text-h2 font-black text-white">{topic.title} done!</h1>
           <p className="text-white/60">You finished every task in this topic.</p>
           <div className="flex w-full flex-col gap-2">
-            <SlayButton
-              variant="green"
-              onClick={() => {
-                setCurrentIndex(0);
-                setFinished(false);
-              }}
-            >
+            <SlayButton variant="green" onClick={() => startPractice(true)}>
               Practice Again
             </SlayButton>
             <SlayButton variant="ghost" onClick={() => router.push("/homework")}>
