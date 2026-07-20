@@ -22,6 +22,8 @@ export interface HomeworkTopicItemProps {
     note_image_url: string | null;
   };
   taskCount: number;
+  /** False when already on the topic's own tasks page — the title shouldn't link to itself. */
+  linkToTasks?: boolean;
 }
 
 function SaveButton() {
@@ -34,7 +36,12 @@ function SaveButton() {
 }
 
 /** One lesson topic row: edit (inline) or delete, and a link into its tasks. */
-export default function HomeworkTopicItem({ groupId, topic, taskCount }: HomeworkTopicItemProps) {
+export default function HomeworkTopicItem({
+  groupId,
+  topic,
+  taskCount,
+  linkToTasks = true,
+}: HomeworkTopicItemProps) {
   const [editing, setEditing] = useState(false);
   const [state, formAction] = useActionState<TeacherFormState, FormData>(updateHomeworkTopic, {});
 
@@ -112,24 +119,34 @@ export default function HomeworkTopicItem({ groupId, topic, taskCount }: Homewor
     );
   }
 
+  const body = (
+    <>
+      <p className="truncate text-body-strong text-white">{topic.title}</p>
+      {topic.description && (
+        <p className="mt-0.5 truncate text-small text-white/50">{topic.description}</p>
+      )}
+      <div className="mt-1 flex items-center gap-2">
+        <p className="text-xs font-bold uppercase tracking-wide text-cyan">
+          {taskCount} {taskCount === 1 ? "task" : "tasks"}
+        </p>
+        {(topic.note_text || topic.note_link_url || topic.note_image_url) && (
+          <span className="text-xs text-white/40" title="Has extra info for students">
+            📎
+          </span>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <li className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4">
-      <NavLink href={`/teacher/groups/${groupId}/topics/${topic.id}`} className="block">
-        <p className="truncate text-body-strong text-white">{topic.title}</p>
-        {topic.description && (
-          <p className="mt-0.5 truncate text-small text-white/50">{topic.description}</p>
-        )}
-        <div className="mt-1 flex items-center gap-2">
-          <p className="text-xs font-bold uppercase tracking-wide text-cyan">
-            {taskCount} {taskCount === 1 ? "task" : "tasks"}
-          </p>
-          {(topic.note_text || topic.note_link_url || topic.note_image_url) && (
-            <span className="text-xs text-white/40" title="Has extra info for students">
-              📎
-            </span>
-          )}
-        </div>
-      </NavLink>
+      {linkToTasks ? (
+        <NavLink href={`/teacher/groups/${groupId}/topics/${topic.id}`} className="block">
+          {body}
+        </NavLink>
+      ) : (
+        <div>{body}</div>
+      )}
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button
