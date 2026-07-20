@@ -57,7 +57,7 @@ export default async function AdminPage() {
       title: "Manage Teachers",
       count: null,
       description: "Add teacher accounts and assign student groups.",
-      accent: "text-purple",
+      accent: "text-cyan",
     },
   ];
 
