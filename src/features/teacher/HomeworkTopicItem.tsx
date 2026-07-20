@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { SlayButton } from "@/components/ui";
 import NavLink from "@/components/ui/NavLink";
 import { INPUT_CLASS, LABEL_CLASS } from "@/features/admin/formStyles";
+import ImageUploadField from "@/features/admin/ImageUploadField";
 
 import { deleteHomeworkTopic, updateHomeworkTopic, type TeacherFormState } from "./actions";
 
@@ -16,6 +17,9 @@ export interface HomeworkTopicItemProps {
     title: string;
     description: string | null;
     order_index: number;
+    note_text: string | null;
+    note_link_url: string | null;
+    note_image_url: string | null;
   };
   taskCount: number;
 }
@@ -62,6 +66,35 @@ export default function HomeworkTopicItem({ groupId, topic, taskCount }: Homewor
             />
           </label>
 
+          <label className="flex flex-col gap-1.5">
+            <span className={LABEL_CLASS}>Extra Info (optional)</span>
+            <textarea
+              name="note_text"
+              rows={3}
+              defaultValue={topic.note_text ?? ""}
+              placeholder="Anything else the student should know before starting"
+              className={INPUT_CLASS}
+            />
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className={LABEL_CLASS}>Link (optional)</span>
+            <input
+              name="note_link_url"
+              type="url"
+              defaultValue={topic.note_link_url ?? ""}
+              placeholder="https://..."
+              className={INPUT_CLASS}
+            />
+          </label>
+
+          <ImageUploadField
+            name="note_image_url"
+            label="Image (optional)"
+            folder="homework"
+            defaultValue={topic.note_image_url}
+          />
+
           {state.error && (
             <p role="alert" className="text-sm font-semibold text-neon-pink">
               {state.error}
@@ -86,9 +119,16 @@ export default function HomeworkTopicItem({ groupId, topic, taskCount }: Homewor
         {topic.description && (
           <p className="mt-0.5 truncate text-small text-white/50">{topic.description}</p>
         )}
-        <p className="mt-1 text-xs font-bold uppercase tracking-wide text-cyan">
-          {taskCount} {taskCount === 1 ? "task" : "tasks"}
-        </p>
+        <div className="mt-1 flex items-center gap-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-cyan">
+            {taskCount} {taskCount === 1 ? "task" : "tasks"}
+          </p>
+          {(topic.note_text || topic.note_link_url || topic.note_image_url) && (
+            <span className="text-xs text-white/40" title="Has extra info for students">
+              📎
+            </span>
+          )}
+        </div>
       </NavLink>
 
       <div className="mt-3 grid grid-cols-2 gap-2">

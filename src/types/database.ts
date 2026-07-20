@@ -213,6 +213,9 @@ export type Database = {
           description: string | null
           group_id: string
           id: string
+          note_image_url: string | null
+          note_link_url: string | null
+          note_text: string | null
           order_index: number
           title: string
           updated_at: string
@@ -222,6 +225,9 @@ export type Database = {
           description?: string | null
           group_id: string
           id?: string
+          note_image_url?: string | null
+          note_link_url?: string | null
+          note_text?: string | null
           order_index?: number
           title: string
           updated_at?: string
@@ -231,6 +237,9 @@ export type Database = {
           description?: string | null
           group_id?: string
           id?: string
+          note_image_url?: string | null
+          note_link_url?: string | null
+          note_text?: string | null
           order_index?: number
           title?: string
           updated_at?: string
@@ -828,6 +837,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_group_member: { Args: { p_group_id: string }; Returns: boolean }
       is_linked_child: { Args: { p_child_id: string }; Returns: boolean }
+      is_teacher: { Args: never; Returns: boolean }
       link_child_by_email: {
         Args: { p_child_email: string }
         Returns: {
