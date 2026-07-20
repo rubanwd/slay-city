@@ -43,6 +43,16 @@ const TASK_TYPE_LABELS: Record<MissionTaskType, string> = {
   true_false: "True or False",
   flashcards: "Flashcards",
   story_sequencing: "Story Sequencing",
+  counting_game: "Counting Game",
+  math_challenge: "Math Challenge",
+  simon_sequence: "Simon Sequence",
+  reaction_tap: "Speed Tap",
+  picture_reveal: "Picture Reveal",
+  rhyme_match: "Rhyme Match",
+  number_pattern: "Pattern Puzzle",
+  compare_size: "Bigger or Smaller",
+  letter_fill: "Missing Letters",
+  dialogue_choice: "Pick the Reply",
 };
 
 export function taskTypeLabel(taskType: MissionTaskType): string {
@@ -80,6 +90,16 @@ const TASK_INSTRUCTIONS: Record<MissionTaskType, string> = {
   flashcards: "Tap a card to flip it and see the answer. Step through every card to finish.",
   story_sequencing:
     "Use the up and down arrows to put the steps in the right order, then tap Check.",
+  counting_game: "Count the objects, then tap the number that matches.",
+  math_challenge: "Solve the equation and tap the correct answer.",
+  simon_sequence: "Watch the tiles light up, then tap them back in the same order.",
+  reaction_tap: "Tap every correct word before the timer runs out — avoid the wrong ones.",
+  picture_reveal: "Tap Reveal to see more of the picture, then tap what it shows.",
+  rhyme_match: "Tap the word that rhymes with the word shown.",
+  number_pattern: "Figure out the pattern and tap what comes next.",
+  compare_size: "Read the prompt and tap the correct one of the two.",
+  letter_fill: "Tap the missing letters, in order, to complete the word.",
+  dialogue_choice: "Read the line, then tap the best reply.",
 };
 
 export function taskTypeInstructions(taskType: MissionTaskType): string {
@@ -149,6 +169,11 @@ function asBoolean(value: Json | undefined): boolean {
 function asStringArray(value: Json | undefined): string[] {
   if (!Array.isArray(value)) return [];
   return value.filter((v): v is string => typeof v === "string");
+}
+
+function asNumberArray(value: Json | undefined): number[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is number => typeof v === "number" && Number.isFinite(v));
 }
 
 export function parseVocabularyContent(content: Json): VocabularyContent | null {
@@ -574,4 +599,240 @@ export function parseStorySequencingContent(content: Json): StorySequencingConte
   });
   if (steps.length < 2) return null;
   return { prompt: asString(content.prompt) ?? "Put the story in order", steps };
+}
+
+/* ── Second wave of new task type content shapes & parsers ─────────────────── */
+
+export interface CountingGameContent {
+  prompt: string;
+  emoji: string;
+  count: number;
+  options: number[];
+}
+
+export function parseCountingGameContent(content: Json): CountingGameContent | null {
+  if (!isRecord(content)) return null;
+  const emoji = asString(content.emoji);
+  const rawCount = asNumber(content.count);
+  if (!emoji || rawCount === null) return null;
+  const count = Math.round(rawCount);
+  if (count < 1 || count > 30) return null;
+
+  const options = Array.from(new Set(asNumberArray(content.options).map((n) => Math.round(n))));
+  if (!options.includes(count)) options.push(count);
+  if (options.length < 2) return null;
+
+  return { prompt: asString(content.prompt) ?? "How many do you see?", emoji, count, options };
+}
+
+export interface MathChallengeContent {
+  question: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseMathChallengeContent(content: Json): MathChallengeContent | null {
+  if (!isRecord(content)) return null;
+  const question = asString(content.question);
+  const options = asStringArray(content.options);
+  if (!question || options.length < 2) return null;
+
+  const correctIndex =
+    asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return { question, options, correctIndex };
+}
+
+export interface SimonSequenceContent {
+  prompt: string;
+  colors: string[];
+  sequence: number[];
+}
+
+export function parseSimonSequenceContent(content: Json): SimonSequenceContent | null {
+  if (!isRecord(content)) return null;
+  const colors = asStringArray(content.colors).map((c) => c.trim()).filter(Boolean);
+  if (colors.length < 2) return null;
+
+  const sequence = asNumberArray(content.sequence)
+    .map((n) => Math.round(n))
+    .filter((n) => n >= 0 && n < colors.length);
+  if (sequence.length < 2) return null;
+
+  return {
+    prompt: asString(content.prompt) ?? "Watch, then repeat the pattern",
+    colors,
+    sequence,
+  };
+}
+
+export interface ReactionTapContent {
+  prompt: string;
+  correct: string[];
+  distractors: string[];
+  roundSeconds: number;
+}
+
+export function parseReactionTapContent(content: Json): ReactionTapContent | null {
+  if (!isRecord(content)) return null;
+  const correct = asStringArray(content.correct).map((s) => s.trim()).filter(Boolean);
+  if (correct.length === 0) return null;
+
+  const rawSeconds = asNumber(content.roundSeconds ?? content.round_seconds) ?? 15;
+  const roundSeconds = Math.min(60, Math.max(5, Math.round(rawSeconds)));
+
+  return {
+    prompt: asString(content.prompt) ?? "Tap every correct word before time runs out!",
+    correct,
+    distractors: asStringArray(content.distractors).map((s) => s.trim()).filter(Boolean),
+    roundSeconds,
+  };
+}
+
+export interface PictureRevealContent {
+  prompt: string;
+  imageUrl: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parsePictureRevealContent(content: Json): PictureRevealContent | null {
+  if (!isRecord(content)) return null;
+  const imageUrl = asString(content.imageUrl ?? content.image_url);
+  const options = asStringArray(content.options);
+  if (!imageUrl || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return {
+    prompt: asString(content.prompt) ?? "What's in the picture?",
+    imageUrl,
+    options,
+    correctIndex,
+  };
+}
+
+export interface RhymeMatchContent {
+  prompt: string;
+  targetWord: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseRhymeMatchContent(content: Json): RhymeMatchContent | null {
+  if (!isRecord(content)) return null;
+  const targetWord = asString(content.targetWord ?? content.target_word)?.trim();
+  const options = asStringArray(content.options);
+  if (!targetWord || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return {
+    prompt: asString(content.prompt) ?? `Which word rhymes with "${targetWord}"?`,
+    targetWord,
+    options,
+    correctIndex,
+  };
+}
+
+export interface NumberPatternContent {
+  prompt: string;
+  sequence: string[];
+  blankIndex: number;
+  options: string[];
+  correctIndex: number;
+}
+
+export function parseNumberPatternContent(content: Json): NumberPatternContent | null {
+  if (!isRecord(content)) return null;
+  const sequence = asStringArray(content.sequence);
+  if (sequence.length < 3) return null;
+
+  const rawBlank = asNumber(content.blankIndex ?? content.blank_index);
+  if (rawBlank === null) return null;
+  const blankIndex = Math.round(rawBlank);
+  if (blankIndex < 0 || blankIndex >= sequence.length) return null;
+
+  const options = asStringArray(content.options);
+  if (options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return { prompt: asString(content.prompt) ?? "What comes next?", sequence, blankIndex, options, correctIndex };
+}
+
+export interface CompareSizeContent {
+  prompt: string;
+  optionA: string;
+  optionB: string;
+  imageUrlA: string | null;
+  imageUrlB: string | null;
+  correctOption: "a" | "b";
+}
+
+export function parseCompareSizeContent(content: Json): CompareSizeContent | null {
+  if (!isRecord(content)) return null;
+  const optionA = asString(content.optionA ?? content.option_a)?.trim();
+  const optionB = asString(content.optionB ?? content.option_b)?.trim();
+  if (!optionA || !optionB) return null;
+
+  const rawCorrect = content.correctOption ?? content.correct_option;
+  if (rawCorrect !== "a" && rawCorrect !== "b") return null;
+
+  return {
+    prompt: asString(content.prompt) ?? "Tap the correct one",
+    optionA,
+    optionB,
+    imageUrlA: asString(content.imageUrlA ?? content.image_url_a),
+    imageUrlB: asString(content.imageUrlB ?? content.image_url_b),
+    correctOption: rawCorrect,
+  };
+}
+
+export interface LetterFillContent {
+  word: string;
+  hint: string | null;
+  translation: string | null;
+}
+
+export function parseLetterFillContent(content: Json): LetterFillContent | null {
+  if (!isRecord(content)) return null;
+  const raw = asString(content.word);
+  const word = raw?.trim().toUpperCase();
+  if (!word || word.length < 3 || !/[A-Z]/.test(word)) return null;
+  return {
+    word,
+    hint: asString(content.hint),
+    translation: asString(content.translation),
+  };
+}
+
+export interface DialogueChoiceContent {
+  prompt: string;
+  speaker: string | null;
+  options: string[];
+  correctIndex: number;
+  translation: string | null;
+}
+
+export function parseDialogueChoiceContent(content: Json): DialogueChoiceContent | null {
+  if (!isRecord(content)) return null;
+  const prompt = asString(content.prompt);
+  const options = asStringArray(content.options);
+  if (!prompt || options.length < 2) return null;
+
+  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
+  if (correctIndex < 0 || correctIndex >= options.length) return null;
+
+  return {
+    prompt,
+    speaker: asString(content.speaker),
+    options,
+    correctIndex,
+    translation: asString(content.translation),
+  };
 }

@@ -18,6 +18,9 @@ user_wardrobe_items
 achievements
 user_achievements
 ai_content_drafts
+admin_emails
+parent_child_links
+task_type_templates
 ```
 
 Table purposes:
@@ -61,6 +64,15 @@ Stores achievements unlocked by a user.
 
 ai_content_drafts
 Stores AI-generated content before review and publishing.
+
+admin_emails
+Allowlist of email addresses permitted to self-claim the admin role (see claim_admin RPC).
+
+parent_child_links
+Links a parent account to one or more child profiles (see link_child_by_email RPC).
+
+task_type_templates
+Stores per-task-type default config used by the admin Task Types configurator/tester.
 ```
 
 Database rules:

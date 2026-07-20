@@ -1,16 +1,26 @@
 import {
   parseBubblePopContent,
   parseCategorySortContent,
+  parseCompareSizeContent,
+  parseCountingGameContent,
   parseCrosswordContent,
+  parseDialogueChoiceContent,
   parseEmojiDecodeContent,
   parseFillBlankContent,
   parseFlashcardsContent,
   parseHangmanContent,
+  parseLetterFillContent,
+  parseMathChallengeContent,
   parseMatchingContent,
   parseMemoryCardsContent,
+  parseNumberPatternContent,
   parseOddOneOutContent,
+  parsePictureRevealContent,
   parseQuizContent,
+  parseReactionTapContent,
+  parseRhymeMatchContent,
   parseSentenceBuilderContent,
+  parseSimonSequenceContent,
   parseSnakeGameContent,
   parseSpellingBeeContent,
   parseStorySequencingContent,
@@ -35,6 +45,18 @@ import {
   TrueFalseEditor,
 } from "./choiceEditors";
 import type { TaskEditorProps } from "./fields";
+import {
+  CompareSizeEditor,
+  CountingGameEditor,
+  DialogueChoiceEditor,
+  LetterFillEditor,
+  MathChallengeEditor,
+  NumberPatternEditor,
+  PictureRevealEditor,
+  ReactionTapEditor,
+  RhymeMatchEditor,
+  SimonSequenceEditor,
+} from "./moreEditors";
 import {
   CategorySortEditor,
   CrosswordEditor,
@@ -81,6 +103,16 @@ export const TASK_EDITORS: Partial<Record<MissionTaskType, TaskEditorEntry>> = {
   true_false: { Editor: TrueFalseEditor, parse: parseTrueFalseContent },
   flashcards: { Editor: FlashcardsEditor, parse: parseFlashcardsContent },
   story_sequencing: { Editor: StorySequencingEditor, parse: parseStorySequencingContent },
+  counting_game: { Editor: CountingGameEditor, parse: parseCountingGameContent },
+  math_challenge: { Editor: MathChallengeEditor, parse: parseMathChallengeContent },
+  simon_sequence: { Editor: SimonSequenceEditor, parse: parseSimonSequenceContent },
+  reaction_tap: { Editor: ReactionTapEditor, parse: parseReactionTapContent },
+  picture_reveal: { Editor: PictureRevealEditor, parse: parsePictureRevealContent },
+  rhyme_match: { Editor: RhymeMatchEditor, parse: parseRhymeMatchContent },
+  number_pattern: { Editor: NumberPatternEditor, parse: parseNumberPatternContent },
+  compare_size: { Editor: CompareSizeEditor, parse: parseCompareSizeContent },
+  letter_fill: { Editor: LetterFillEditor, parse: parseLetterFillContent },
+  dialogue_choice: { Editor: DialogueChoiceEditor, parse: parseDialogueChoiceContent },
 };
 
 export type { TaskEditorProps };

@@ -55,25 +55,31 @@ Follow this directory layout exactly. Do not create top-level directories outsid
 ```
 src/
   app/              # Next.js App Router pages and layouts
-  components/       # Shared, reusable UI primitives
-  features/         # Feature-scoped modules (map, mission, wardrobe, parent, admin)
+  components/       # Shared, reusable UI primitives (+ Storybook stories/docs)
+  features/         # Feature-scoped modules (map, mission, wardrobe, parent, admin, auth, onboarding, profile, reward)
   hooks/            # Custom React hooks
   lib/              # Third-party client instances (Supabase client, etc.)
-  services/         # Data-fetching and API abstraction layer
   types/            # TypeScript types and generated Supabase types
   styles/           # Global styles and Tailwind config extensions
 
 supabase/
-  functions/        # Supabase Edge Functions (one directory per function)
+  functions/        # Supabase Edge Functions — as-built, this is just update-streak
   migrations/       # Ordered SQL migration files
-  seed.sql          # Seed data for development/staging
 ```
 
-- Place feature-specific components inside `src/features/<feature-name>/components/`.
-- Place feature-specific hooks inside `src/features/<feature-name>/hooks/`.
-- Never put business logic directly inside `src/app/` page files — delegate to features or services.
-- Never put Edge Function source code anywhere except `supabase/functions/`.
+> **As-built deviation:** there is no `src/services/` layer. Each
+> `src/features/<feature-name>/` directory owns its own `actions.ts`
+> (Next.js Server Actions, `"use server"`) that talks to Supabase directly —
+> either a plain table query or `supabase.rpc(...)` against a Postgres
+> `SECURITY DEFINER` function in `supabase/migrations/`. Follow that pattern
+> for new features rather than reintroducing a `services/` layer.
+
+- Place feature-specific components directly inside `src/features/<feature-name>/` (this repo does not use a further `components/` subfolder per feature).
+- Place feature-specific hooks inside `src/features/<feature-name>/` or `src/hooks/`.
+- Never put business logic directly inside `src/app/` page files — delegate to `src/features/<feature-name>/actions.ts` and components.
+- Never put Edge Function source code anywhere except `supabase/functions/`. In practice, prefer a Postgres `SECURITY DEFINER` RPC function over a new Edge Function unless the logic needs the service-role client or Deno-only capabilities (see `supabase/functions/update-streak/`).
 - Keep each file focused on a single responsibility.
+- Storybook (`npm run storybook`) documents `src/components/ui` and select `src/features/*` components via `.stories.tsx`/`.mdx` files — add stories for new shared UI primitives.
 
 ---
 
@@ -131,16 +137,20 @@ Configure these in `tailwind.config.ts` under `theme.extend.colors` and referenc
 
 ## Testing Requirements
 
-- Write **unit tests** for all utility functions in `src/lib/` and `src/services/`.
-- Write **unit tests** for all custom hooks in `src/hooks/` and `src/features/*/hooks/`.
+- Write **unit tests** for all utility functions in `src/lib/` and `src/features/*`.
+- Write **unit tests** for all custom hooks in `src/hooks/` and `src/features/*`.
 - Write **integration tests** for all Supabase Edge Functions.
 - Tests must pass before any PR is merged.
 - CI/CD pipeline must include: lint → type-check → unit tests → build check.
 - Do not merge code that introduces TypeScript errors or lint failures.
-- Use a test runner compatible with the project setup (add Jest or Vitest if not already configured — document the choice in this file).
+- **Test runner: Vitest** (`npm run test` runs `vitest run --project unit`). Do not introduce Jest.
 - Cover all game-state mutation paths (completeMission, purchaseWardrobeItem, equipWardrobeItem, updateStreak) with tests that verify server-side validation is enforced.
 
-> Specific test file conventions (naming, location) must be added here once a test runner is confirmed.
+Test file convention: colocate `*.test.ts` next to the module it covers
+(e.g. `src/features/map/mapState.test.ts`, `supabase/functions/update-streak/index.test.ts`).
+Edge Function logic that needs unit tests should be split into a
+dependency-free module (see `update-streak/streak.ts`) so it can run under
+Vitest/Node instead of only the Deno runtime.
 
 ---
 
@@ -222,7 +232,7 @@ Follow this workflow for every task:
 
 ## Security Rules
 
-- **Never expose the OpenAI API key to the frontend.** All OpenAI calls must go through Supabase Edge Functions.
+- **Never expose the OpenRouter API key to the frontend.** All OpenRouter calls must go through Next.js Server Actions (this project does not use OpenAI or an Edge Function for this).
 - **Never expose Supabase service role keys to the frontend.** Use the anon key only in the browser.
 - **Never store API keys, database credentials, or service tokens in the repository.** Use Vercel Environment Variables and Supabase Secrets.
 - **Never trust the client for game-state changes.** XP, coins, streaks, and location unlocks must be computed and written server-side.
@@ -259,12 +269,15 @@ Implement all of the following tables. Do not rename them:
 | `achievements` | Achievement definitions |
 | `user_achievements` | Achievements unlocked by a user |
 | `ai_content_drafts` | AI-generated content pending review |
+| `admin_emails` | Allowlist of emails permitted to self-claim the admin role (`claim_admin` RPC) |
+| `parent_child_links` | Links a parent account to child profile(s) (`link_child_by_email` RPC) |
+| `task_type_templates` | Default config per task type, used by the admin Task Types configurator/tester |
 
 ### Rules
 - All user-related tables must have RLS enabled and appropriate policies defined.
 - Admin content tables (`districts`, `locations`, `missions`, `vocabulary_items`, `mission_tasks`) must support `draft` and `published` states.
 - Never write to reward-related columns (`xp`, `coins`, `streak`, `unlocked_locations`) from the client.
-- All reward and progress mutations must go through named Edge Functions: `completeMission`, `purchaseWardrobeItem`, `equipWardrobeItem`, `updateStreak`.
+- All reward and progress mutations must go through named server-side functions: `complete_mission`, `purchase_wardrobe_item`, `equip_wardrobe_item`, `unequip_wardrobe_item` (Postgres `SECURITY DEFINER` RPCs) and `updateStreak` (the one actual Edge Function). Never grant the client direct UPDATE/INSERT on the underlying tables.
 - Use `supabase gen types typescript` to regenerate `src/types/supabase.ts` after every schema change. Commit the updated types file with the migration.
 - Use `snake_case` for all column and table names.
 - Define foreign key constraints and appropriate indexes on all join columns.
@@ -319,15 +332,15 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
 ## Architecture Decisions
 
 - **Next.js App Router** is the routing and rendering model. Use Server Components by default; opt into Client Components only when interactivity or browser APIs are required.
-- **Supabase is the entire backend.** Do not introduce a separate Node.js/Express backend. All server logic runs in Supabase Edge Functions (Deno runtime).
+- **Supabase is the entire backend.** Do not introduce a separate Node.js/Express backend. Privileged server logic runs either as a Postgres `SECURITY DEFINER` RPC function (the default choice, e.g. `complete_mission`, `purchase_wardrobe_item`) or, when the service-role client or Deno runtime is genuinely needed, a Supabase Edge Function (currently only `update-streak`). Next.js Server Actions (`"use server"`) are the client-facing entry point that calls into these.
 - **PostgreSQL via Supabase** is the only database. Do not introduce additional databases or ORMs.
 - **Supabase Auth** handles all authentication. Do not introduce third-party auth providers (NextAuth, Clerk, etc.) without permission.
-- **OpenAI API** is called exclusively from Supabase Edge Functions. It is never called from the browser or from Next.js API routes.
+- **OpenRouter API** (not OpenAI) powers AI image generation (`google/gemini-2.5-flash-image`, for admin district/location art). It is called exclusively from Next.js Server Actions in `src/features/admin/` (`openRouterImage.ts` and its callers), gated by `requireAdmin`. It is never called from the browser.
 - **Vercel** hosts the Next.js frontend. **Supabase Cloud** hosts all backend services.
 - **Tailwind CSS** is the only styling solution. No CSS-in-JS, no Styled Components, no Sass.
-- **Three environments must exist:** Development, Staging, Production. Never test against Production.
-- **CI/CD via GitHub Actions** runs lint → type-check → unit tests → build check on every PR.
-- **Sentry** is used for error monitoring. **Vercel Analytics** and **Supabase Logs** for observability.
+- **Storybook** documents shared UI primitives and select feature components (`.stories.tsx`/`.mdx` files); it is a dev-time tool, not part of the CI pipeline.
+- **As-built:** there is a single environment in practice — the app develops directly against the remote Supabase project (see project memory on verifying authed pages / applying migrations remotely). CI pushes migrations straight to that production database on every merge to `main` (see `.github/workflows/ci.yml`, `migrate` job) — there is no separate staging gate. Treat every migration merged to `main` as immediately live.
+- **CI/CD via GitHub Actions** runs lint → type-check → unit tests (Vitest) → build check on every push/PR, then auto-applies pending migrations to production on `main`.
 - All secrets live in **Vercel Environment Variables** and **Supabase Secrets** only.
 
 ---

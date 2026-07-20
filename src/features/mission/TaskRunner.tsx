@@ -5,16 +5,26 @@ import type { Json } from "@/types/database";
 
 import BubblePopTask from "./BubblePopTask";
 import CategorySortTask from "./CategorySortTask";
+import CompareSizeTask from "./CompareSizeTask";
+import CountingGameTask from "./CountingGameTask";
 import CrosswordTask from "./CrosswordTask";
+import DialogueChoiceTask from "./DialogueChoiceTask";
 import EmojiDecodeTask from "./EmojiDecodeTask";
 import FillBlankTask from "./FillBlankTask";
 import FlashcardsTask from "./FlashcardsTask";
 import HangmanTask from "./HangmanTask";
+import LetterFillTask from "./LetterFillTask";
+import MathChallengeTask from "./MathChallengeTask";
 import MatchingTask from "./MatchingTask";
 import MemoryCardsTask from "./MemoryCardsTask";
+import NumberPatternTask from "./NumberPatternTask";
 import OddOneOutTask from "./OddOneOutTask";
+import PictureRevealTask from "./PictureRevealTask";
 import QuizTask from "./QuizTask";
+import ReactionTapTask from "./ReactionTapTask";
+import RhymeMatchTask from "./RhymeMatchTask";
 import SentenceBuilderTask from "./SentenceBuilderTask";
+import SimonSequenceTask from "./SimonSequenceTask";
 import SnakeGameTask from "./SnakeGameTask";
 import SpellingBeeTask from "./SpellingBeeTask";
 import StorySequencingTask from "./StorySequencingTask";
@@ -25,16 +35,26 @@ import WordSearchTask from "./WordSearchTask";
 import {
   parseBubblePopContent,
   parseCategorySortContent,
+  parseCompareSizeContent,
+  parseCountingGameContent,
   parseCrosswordContent,
+  parseDialogueChoiceContent,
   parseEmojiDecodeContent,
   parseFillBlankContent,
   parseFlashcardsContent,
   parseHangmanContent,
+  parseLetterFillContent,
+  parseMathChallengeContent,
   parseMatchingContent,
   parseMemoryCardsContent,
+  parseNumberPatternContent,
   parseOddOneOutContent,
+  parsePictureRevealContent,
   parseQuizContent,
+  parseReactionTapContent,
+  parseRhymeMatchContent,
   parseSentenceBuilderContent,
+  parseSimonSequenceContent,
   parseSnakeGameContent,
   parseSpellingBeeContent,
   parseStorySequencingContent,
@@ -153,6 +173,46 @@ function renderTaskByType(
     case "story_sequencing": {
       const content = parseStorySequencingContent(rawContent);
       return content ? <StorySequencingTask content={content} {...props} /> : null;
+    }
+    case "counting_game": {
+      const content = parseCountingGameContent(rawContent);
+      return content ? <CountingGameTask content={content} {...props} /> : null;
+    }
+    case "math_challenge": {
+      const content = parseMathChallengeContent(rawContent);
+      return content ? <MathChallengeTask content={content} {...props} /> : null;
+    }
+    case "simon_sequence": {
+      const content = parseSimonSequenceContent(rawContent);
+      return content ? <SimonSequenceTask content={content} {...props} /> : null;
+    }
+    case "reaction_tap": {
+      const content = parseReactionTapContent(rawContent);
+      return content ? <ReactionTapTask content={content} {...props} /> : null;
+    }
+    case "picture_reveal": {
+      const content = parsePictureRevealContent(rawContent);
+      return content ? <PictureRevealTask content={content} {...props} /> : null;
+    }
+    case "rhyme_match": {
+      const content = parseRhymeMatchContent(rawContent);
+      return content ? <RhymeMatchTask content={content} {...props} /> : null;
+    }
+    case "number_pattern": {
+      const content = parseNumberPatternContent(rawContent);
+      return content ? <NumberPatternTask content={content} {...props} /> : null;
+    }
+    case "compare_size": {
+      const content = parseCompareSizeContent(rawContent);
+      return content ? <CompareSizeTask content={content} {...props} /> : null;
+    }
+    case "letter_fill": {
+      const content = parseLetterFillContent(rawContent);
+      return content ? <LetterFillTask content={content} {...props} /> : null;
+    }
+    case "dialogue_choice": {
+      const content = parseDialogueChoiceContent(rawContent);
+      return content ? <DialogueChoiceTask content={content} {...props} /> : null;
     }
     default:
       return null;

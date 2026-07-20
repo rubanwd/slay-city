@@ -712,6 +712,16 @@ export type Database = {
         | "true_false"
         | "flashcards"
         | "story_sequencing"
+        | "counting_game"
+        | "math_challenge"
+        | "simon_sequence"
+        | "reaction_tap"
+        | "picture_reveal"
+        | "rhyme_match"
+        | "number_pattern"
+        | "compare_size"
+        | "letter_fill"
+        | "dialogue_choice"
       user_role: "child" | "parent" | "admin"
     }
     CompositeTypes: {
@@ -865,6 +875,16 @@ export const Constants = {
         "true_false",
         "flashcards",
         "story_sequencing",
+        "counting_game",
+        "math_challenge",
+        "simon_sequence",
+        "reaction_tap",
+        "picture_reveal",
+        "rhyme_match",
+        "number_pattern",
+        "compare_size",
+        "letter_fill",
+        "dialogue_choice",
       ],
       user_role: ["child", "parent", "admin"],
     },
