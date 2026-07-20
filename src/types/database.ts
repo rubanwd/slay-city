@@ -7,48 +7,13 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
-      admin_emails: {
-        Row: {
-          created_at: string
-          email: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-        }
-        Relationships: []
-      }
       achievements: {
         Row: {
           condition_type: string
@@ -82,6 +47,21 @@ export type Database = {
           is_published?: boolean
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_emails: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
         }
         Relationships: []
       }
@@ -378,6 +358,71 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_group_members: {
+        Row: {
+          child_id: string
+          created_at: string
+          group_id: string
+          id: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          group_id: string
+          id?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_group_members_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_groups: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_groups_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -658,27 +703,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_admin: { Args: never; Returns: boolean }
       complete_mission: {
         Args: { p_mission_id: string }
         Returns: {
           already_completed: boolean
-          xp_earned: number
           coins_earned: number
+          xp_earned: number
         }[]
       }
-      claim_admin: { Args: never; Returns: boolean }
+      equip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       is_linked_child: { Args: { p_child_id: string }; Returns: boolean }
       link_child_by_email: {
         Args: { p_child_email: string }
         Returns: {
-          linked: boolean
           child_id: string
+          linked: boolean
           reason: string
         }[]
       }
-      reset_my_progress: { Args: never; Returns: undefined }
-      reset_location_progress: { Args: { p_location_id: string }; Returns: undefined }
+      promote_teacher: {
+        Args: { p_identifier: string }
+        Returns: {
+          profile_id: string
+          reason: string
+          success: boolean
+          username: string
+        }[]
+      }
       purchase_wardrobe_item: {
         Args: { p_item_id: string }
         Returns: {
@@ -686,7 +739,13 @@ export type Database = {
           item_id: string
         }[]
       }
-      equip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
+      reset_location_progress: {
+        Args: { p_location_id: string }
+        Returns: undefined
+      }
+      reset_my_progress: { Args: never; Returns: undefined }
+      revoke_teacher: { Args: { p_profile_id: string }; Returns: boolean }
+      teaches_child: { Args: { p_child_id: string }; Returns: boolean }
       unequip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
     }
     Enums: {
@@ -732,7 +791,7 @@ export type Database = {
         | "size_order"
         | "spot_the_difference"
         | "clock_reading"
-      user_role: "child" | "parent" | "admin"
+      user_role: "child" | "parent" | "admin" | "teacher"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -858,9 +917,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       ai_content_draft_status: ["pending", "approved", "rejected"],
@@ -906,8 +962,7 @@ export const Constants = {
         "spot_the_difference",
         "clock_reading",
       ],
-      user_role: ["child", "parent", "admin"],
+      user_role: ["child", "parent", "admin", "teacher"],
     },
   },
 } as const
-

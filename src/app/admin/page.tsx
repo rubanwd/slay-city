@@ -52,6 +52,13 @@ export default async function AdminPage() {
       description: "Add or remove admin access by email.",
       accent: "text-purple",
     },
+    {
+      href: "/admin/teachers",
+      title: "Manage Teachers",
+      count: null,
+      description: "Add teacher accounts and assign student groups.",
+      accent: "text-purple",
+    },
   ];
 
   return (

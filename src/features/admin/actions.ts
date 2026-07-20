@@ -459,6 +459,132 @@ export async function removeAdminEmail(formData: FormData): Promise<void> {
   if (!error) revalidatePath("/admin/admins");
 }
 
+/* ── Teachers & groups ─────────────────────────────────────────────────────── */
+
+/**
+ * Promotes an existing account (looked up by username or email) to the
+ * `teacher` role via the `promote_teacher` RPC. Never creates a new account —
+ * this project has no service-role key configured to do that safely.
+ */
+export async function promoteTeacher(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const identifier = String(formData.get("identifier") ?? "").trim();
+  if (!identifier) return { error: "Enter an email or username." };
+
+  const { data, error } = await supabase.rpc("promote_teacher", { p_identifier: identifier });
+  if (error) return { error: error.message };
+
+  const result = data?.[0];
+  if (!result?.success) {
+    switch (result?.reason) {
+      case "user_not_found":
+        return { error: "No account found with that email or username." };
+      case "already_admin":
+        return { error: "That account is already an admin." };
+      case "already_teacher":
+        return { error: "That account is already a teacher." };
+      default:
+        return { error: "Couldn't add that teacher." };
+    }
+  }
+
+  revalidatePath("/admin/teachers");
+  return { success: `${result.username} is now a teacher.` };
+}
+
+/** Revokes a teacher's role (back to `parent`) and deletes their groups,
+ * via the `revoke_teacher` RPC. */
+export async function revokeTeacher(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const profileId = String(formData.get("profile_id") ?? "").trim();
+  if (!profileId) return;
+
+  await supabase.rpc("revoke_teacher", { p_profile_id: profileId });
+  revalidatePath("/admin/teachers");
+}
+
+/** Creates a new group under a teacher. */
+export async function createTeacherGroup(
+  _prevState: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return { error: admin.error };
+
+  const teacherId = String(formData.get("teacher_id") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim();
+  if (!teacherId || !name) return { error: "Enter a group name." };
+
+  const { error } = await supabase.from("teacher_groups").insert({ teacher_id: teacherId, name });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/teachers/${teacherId}`);
+  return { success: `Group "${name}" created.` };
+}
+
+/** Deletes a group; its memberships go with it (cascade). */
+export async function deleteTeacherGroup(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const groupId = String(formData.get("group_id") ?? "").trim();
+  const teacherId = String(formData.get("teacher_id") ?? "").trim();
+  if (!groupId) return;
+
+  const { error } = await supabase.from("teacher_groups").delete().eq("id", groupId);
+  if (!error && teacherId) revalidatePath(`/admin/teachers/${teacherId}`);
+}
+
+/** Adds an existing `child` account to one of a teacher's groups. */
+export async function addGroupMember(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const groupId = String(formData.get("group_id") ?? "").trim();
+  const childId = String(formData.get("child_id") ?? "").trim();
+  const teacherId = String(formData.get("teacher_id") ?? "").trim();
+  if (!groupId || !childId) return;
+
+  const { error } = await supabase
+    .from("teacher_group_members")
+    .insert({ group_id: groupId, child_id: childId });
+  // 23505 = unique_violation — already a member, treat as success.
+  if ((!error || error.code === "23505") && teacherId) {
+    revalidatePath(`/admin/teachers/${teacherId}`);
+  }
+}
+
+/** Removes a child from one of a teacher's groups. */
+export async function removeGroupMember(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const admin = await requireAdmin(supabase);
+  if (!admin.ok) return;
+
+  const groupId = String(formData.get("group_id") ?? "").trim();
+  const childId = String(formData.get("child_id") ?? "").trim();
+  const teacherId = String(formData.get("teacher_id") ?? "").trim();
+  if (!groupId || !childId) return;
+
+  const { error } = await supabase
+    .from("teacher_group_members")
+    .delete()
+    .eq("group_id", groupId)
+    .eq("child_id", childId);
+  if (!error && teacherId) revalidatePath(`/admin/teachers/${teacherId}`);
+}
+
 /* ── Districts & locations ─────────────────────────────────────────────────── */
 
 export async function createDistrict(

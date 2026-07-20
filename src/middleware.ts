@@ -79,6 +79,7 @@ export async function middleware(request: NextRequest) {
     const onOnboarding = pathname.startsWith("/onboarding");
     const inParentArea = pathname === "/parent" || pathname.startsWith("/parent/");
     const inAdminArea = pathname === "/admin" || pathname.startsWith("/admin/");
+    const inTeacherArea = pathname === "/teacher" || pathname.startsWith("/teacher/");
     const onMap = pathname === "/map";
     const { data: profile } = await supabase
       .from("profiles")
@@ -123,9 +124,15 @@ export async function middleware(request: NextRequest) {
         url.pathname = "/parent";
         return NextResponse.redirect(url);
       }
-      // Children (and any non-parent, non-admin role) can't view the parent
-      // dashboard. Admins are intentionally unrestricted.
-      if (profile.role === "child" && inParentArea) {
+      // Teachers may only use their own dashboard, same rule as parents.
+      if (profile.role === "teacher" && !inTeacherArea) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/teacher";
+        return NextResponse.redirect(url);
+      }
+      // Children (and any non-parent/teacher, non-admin role) can't view the
+      // parent or teacher dashboards. Admins are intentionally unrestricted.
+      if (profile.role === "child" && (inParentArea || inTeacherArea)) {
         const url = request.nextUrl.clone();
         url.pathname = "/map";
         return NextResponse.redirect(url);

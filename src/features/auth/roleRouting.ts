@@ -25,6 +25,7 @@ type ProvisionRole = "parent" | "admin";
 export function roleHome(role: string | null | undefined): string {
   if (role === "admin") return "/admin";
   if (role === "parent") return "/parent";
+  if (role === "teacher") return "/teacher";
   return "/map";
 }
 
