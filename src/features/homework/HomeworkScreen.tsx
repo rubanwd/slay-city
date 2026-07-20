@@ -5,12 +5,15 @@ export interface HomeworkTopicSummary {
   id: string;
   title: string;
   description: string | null;
-  groupName: string;
+  /** Who assigned this topic — shown per card since a child can be in more than one group. */
+  teacherUsername: string;
   totalTasks: number;
   completedTasks: number;
 }
 
 export interface HomeworkScreenProps {
+  /** Names of every group the child belongs to — almost always just one, shown once up top. */
+  groupNames: string[];
   topics: HomeworkTopicSummary[];
 }
 
@@ -22,7 +25,7 @@ function TopicCard({ topic }: { topic: HomeworkTopicSummary }) {
       className="block rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4 transition-colors hover:border-white/20"
     >
       <p className="text-[11px] font-bold uppercase tracking-wide text-white/40">
-        {topic.groupName}
+        By {topic.teacherUsername}
       </p>
       <p className="mt-1 truncate text-body-strong text-white">{topic.title}</p>
       {topic.description && (
@@ -46,12 +49,17 @@ function TopicCard({ topic }: { topic: HomeworkTopicSummary }) {
 }
 
 /** Homework list: every lesson topic across every group the child belongs to. */
-export default function HomeworkScreen({ topics }: HomeworkScreenProps) {
+export default function HomeworkScreen({ groupNames, topics }: HomeworkScreenProps) {
   return (
     <AppContainer>
       <Section pt="lg" pb="sm">
         <h1 className="text-h2 font-black text-white">Homework</h1>
-        <p className="text-small text-white/50">Practice what your teacher assigned.</p>
+        {groupNames.length > 0 && (
+          <p className="mt-1 text-xs font-bold uppercase tracking-wide text-cyan">
+            {groupNames.join(" · ")}
+          </p>
+        )}
+        <p className="mt-0.5 text-small text-white/50">Practice what your teacher assigned.</p>
       </Section>
 
       <Section py="sm" className={BOTTOM_NAV_CLEARANCE}>
