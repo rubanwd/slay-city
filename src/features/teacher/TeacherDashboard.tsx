@@ -5,6 +5,9 @@ import type { TeacherGroup } from "./queries";
 
 export interface TeacherDashboardProps {
   groups: TeacherGroup[];
+  /** Display name chosen at signup; null only for profiles predating onboarding. */
+  username: string | null;
+  email: string | null;
 }
 
 function StatChip({ label, value }: { label: string; value: string | number }) {
@@ -22,11 +25,12 @@ function StatChip({ label, value }: { label: string; value: string | number }) {
  * class-sized group needs to stay scannable, unlike the single-child parent
  * dashboard this mirrors (`ParentDashboard.tsx`).
  */
-export default function TeacherDashboard({ groups }: TeacherDashboardProps) {
+export default function TeacherDashboard({ groups, username, email }: TeacherDashboardProps) {
   const header = (
     <header className="flex items-center justify-between gap-3 py-5">
       <div className="min-w-0">
         <h1 className="text-h2 font-black text-white">Teacher Dashboard</h1>
+        <p className="truncate text-small text-white">{username ?? email ?? "Teacher"}</p>
         <p className="truncate text-small text-white/50">
           {groups.length === 0
             ? "No groups yet"
