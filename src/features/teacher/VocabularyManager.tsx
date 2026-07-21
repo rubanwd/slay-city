@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import { SlayButton } from "@/components/ui";
 import { INPUT_CLASS, LABEL_CLASS } from "@/features/admin/formStyles";
 import { useAdminToast } from "@/features/admin/AdminToast";
 import { uploadContentImage } from "@/features/admin/uploadContentImage";
-import { clampWordCount, defaultTestTaskCount, MAX_VOCAB_WORDS } from "@/features/homework/vocabulary";
+import {
+  buildVocabTest,
+  clampWordCount,
+  defaultTestTaskCount,
+  describeVocabTask,
+  MAX_VOCAB_WORDS,
+} from "@/features/homework/vocabulary";
 
 import VocabWordEditor, { type DraftWord } from "./VocabWordEditor";
 import {
@@ -110,6 +116,7 @@ export default function VocabularyManager({
     initialTaskCount > 0 ? initialTaskCount : defaultTestTaskCount(initialWords.length)
   );
   const [wordCount, setWordCount] = useState<number>(initialWords.length || 6);
+  const [testSeed, setTestSeed] = useState(0);
   const [extra, setExtra] = useState("");
   const [busyImages, setBusyImages] = useState<Set<string>>(new Set());
   const [imageJob, setImageJob] = useState<ImageJob | null>(null);
@@ -118,6 +125,16 @@ export default function VocabularyManager({
   const [publishing, startPublish] = useTransition();
 
   const hasPublished = initialWords.length > 0;
+
+  // Live preview of the test that Publish will build: derived from the current
+  // words, the requested task count and the chosen variant, using the exact
+  // same builder the server runs — so what the teacher sees is what publishes.
+  const previewTasks = useMemo(() => {
+    const source = words
+      .filter((w) => w.word.trim() && w.translation.trim())
+      .map((w) => ({ word: w.word, translation: w.translation, imageUrl: w.imageUrl }));
+    return buildVocabTest(source, taskCount, testSeed);
+  }, [words, taskCount, testSeed]);
 
   function patchWord(key: string, patch: Partial<DraftWord>) {
     setWords((prev) => prev.map((w) => (w.key === key ? { ...w, ...patch } : w)));
@@ -212,6 +229,7 @@ export default function VocabularyManager({
       }));
       setWords(drafted);
       setTaskCount(defaultTestTaskCount(drafted.length));
+      setTestSeed(0);
       toast.success(`Drafted ${drafted.length} words. Generating images…`);
       // Fire-and-forget: images stream in while the teacher reviews the words.
       void runBackgroundImages(
@@ -284,6 +302,7 @@ export default function VocabularyManager({
               imageUrl: w.imageUrl,
             })),
           taskCount,
+          testSeed,
         });
         if (!result.ok) {
           toast.error(result.error);
@@ -395,6 +414,50 @@ export default function VocabularyManager({
       >
         + Add word manually
       </SlayButton>
+
+      {/* Test preview — the deterministic test Publish will build from the words
+          above. Regenerating reshuffles it into a different, still-valid set. */}
+      {words.length > 0 && (
+        <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-black/30 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className={LABEL_CLASS}>
+              Test preview ({previewTasks.length} task{previewTasks.length === 1 ? "" : "s"})
+            </span>
+            <button
+              type="button"
+              onClick={() => setTestSeed((s) => s + 1)}
+              disabled={busy || previewTasks.length === 0}
+              className="rounded-md bg-purple/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white disabled:opacity-40"
+            >
+              Regenerate test
+            </button>
+          </div>
+          {previewTasks.length === 0 ? (
+            <p className="text-[11px] text-white/40">
+              {taskCount === 0
+                ? "Test tasks set to 0 — no test will be built."
+                : "Add a word with a translation to build the test."}
+            </p>
+          ) : (
+            <ol className="flex flex-col gap-1.5">
+              {previewTasks.map((task, i) => {
+                const { label, detail } = describeVocabTask(task.taskType, task.content);
+                return (
+                  <li key={i} className="flex items-start gap-2 text-small text-white/80">
+                    <span className="mt-0.5 shrink-0 rounded bg-purple/25 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                      {label}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-white/60">{detail}</span>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+          <p className="text-[11px] text-white/30">
+            Publishing replaces this topic&apos;s current test with the one above.
+          </p>
+        </div>
+      )}
 
       {/* Publish / clear */}
       <div className="flex gap-2">

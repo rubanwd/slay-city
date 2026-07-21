@@ -4,6 +4,7 @@ import {
   buildVocabTest,
   clampWordCount,
   defaultTestTaskCount,
+  describeVocabTask,
   MAX_VOCAB_WORDS,
   normalizeWordKey,
   parseGeneratedWords,
@@ -95,6 +96,42 @@ describe("buildVocabTest", () => {
 
   it("is deterministic for the same input", () => {
     expect(buildVocabTest(WORDS, 5)).toEqual(buildVocabTest(WORDS, 5));
+  });
+
+  it("keeps the canonical output for seed 0", () => {
+    expect(buildVocabTest(WORDS, 5, 0)).toEqual(buildVocabTest(WORDS, 5));
+  });
+
+  it("varies with the seed but stays valid and the same length", () => {
+    const base = buildVocabTest(WORDS, 5, 0);
+    const variant = buildVocabTest(WORDS, 5, 1);
+    expect(variant).toHaveLength(base.length);
+    expect(variant).not.toEqual(base);
+    for (const task of variant) {
+      expect(VOCAB_TEST_TASK_TYPES).toContain(task.taskType);
+    }
+    expect(variant.map((t) => t.orderIndex)).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  it("is deterministic for the same seed", () => {
+    expect(buildVocabTest(WORDS, 4, 3)).toEqual(buildVocabTest(WORDS, 4, 3));
+  });
+});
+
+describe("describeVocabTask", () => {
+  it("labels each built task and gives a non-empty detail", () => {
+    for (const task of buildVocabTest(WORDS, 5)) {
+      const { label, detail } = describeVocabTask(task.taskType, task.content);
+      expect(label.length).toBeGreaterThan(0);
+      expect(detail.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("reads the quiz question into the detail", () => {
+    const [quiz] = buildVocabTest(WORDS, 1);
+    const { label, detail } = describeVocabTask(quiz.taskType, quiz.content);
+    expect(label).toBe("Quiz");
+    expect(detail).toContain("apple");
   });
 });
 

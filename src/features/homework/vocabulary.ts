@@ -219,12 +219,18 @@ function buildFlashcards(words: TestSourceWord[], index: number): { taskType: Mi
  * distractors (quiz, fill_blank) are only used when there are at least two
  * words; with a single word the test falls back to scramble/flashcards.
  *
+ * `seed` shifts which task type and word each slot uses (and the internal
+ * shuffles), so "regenerate" can produce a different — but equally valid —
+ * test from the same words. `seed = 0` (the default) keeps the canonical
+ * output, so persisted tests and the builder's tests stay stable.
+ *
  * Returns `{ taskType, content, orderIndex }[]` ready to insert into
  * `homework_vocab_tasks`.
  */
 export function buildVocabTest(
   words: TestSourceWord[],
-  count: number
+  count: number,
+  seed = 0
 ): { taskType: MissionTaskType; content: Json; orderIndex: number }[] {
   const usable = words.filter((w) => w.word.trim() && w.translation.trim());
   if (usable.length === 0 || count <= 0) return [];
@@ -235,14 +241,40 @@ export function buildVocabTest(
       ? [buildQuiz, buildMatching, buildWordScramble, buildFillBlank, buildFlashcards]
       : [buildWordScramble, buildFlashcards];
 
+  const offset = ((Math.trunc(seed) % 1000) + 1000) % 1000;
   const tasks: { taskType: MissionTaskType; content: Json; orderIndex: number }[] = [];
   for (let i = 0; i < count; i++) {
-    const builder = builders[i % builders.length];
-    const wordIndex = i % usable.length;
+    const builder = builders[(i + offset) % builders.length];
+    // The builder uses its index arg as both the word picked and the shuffle
+    // seed, so offsetting it varies the whole task with the seed.
+    const wordIndex = (i + offset) % usable.length;
     const { taskType, content } = builder(usable, wordIndex);
     tasks.push({ taskType, content, orderIndex: i });
   }
   return tasks;
+}
+
+/** Human-facing label + one-line detail for a built test task, for previews. */
+export function describeVocabTask(taskType: MissionTaskType, content: Json): { label: string; detail: string } {
+  const c = isRecord(content) ? content : {};
+  switch (taskType) {
+    case "quiz":
+      return { label: "Quiz", detail: asTrimmedString(c.question) ?? "Pick the right meaning" };
+    case "matching": {
+      const pairs = Array.isArray(c.pairs) ? c.pairs.length : 0;
+      return { label: "Matching", detail: `Match ${pairs} word${pairs === 1 ? "" : "s"} to meanings` };
+    }
+    case "word_scramble":
+      return { label: "Word scramble", detail: `Unscramble "${asTrimmedString(c.word) ?? "the word"}"` };
+    case "fill_blank":
+      return { label: "Fill the blank", detail: asTrimmedString(c.sentence) ?? "Complete the sentence" };
+    case "flashcards": {
+      const cards = Array.isArray(c.cards) ? c.cards.length : 0;
+      return { label: "Flashcards", detail: `Review ${cards} card${cards === 1 ? "" : "s"}` };
+    }
+    default:
+      return { label: taskType, detail: "" };
+  }
 }
 
 /* ── AI response parsing ───────────────────────────────────────────────────── */
