@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import type { Database } from "@/types/database";
 import { roleHome } from "@/features/auth/roleRouting";
+import { VIEW_AS_TEACHER_COOKIE } from "@/features/teacher/viewAsCookie";
 
 /** Routes reachable without a session. Everything else requires auth. */
 function isPublicPath(pathname: string): boolean {
@@ -81,6 +82,10 @@ export async function middleware(request: NextRequest) {
     const inAdminArea = pathname === "/admin" || pathname.startsWith("/admin/");
     const inTeacherArea = pathname === "/teacher" || pathname.startsWith("/teacher/");
     const onMap = pathname === "/map";
+    // An admin who is "viewing as" a teacher (cookie set) is allowed into the
+    // teacher console; the server guard verifies the cookie points at a real
+    // teacher before rendering anything.
+    const viewingAsTeacher = Boolean(request.cookies.get(VIEW_AS_TEACHER_COOKIE)?.value);
     const { data: profile } = await supabase
       .from("profiles")
       .select("id, role")
@@ -112,7 +117,7 @@ export async function middleware(request: NextRequest) {
       // position, so admins need it to check their own content. Without it the
       // only way to look was to demote yourself to a player, which silently
       // breaks every admin write.
-      if (profile.role === "admin" && !inAdminArea && !onMap) {
+      if (profile.role === "admin" && !inAdminArea && !onMap && !(inTeacherArea && viewingAsTeacher)) {
         const url = request.nextUrl.clone();
         url.pathname = "/admin";
         return NextResponse.redirect(url);

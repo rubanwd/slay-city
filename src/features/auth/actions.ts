@@ -1,10 +1,11 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { VIEW_AS_TEACHER_COOKIE } from "@/features/teacher/viewAsCookie";
 
 import { resolveHomePath } from "./roleRouting";
 
@@ -130,6 +131,9 @@ export async function googleFormAction(): Promise<void> {
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
+  // Drop any admin "View as Teacher" impersonation so it can't leak into the
+  // next session on this browser.
+  (await cookies()).delete(VIEW_AS_TEACHER_COOKIE);
   revalidatePath("/", "layout");
   redirect("/auth/login");
 }

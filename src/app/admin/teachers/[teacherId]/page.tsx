@@ -6,6 +6,7 @@ import AdminHeader from "@/features/admin/AdminHeader";
 import { addGroupMember, deleteTeacherGroup, removeGroupMember } from "@/features/admin/actions";
 import { INPUT_CLASS } from "@/features/admin/formStyles";
 import { requireAdminPage } from "@/features/admin/guard";
+import { enterViewAsTeacher } from "@/features/teacher/viewAsActions";
 import { SlayButton } from "@/components/ui";
 
 interface TeacherGroupsPageProps {
@@ -74,6 +75,16 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
         <AdminHeader title={teacher.username} backHref="/admin/teachers" />
+
+        <form action={enterViewAsTeacher} className="mb-4">
+          <input type="hidden" name="teacher_id" value={teacherId} />
+          <button
+            type="submit"
+            className="w-full rounded-full border border-cyan/50 px-4 py-2.5 text-small font-bold uppercase tracking-wide text-cyan transition-colors hover:bg-cyan/10"
+          >
+            View as Teacher
+          </button>
+        </form>
 
         <div className="mb-6">
           <AdminCreateModal triggerLabel="Add Group" title="Create Group">

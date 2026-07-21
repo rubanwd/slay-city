@@ -13,13 +13,13 @@ interface GroupHomeworkPageProps {
 /** Manage a group's lesson topics (add, edit, delete). Each topic links to its own tasks page. */
 export default async function GroupHomeworkPage({ params }: GroupHomeworkPageProps) {
   const { groupId } = await params;
-  const { supabase, user } = await requireTeacherPage();
+  const { supabase, teacherId } = await requireTeacherPage();
 
   const { data: group } = await supabase
     .from("teacher_groups")
     .select("id, name")
     .eq("id", groupId)
-    .eq("teacher_id", user.id)
+    .eq("teacher_id", teacherId)
     .maybeSingle();
 
   if (!group) {

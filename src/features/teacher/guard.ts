@@ -3,15 +3,27 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { roleHome } from "@/features/auth/roleRouting";
 
+import { resolveTeacherContext, type TeacherContext } from "./viewAs";
+
+export type RequireTeacherPageResult = { supabase: Awaited<ReturnType<typeof createClient>> } & TeacherContext;
+
 /**
- * Server-side guard for the teacher dashboard. Middleware already keeps
- * non-teachers out of `/teacher`, but enforcing it here too means the page is
- * safe even if the matcher ever changes. Returns the authenticated supabase
- * client for reuse.
+ * Server-side guard for the teacher console. Resolves the effective teacher
+ * (own id for a teacher, or the impersonated teacher for an admin who is
+ * "viewing as" one) and returns it alongside the authenticated supabase client.
+ * Anyone who is neither is redirected to their own home. Middleware enforces the
+ * same rule, but keeping it here means the pages are safe even if the matcher
+ * ever changes.
  */
-export async function requireTeacherPage() {
+export async function requireTeacherPage(): Promise<RequireTeacherPageResult> {
   const supabase = await createClient();
 
+  const context = await resolveTeacherContext(supabase);
+  if (context) {
+    return { supabase, ...context };
+  }
+
+  // Not a teacher and not an admin impersonating one — send them home.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,9 +35,5 @@ export async function requireTeacherPage() {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profile?.role !== "teacher") {
-    redirect(roleHome(profile?.role));
-  }
-
-  return { supabase, user };
+  redirect(roleHome(profile?.role));
 }
