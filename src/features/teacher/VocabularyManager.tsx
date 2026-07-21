@@ -35,6 +35,27 @@ export interface VocabularyManagerProps {
 let keySeq = 0;
 const nextKey = () => `w${keySeq++}`;
 
+/**
+ * How many word images to generate at once in the background. Each image call
+ * is slow (seconds), so a small pool keeps the whole set moving without firing
+ * a dozen requests at the model at once.
+ */
+const IMAGE_CONCURRENCY = 3;
+
+/** A word queued for background image generation. */
+interface ImageTarget {
+  key: string;
+  word: string;
+  imagePrompt: string | null;
+}
+
+/** Progress of the background image-generation run, shown in the bottom loader. */
+interface ImageJob {
+  total: number;
+  done: number;
+  failed: number;
+}
+
 function toDraft(w: VocabularyManagerInitialWord): DraftWord {
   return {
     key: nextKey(),
@@ -91,6 +112,7 @@ export default function VocabularyManager({
   const [wordCount, setWordCount] = useState<number>(initialWords.length || 6);
   const [extra, setExtra] = useState("");
   const [busyImages, setBusyImages] = useState<Set<string>>(new Set());
+  const [imageJob, setImageJob] = useState<ImageJob | null>(null);
 
   const [generating, startGenerate] = useTransition();
   const [publishing, startPublish] = useTransition();
@@ -108,6 +130,62 @@ export default function VocabularyManager({
       else next.delete(key);
       return next;
     });
+  }
+
+  /**
+   * Generates flashcard images for a batch of words in the background with a
+   * small concurrency pool. Non-blocking: the caller does not await it, so the
+   * teacher can keep editing while images stream in. Each finished image is
+   * patched onto its word as soon as it arrives; progress drives the bottom
+   * loader via {@link imageJob}. Words that are already busy or already have an
+   * image are skipped, so it's safe to run after a manual regeneration too.
+   */
+  async function runBackgroundImages(targets: ImageTarget[]) {
+    const pending = targets.filter((t) => t.word.trim());
+    if (pending.length === 0) return;
+
+    // Seed progress from any run already in flight so overlapping batches
+    // (e.g. a regenerate mid-run) accumulate into one visible counter.
+    setImageJob((prev) => ({
+      total: (prev?.total ?? 0) + pending.length,
+      done: prev?.done ?? 0,
+      failed: prev?.failed ?? 0,
+    }));
+
+    let cursor = 0;
+    let batchFailed = 0;
+    async function worker() {
+      while (cursor < pending.length) {
+        const item = pending[cursor++];
+        setImageBusy(item.key, true);
+        const result = await generateWordImage({
+          topicId,
+          word: item.word,
+          imagePrompt: item.imagePrompt,
+        });
+        setImageBusy(item.key, false);
+        if (result.ok) patchWord(item.key, { imageDataUrl: result.dataUrl });
+        else batchFailed++;
+        setImageJob((prev) =>
+          prev
+            ? { total: prev.total, done: prev.done + 1, failed: prev.failed + (result.ok ? 0 : 1) }
+            : prev
+        );
+      }
+    }
+
+    await Promise.all(
+      Array.from({ length: Math.min(IMAGE_CONCURRENCY, pending.length) }, () => worker())
+    );
+
+    // Clear the loader once this batch's slice of the counter is exhausted.
+    setImageJob((prev) => (prev && prev.done >= prev.total ? null : prev));
+
+    if (batchFailed > 0) {
+      toast.error(
+        `${batchFailed} image${batchFailed === 1 ? "" : "s"} couldn't be generated. Use the AI button to retry.`
+      );
+    }
   }
 
   function handleGenerateDraft() {
@@ -134,7 +212,11 @@ export default function VocabularyManager({
       }));
       setWords(drafted);
       setTaskCount(defaultTestTaskCount(drafted.length));
-      toast.success(`Drafted ${drafted.length} words. Review, add images, then publish.`);
+      toast.success(`Drafted ${drafted.length} words. Generating images…`);
+      // Fire-and-forget: images stream in while the teacher reviews the words.
+      void runBackgroundImages(
+        drafted.map((w) => ({ key: w.key, word: w.word, imagePrompt: w.imagePrompt }))
+      );
     });
   }
 
@@ -332,6 +414,33 @@ export default function VocabularyManager({
       </div>
       {busyImages.size > 0 && (
         <p className="text-center text-[11px] text-white/40">Finish generating images before publishing…</p>
+      )}
+
+      {/* Background image-generation progress — floats at the bottom while the
+          pool works, so the teacher can scroll and edit words meanwhile. */}
+      {imageJob && imageJob.total > 0 && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex justify-center px-5"
+        >
+          <div className="pointer-events-auto flex w-full max-w-md items-center gap-3 rounded-xl border border-purple/50 bg-[#1a1a1a]/95 px-4 py-3 shadow-lg backdrop-blur">
+            <span
+              aria-hidden="true"
+              className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/20 border-t-purple"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="text-small font-semibold text-white">
+                Generating word images… {Math.min(imageJob.done + 1, imageJob.total)}/{imageJob.total}
+              </p>
+              {imageJob.failed > 0 && (
+                <p className="text-[11px] text-neon-pink">
+                  {imageJob.failed} failed — use the AI button to retry
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );
