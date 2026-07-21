@@ -33,18 +33,20 @@ export default async function GroupHomeworkPage({ params }: GroupHomeworkPagePro
     .order("order_index");
 
   const topicRows = topics ?? [];
+  const topicIds = topicRows.map((t) => t.id);
 
-  const { data: taskCounts } = await supabase
-    .from("homework_tasks")
-    .select("topic_id")
-    .in(
-      "topic_id",
-      topicRows.map((t) => t.id)
-    );
+  const [wordCountsRes, grammarCountsRes] = await Promise.all([
+    supabase.from("homework_vocab_words").select("topic_id").in("topic_id", topicIds),
+    supabase.from("homework_grammar_points").select("topic_id").in("topic_id", topicIds),
+  ]);
 
-  const countByTopic = new Map<string, number>();
-  for (const row of taskCounts ?? []) {
-    countByTopic.set(row.topic_id, (countByTopic.get(row.topic_id) ?? 0) + 1);
+  const wordsByTopic = new Map<string, number>();
+  for (const row of wordCountsRes.data ?? []) {
+    wordsByTopic.set(row.topic_id, (wordsByTopic.get(row.topic_id) ?? 0) + 1);
+  }
+  const grammarByTopic = new Map<string, number>();
+  for (const row of grammarCountsRes.data ?? []) {
+    grammarByTopic.set(row.topic_id, (grammarByTopic.get(row.topic_id) ?? 0) + 1);
   }
 
   return (
@@ -64,7 +66,8 @@ export default async function GroupHomeworkPage({ params }: GroupHomeworkPagePro
                 key={topic.id}
                 groupId={groupId}
                 topic={topic}
-                taskCount={countByTopic.get(topic.id) ?? 0}
+                wordCount={wordsByTopic.get(topic.id) ?? 0}
+                grammarCount={grammarByTopic.get(topic.id) ?? 0}
               />
             ))}
           </ul>

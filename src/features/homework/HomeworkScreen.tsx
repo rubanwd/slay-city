@@ -7,8 +7,10 @@ export interface HomeworkTopicSummary {
   description: string | null;
   /** Who assigned this topic — shown per card since a child can be in more than one group. */
   teacherUsername: string;
-  totalTasks: number;
-  completedTasks: number;
+  /** How many learning modules (vocabulary, grammar) the topic has. */
+  totalModules: number;
+  /** How many of those modules the child has passed. */
+  passedModules: number;
 }
 
 export interface HomeworkScreenProps {
@@ -18,7 +20,8 @@ export interface HomeworkScreenProps {
 }
 
 function TopicCard({ topic }: { topic: HomeworkTopicSummary }) {
-  const done = topic.totalTasks > 0 && topic.completedTasks >= topic.totalTasks;
+  const done = topic.totalModules > 0 && topic.passedModules >= topic.totalModules;
+  const empty = topic.totalModules === 0;
   return (
     <NavLink
       href={`/homework/${topic.id}`}
@@ -38,11 +41,17 @@ function TopicCard({ topic }: { topic: HomeworkTopicSummary }) {
             done ? "text-lime-green" : "text-cyan",
           ].join(" ")}
         >
-          {done ? "Completed" : `${topic.completedTasks}/${topic.totalTasks} done`}
+          {empty
+            ? "Nothing to study yet"
+            : done
+              ? "Completed"
+              : `${topic.passedModules}/${topic.totalModules} passed`}
         </span>
-        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white">
-          {done ? "Practice Again" : topic.completedTasks > 0 ? "Continue" : "Start"}
-        </span>
+        {!empty && (
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white">
+            {done ? "Review" : topic.passedModules > 0 ? "Continue" : "Start"}
+          </span>
+        )}
       </div>
     </NavLink>
   );

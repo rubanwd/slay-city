@@ -1,15 +1,17 @@
 import { redirect } from "next/navigation";
 
-import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import CollapsibleSection from "@/features/teacher/CollapsibleSection";
-import HomeworkTaskForm from "@/features/teacher/HomeworkTaskForm";
-import HomeworkTaskItem from "@/features/teacher/HomeworkTaskItem";
+import GrammarCompletions, {
+  type GrammarCompletionRow,
+} from "@/features/teacher/GrammarCompletions";
+import GrammarManager from "@/features/teacher/GrammarManager";
 import HomeworkTopicItem from "@/features/teacher/HomeworkTopicItem";
 import TeacherHeader from "@/features/teacher/TeacherHeader";
 import VocabularyCompletions, {
   type VocabularyCompletionRow,
 } from "@/features/teacher/VocabularyCompletions";
 import VocabularyManager from "@/features/teacher/VocabularyManager";
+import type { GrammarDraftTask } from "@/features/homework/grammar";
 import { requireTeacherPage } from "@/features/teacher/guard";
 
 interface TopicTasksPageProps {
@@ -17,9 +19,9 @@ interface TopicTasksPageProps {
 }
 
 /**
- * Manage the tasks that make up one homework topic (add, edit, delete). Task
- * types and their content editors are identical to the admin mission-task
- * form — every published task type is offered here too.
+ * Manage one homework topic: its info, plus the two learning modules a topic
+ * can carry — Vocabulary and Grammar — each an AI-authored set of study cards
+ * and a test, with a roster of who has passed.
  */
 export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
   const { groupId, topicId } = await params;
@@ -47,18 +49,18 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
     redirect(`/teacher/groups/${groupId}`);
   }
 
-  const { data: tasks } = await supabase
-    .from("homework_tasks")
-    .select("id, task_type, order_index, content")
-    .eq("topic_id", topicId)
-    .order("order_index");
-
-  const rows = tasks ?? [];
-
-  // Vocabulary set for this topic: words, the size of its test, and who has
-  // passed. `teacher_group_members` (with member usernames) is the RLS-allowed
-  // path to child names; completions are cross-referenced against it.
-  const [vocabWordsRes, vocabTasksRes, membersRes, vocabCompletionsRes] = await Promise.all([
+  // Vocabulary + grammar sets for this topic, plus the group roster used to
+  // cross-reference completions. `teacher_group_members` (with member usernames)
+  // is the RLS-allowed path to child names.
+  const [
+    vocabWordsRes,
+    vocabTasksRes,
+    grammarPointsRes,
+    grammarTasksRes,
+    membersRes,
+    vocabCompletionsRes,
+    grammarCompletionsRes,
+  ] = await Promise.all([
     supabase
       .from("homework_vocab_words")
       .select("word, transcription, translation, image_url, order_index")
@@ -66,10 +68,21 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
       .order("order_index"),
     supabase.from("homework_vocab_tasks").select("id").eq("topic_id", topicId),
     supabase
+      .from("homework_grammar_points")
+      .select("title, explanation, example, order_index")
+      .eq("topic_id", topicId)
+      .order("order_index"),
+    supabase
+      .from("homework_grammar_tasks")
+      .select("task_type, content, order_index")
+      .eq("topic_id", topicId)
+      .order("order_index"),
+    supabase
       .from("teacher_group_members")
       .select("child_id, profiles(username)")
       .eq("group_id", groupId),
     supabase.from("homework_vocab_completions").select("child_id").eq("topic_id", topicId),
+    supabase.from("homework_grammar_completions").select("child_id").eq("topic_id", topicId),
   ]);
 
   const vocabWords = (vocabWordsRes.data ?? []).map((w) => ({
@@ -79,11 +92,31 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
     imageUrl: w.image_url,
   }));
 
-  const passedChildIds = new Set((vocabCompletionsRes.data ?? []).map((r) => r.child_id));
-  const completionRows: VocabularyCompletionRow[] = (membersRes.data ?? []).map((m) => ({
+  const grammarPoints = (grammarPointsRes.data ?? []).map((p) => ({
+    title: p.title,
+    explanation: p.explanation,
+    example: p.example,
+  }));
+
+  const grammarTasks: GrammarDraftTask[] = (grammarTasksRes.data ?? []).map((t) => ({
+    taskType: t.task_type,
+    content: t.content,
+  }));
+
+  const members = membersRes.data ?? [];
+
+  const vocabPassed = new Set((vocabCompletionsRes.data ?? []).map((r) => r.child_id));
+  const vocabRows: VocabularyCompletionRow[] = members.map((m) => ({
     childId: m.child_id,
     username: m.profiles?.username ?? "Unknown",
-    passed: passedChildIds.has(m.child_id),
+    passed: vocabPassed.has(m.child_id),
+  }));
+
+  const grammarPassed = new Set((grammarCompletionsRes.data ?? []).map((r) => r.child_id));
+  const grammarRows: GrammarCompletionRow[] = members.map((m) => ({
+    childId: m.child_id,
+    username: m.profiles?.username ?? "Unknown",
+    passed: grammarPassed.has(m.child_id),
   }));
 
   return (
@@ -99,31 +132,11 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
             <HomeworkTopicItem
               groupId={groupId}
               topic={topic}
-              taskCount={rows.length}
+              wordCount={vocabWords.length}
+              grammarCount={grammarPoints.length}
               linkToTasks={false}
             />
           </ul>
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title={`Tasks (${rows.length})`}
-          subtitle="Activities students complete for this topic, in order."
-        >
-          {rows.length === 0 ? (
-            <p className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
-              No tasks yet. Add the first one below.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {rows.map((task) => (
-                <HomeworkTaskItem key={task.id} topicId={topicId} groupId={groupId} task={task} />
-              ))}
-            </ul>
-          )}
-
-          <AdminCreateModal triggerLabel="Add Task" title="Add Homework Task">
-            <HomeworkTaskForm topicId={topicId} groupId={groupId} nextOrder={rows.length} />
-          </AdminCreateModal>
         </CollapsibleSection>
 
         <CollapsibleSection
@@ -137,7 +150,21 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
             initialWords={vocabWords}
             initialTaskCount={vocabTasksRes.data?.length ?? 0}
           />
-          <VocabularyCompletions rows={completionRows} />
+          <VocabularyCompletions rows={vocabRows} />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Grammar Learning"
+          subtitle="Grammar rules the group studies as cards, plus an AI-built test to check them."
+        >
+          <GrammarManager
+            topicId={topicId}
+            topicTitle={topic.title}
+            topicDescription={topic.description}
+            initialPoints={grammarPoints}
+            initialTasks={grammarTasks}
+          />
+          <GrammarCompletions rows={grammarRows} />
         </CollapsibleSection>
       </div>
     </main>

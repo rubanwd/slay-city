@@ -39,31 +39,38 @@ export default async function HomeworkPage() {
   const topics = topicRows ?? [];
   const topicIds = topics.map((t) => t.id);
 
-  const [tasksRes, completionsRes] = await Promise.all([
+  // A topic offers up to two learning modules (vocabulary, grammar); progress
+  // is how many of the present modules the child has passed.
+  const [vocabWordsRes, grammarPointsRes, vocabPassRes, grammarPassRes] = await Promise.all([
     topicIds.length > 0
-      ? supabase.from("homework_tasks").select("id, topic_id").in("topic_id", topicIds)
-      : Promise.resolve({ data: [] as { id: string; topic_id: string }[] }),
-    supabase.from("homework_task_completions").select("task_id").eq("child_id", user.id),
+      ? supabase.from("homework_vocab_words").select("topic_id").in("topic_id", topicIds)
+      : Promise.resolve({ data: [] as { topic_id: string }[] }),
+    topicIds.length > 0
+      ? supabase.from("homework_grammar_points").select("topic_id").in("topic_id", topicIds)
+      : Promise.resolve({ data: [] as { topic_id: string }[] }),
+    supabase.from("homework_vocab_completions").select("topic_id").eq("child_id", user.id),
+    supabase.from("homework_grammar_completions").select("topic_id").eq("child_id", user.id),
   ]);
 
-  const tasksByTopic = new Map<string, string[]>();
-  for (const task of tasksRes.data ?? []) {
-    const list = tasksByTopic.get(task.topic_id) ?? [];
-    list.push(task.id);
-    tasksByTopic.set(task.topic_id, list);
-  }
-
-  const completedTaskIds = new Set((completionsRes.data ?? []).map((row) => row.task_id));
+  const topicsWithVocab = new Set((vocabWordsRes.data ?? []).map((r) => r.topic_id));
+  const topicsWithGrammar = new Set((grammarPointsRes.data ?? []).map((r) => r.topic_id));
+  const vocabPassed = new Set((vocabPassRes.data ?? []).map((r) => r.topic_id));
+  const grammarPassed = new Set((grammarPassRes.data ?? []).map((r) => r.topic_id));
 
   const topicSummaries: HomeworkTopicSummary[] = topics.map((topic) => {
-    const taskIds = tasksByTopic.get(topic.id) ?? [];
+    const hasVocab = topicsWithVocab.has(topic.id);
+    const hasGrammar = topicsWithGrammar.has(topic.id);
+    const totalModules = (hasVocab ? 1 : 0) + (hasGrammar ? 1 : 0);
+    const passedModules =
+      (hasVocab && vocabPassed.has(topic.id) ? 1 : 0) +
+      (hasGrammar && grammarPassed.has(topic.id) ? 1 : 0);
     return {
       id: topic.id,
       title: topic.title,
       description: topic.description,
       teacherUsername: teacherByGroup.get(topic.group_id) ?? "your teacher",
-      totalTasks: taskIds.length,
-      completedTasks: taskIds.filter((id) => completedTaskIds.has(id)).length,
+      totalModules,
+      passedModules,
     };
   });
 
