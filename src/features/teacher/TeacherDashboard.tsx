@@ -125,24 +125,48 @@ export default function TeacherDashboard({ groups, username, email }: TeacherDas
                 </p>
               ) : (
                 <ul className="flex flex-col gap-2">
-                  {group.children.map((child) => (
-                    <li
-                      key={child.id}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3"
-                    >
-                      <span className="min-w-0 truncate text-body-strong text-white">
-                        {child.username}
-                      </span>
-                      <div className="flex shrink-0 gap-2">
-                        <StatChip label="Missions" value={child.progress.missionsCompleted} />
-                        <StatChip label="Streak" value={child.progress.currentStreak} />
-                        <StatChip
-                          label="Places"
-                          value={`${child.progress.locationsUnlocked}/${child.progress.totalLocations}`}
-                        />
-                      </div>
-                    </li>
-                  ))}
+                  {group.children.map((child) => {
+                    const passedCount = child.topicResults.filter((t) => t.passed).length;
+                    return (
+                      <li
+                        key={child.id}
+                        className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="min-w-0 truncate text-body-strong text-white">
+                            {child.username}
+                          </span>
+                          <StatChip label="Missions" value={child.missionsCompleted} />
+                        </div>
+
+                        {child.topicResults.length === 0 ? (
+                          <p className="text-[11px] text-white/40">No homework topics yet.</p>
+                        ) : (
+                          <div className="flex flex-col gap-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-white/40">
+                              Topics passed {passedCount}/{child.topicResults.length}
+                            </p>
+                            <ul className="flex flex-wrap gap-1.5">
+                              {child.topicResults.map((topic) => (
+                                <li
+                                  key={topic.topicId}
+                                  className={[
+                                    "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+                                    topic.passed
+                                      ? "bg-lime-green/15 text-lime-green"
+                                      : "bg-white/5 text-white/50",
+                                  ].join(" ")}
+                                >
+                                  <span aria-hidden="true">{topic.passed ? "✓" : "○"}</span>
+                                  <span className="max-w-[9rem] truncate">{topic.title}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </section>
