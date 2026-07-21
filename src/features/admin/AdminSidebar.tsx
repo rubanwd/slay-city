@@ -22,7 +22,7 @@ const ITEMS: SidebarItem[] = [
   { href: "/admin/task-types", title: "Task Types", accent: "text-lime-green" },
   { href: "/admin/wardrobe", title: "Wardrobe", accent: "text-neon-pink" },
   { href: "/admin/admins", title: "Manage Admins", accent: "text-purple" },
-  { href: "/admin/teachers", title: "Manage Teachers", accent: "text-purple" },
+  { href: "/admin/teachers", title: "Manage Teachers", accent: "text-cyan" },
 ];
 
 /**
