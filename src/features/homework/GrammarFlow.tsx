@@ -221,8 +221,8 @@ export default function GrammarFlow({
 
   /* ── Done ──────────────────────────────────────────────────────────────── */
   return (
-    <AppContainer className="justify-center">
-      <Section className="items-center gap-4 text-center">
+    <AppContainer>
+      <Section pt="lg" className="items-center gap-4 text-center">
         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-lime-green/15 text-3xl">
           🎉
         </span>
@@ -233,11 +233,11 @@ export default function GrammarFlow({
             : "You studied every rule and finished the test. Your teacher can see it too."}
         </p>
         {error && <p className="text-center text-neon-pink">{error}</p>}
-        <div className="flex w-full flex-col gap-2">
-          <SlayButton variant="green" onClick={startFlow}>
+        <div className="flex w-full gap-2">
+          <SlayButton variant="green" className="flex-1" onClick={startFlow}>
             Study Again
           </SlayButton>
-          <SlayButton variant="ghost" onClick={onExit}>
+          <SlayButton variant="ghost" className="flex-1" onClick={onExit}>
             Back to Topic
           </SlayButton>
         </div>
