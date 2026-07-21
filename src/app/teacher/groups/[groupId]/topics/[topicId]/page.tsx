@@ -18,13 +18,13 @@ interface TopicTasksPageProps {
  */
 export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
   const { groupId, topicId } = await params;
-  const { supabase, user } = await requireTeacherPage();
+  const { supabase, teacherId } = await requireTeacherPage();
 
   const { data: group } = await supabase
     .from("teacher_groups")
     .select("id, name")
     .eq("id", groupId)
-    .eq("teacher_id", user.id)
+    .eq("teacher_id", teacherId)
     .maybeSingle();
 
   if (!group) {

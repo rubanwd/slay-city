@@ -5,6 +5,7 @@ import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminHeader from "@/features/admin/AdminHeader";
 import { revokeTeacher } from "@/features/admin/actions";
 import { requireAdminPage } from "@/features/admin/guard";
+import { enterViewAsTeacher } from "@/features/teacher/viewAsActions";
 
 /**
  * Manage teacher accounts: promote an existing account to Teacher, revoke it
@@ -61,15 +62,26 @@ export default async function ManageTeachersPage() {
                     {(groupCounts.get(row.id) ?? 0) === 1 ? "group" : "groups"}
                   </span>
                 </NavLink>
-                <form action={revokeTeacher} className="shrink-0">
-                  <input type="hidden" name="profile_id" value={row.id} />
-                  <button
-                    type="submit"
-                    className="rounded-full border border-neon-pink/40 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
-                  >
-                    Revoke
-                  </button>
-                </form>
+                <div className="flex shrink-0 items-center gap-2">
+                  <form action={enterViewAsTeacher}>
+                    <input type="hidden" name="teacher_id" value={row.id} />
+                    <button
+                      type="submit"
+                      className="rounded-full border border-cyan/50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-cyan transition-colors hover:bg-cyan/10"
+                    >
+                      View as Teacher
+                    </button>
+                  </form>
+                  <form action={revokeTeacher}>
+                    <input type="hidden" name="profile_id" value={row.id} />
+                    <button
+                      type="submit"
+                      className="rounded-full border border-neon-pink/40 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
+                    >
+                      Revoke
+                    </button>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>
