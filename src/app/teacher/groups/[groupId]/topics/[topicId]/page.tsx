@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
+import CollapsibleSection from "@/features/teacher/CollapsibleSection";
 import HomeworkTaskForm from "@/features/teacher/HomeworkTaskForm";
 import HomeworkTaskItem from "@/features/teacher/HomeworkTaskItem";
 import HomeworkTopicItem from "@/features/teacher/HomeworkTopicItem";
@@ -90,34 +91,45 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
         <TeacherHeader title={topic.title} backHref={`/teacher/groups/${groupId}`} />
 
-        <h2 className="mb-2 text-label text-white/50">Topic Info</h2>
-        <ul className="mb-6">
-          <HomeworkTopicItem
-            groupId={groupId}
-            topic={topic}
-            taskCount={rows.length}
-            linkToTasks={false}
-          />
-        </ul>
-
-        <h2 className="mb-2 text-label text-white/50">Tasks ({rows.length})</h2>
-        {rows.length === 0 ? (
-          <p className="mb-6 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
-            No tasks yet. Add the first one below.
-          </p>
-        ) : (
-          <ul className="mb-6 flex flex-col gap-2">
-            {rows.map((task) => (
-              <HomeworkTaskItem key={task.id} topicId={topicId} groupId={groupId} task={task} />
-            ))}
+        <CollapsibleSection
+          title="Topic Info"
+          subtitle="Title, description and extra info students see before starting."
+        >
+          <ul>
+            <HomeworkTopicItem
+              groupId={groupId}
+              topic={topic}
+              taskCount={rows.length}
+              linkToTasks={false}
+            />
           </ul>
-        )}
+        </CollapsibleSection>
 
-        <AdminCreateModal triggerLabel="Add Task" title="Add Homework Task">
-          <HomeworkTaskForm topicId={topicId} groupId={groupId} nextOrder={rows.length} />
-        </AdminCreateModal>
+        <CollapsibleSection
+          title={`Tasks (${rows.length})`}
+          subtitle="Activities students complete for this topic, in order."
+        >
+          {rows.length === 0 ? (
+            <p className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
+              No tasks yet. Add the first one below.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {rows.map((task) => (
+                <HomeworkTaskItem key={task.id} topicId={topicId} groupId={groupId} task={task} />
+              ))}
+            </ul>
+          )}
 
-        <div className="mt-8">
+          <AdminCreateModal triggerLabel="Add Task" title="Add Homework Task">
+            <HomeworkTaskForm topicId={topicId} groupId={groupId} nextOrder={rows.length} />
+          </AdminCreateModal>
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Vocabulary Learning"
+          subtitle="Words the group learns as flashcards, plus an auto-built test to check them."
+        >
           <VocabularyManager
             topicId={topicId}
             topicTitle={topic.title}
@@ -126,7 +138,7 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
             initialTaskCount={vocabTasksRes.data?.length ?? 0}
           />
           <VocabularyCompletions rows={completionRows} />
-        </div>
+        </CollapsibleSection>
       </div>
     </main>
   );

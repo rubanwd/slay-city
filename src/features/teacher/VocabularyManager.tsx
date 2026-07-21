@@ -379,14 +379,7 @@ export default function VocabularyManager({
   const busy = generating || publishing;
 
   return (
-    <section className="mb-6 flex flex-col gap-4 rounded-2xl border border-purple/30 bg-purple/5 p-4">
-      <div>
-        <h2 className="text-body-strong text-white">Vocabulary Learning</h2>
-        <p className="mt-0.5 text-small text-white/50">
-          Words the group learns as flashcards, plus an auto-built test to check them.
-        </p>
-      </div>
-
+    <div className="flex flex-col gap-4">
       {/* AI generation controls */}
       <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/30 p-3">
         <span className={LABEL_CLASS}>Generate with AI</span>
@@ -558,6 +551,6 @@ export default function VocabularyManager({
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }
