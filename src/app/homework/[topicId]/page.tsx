@@ -24,53 +24,58 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
 
   // RLS (`homework_topics_select`) already restricts this to a topic in one of
   // the child's own groups — a topic from another group simply comes back null.
-  const [topicRes, tasksRes, completionsRes, vocabWordsRes, vocabTasksRes, vocabPassRes] =
-    await Promise.all([
-      supabase
-        .from("homework_topics")
-        .select("id, title, description, note_text, note_link_url, note_image_url")
-        .eq("id", topicId)
-        .maybeSingle(),
-      supabase
-        .from("homework_tasks")
-        .select("id, task_type, order_index, content")
-        .eq("topic_id", topicId)
-        .order("order_index"),
-      supabase.from("homework_task_completions").select("task_id").eq("child_id", user.id),
-      supabase
-        .from("homework_vocab_words")
-        .select("id, word, transcription, translation, image_url, order_index")
-        .eq("topic_id", topicId)
-        .order("order_index"),
-      supabase
-        .from("homework_vocab_tasks")
-        .select("id, task_type, order_index, content")
-        .eq("topic_id", topicId)
-        .order("order_index"),
-      supabase
-        .from("homework_vocab_completions")
-        .select("id")
-        .eq("topic_id", topicId)
-        .eq("child_id", user.id)
-        .maybeSingle(),
-    ]);
+  const [
+    topicRes,
+    vocabWordsRes,
+    vocabTasksRes,
+    vocabPassRes,
+    grammarPointsRes,
+    grammarTasksRes,
+    grammarPassRes,
+  ] = await Promise.all([
+    supabase
+      .from("homework_topics")
+      .select("id, title, description, note_text, note_link_url, note_image_url")
+      .eq("id", topicId)
+      .maybeSingle(),
+    supabase
+      .from("homework_vocab_words")
+      .select("id, word, transcription, translation, image_url, order_index")
+      .eq("topic_id", topicId)
+      .order("order_index"),
+    supabase
+      .from("homework_vocab_tasks")
+      .select("id, task_type, order_index, content")
+      .eq("topic_id", topicId)
+      .order("order_index"),
+    supabase
+      .from("homework_vocab_completions")
+      .select("id")
+      .eq("topic_id", topicId)
+      .eq("child_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("homework_grammar_points")
+      .select("id, title, explanation, example, order_index")
+      .eq("topic_id", topicId)
+      .order("order_index"),
+    supabase
+      .from("homework_grammar_tasks")
+      .select("id, task_type, order_index, content")
+      .eq("topic_id", topicId)
+      .order("order_index"),
+    supabase
+      .from("homework_grammar_completions")
+      .select("id")
+      .eq("topic_id", topicId)
+      .eq("child_id", user.id)
+      .maybeSingle(),
+  ]);
 
   const topic = topicRes.data;
   if (!topic) {
     notFound();
   }
-
-  const tasks: MissionTaskViewModel[] = (tasksRes.data ?? []).map((task) => ({
-    id: task.id,
-    taskType: task.task_type,
-    orderIndex: task.order_index,
-    content: task.content,
-  }));
-
-  const taskIds = new Set(tasks.map((t) => t.id));
-  const completedTaskIds = (completionsRes.data ?? [])
-    .map((row) => row.task_id)
-    .filter((id) => taskIds.has(id));
 
   const vocabWords = (vocabWordsRes.data ?? []).map((w) => ({
     id: w.id,
@@ -88,6 +93,21 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
     content: task.content,
   }));
 
+  const grammarPoints = (grammarPointsRes.data ?? []).map((p) => ({
+    id: p.id,
+    title: p.title,
+    explanation: p.explanation,
+    example: p.example,
+    orderIndex: p.order_index,
+  }));
+
+  const grammarTasks: MissionTaskViewModel[] = (grammarTasksRes.data ?? []).map((task) => ({
+    id: task.id,
+    taskType: task.task_type,
+    orderIndex: task.order_index,
+    content: task.content,
+  }));
+
   return (
     <AuthGuard>
       <HomeworkTopicScreen
@@ -97,11 +117,14 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
           linkUrl: topic.note_link_url,
           imageUrl: topic.note_image_url,
         }}
-        tasks={tasks}
-        completedTaskIds={completedTaskIds}
         vocab={
           vocabWords.length > 0
             ? { words: vocabWords, tasks: vocabTasks, passed: Boolean(vocabPassRes.data) }
+            : undefined
+        }
+        grammar={
+          grammarPoints.length > 0
+            ? { points: grammarPoints, tasks: grammarTasks, passed: Boolean(grammarPassRes.data) }
             : undefined
         }
       />

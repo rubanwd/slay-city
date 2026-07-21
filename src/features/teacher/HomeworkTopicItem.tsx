@@ -21,7 +21,10 @@ export interface HomeworkTopicItemProps {
     note_link_url: string | null;
     note_image_url: string | null;
   };
-  taskCount: number;
+  /** How many vocabulary words the topic has. */
+  wordCount: number;
+  /** How many grammar rule points the topic has. */
+  grammarCount: number;
   /** False when already on the topic's own tasks page — the title shouldn't link to itself. */
   linkToTasks?: boolean;
 }
@@ -39,7 +42,8 @@ function SaveButton() {
 export default function HomeworkTopicItem({
   groupId,
   topic,
-  taskCount,
+  wordCount,
+  grammarCount,
   linkToTasks = true,
 }: HomeworkTopicItemProps) {
   // On a topic's own page (linkToTasks === false) the info form is the whole
@@ -133,7 +137,8 @@ export default function HomeworkTopicItem({
       )}
       <div className="mt-1 flex items-center gap-2">
         <p className="text-xs font-bold uppercase tracking-wide text-cyan">
-          {taskCount} {taskCount === 1 ? "task" : "tasks"}
+          {wordCount} {wordCount === 1 ? "word" : "words"} · {grammarCount}{" "}
+          {grammarCount === 1 ? "rule" : "rules"}
         </p>
         {(topic.note_text || topic.note_link_url || topic.note_image_url) && (
           <span className="text-xs text-white/40" title="Has extra info for students">
