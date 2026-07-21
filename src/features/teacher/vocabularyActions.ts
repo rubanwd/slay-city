@@ -219,6 +219,12 @@ export interface PublishVocabularyInput {
   words: PublishWordInput[];
   /** How many test tasks to build from the words. */
   taskCount: number;
+  /**
+   * Test variant the teacher previewed. Threaded into {@link buildVocabTest} so
+   * the published test matches exactly what the teacher saw and regenerated.
+   * Defaults to the canonical variant.
+   */
+  testSeed?: number;
 }
 
 /**
@@ -273,7 +279,8 @@ export async function publishVocabulary(input: PublishVocabularyInput): Promise<
   const taskCount = Math.min(MAX_TASK_COUNT, Math.max(0, Math.round(input.taskCount)));
   const tasks = buildVocabTest(
     words.map((w) => ({ word: w.word, translation: w.translation, imageUrl: w.imageUrl })),
-    taskCount
+    taskCount,
+    input.testSeed ?? 0
   );
 
   if (tasks.length > 0) {
