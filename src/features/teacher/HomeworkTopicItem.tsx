@@ -42,10 +42,14 @@ export default function HomeworkTopicItem({
   taskCount,
   linkToTasks = true,
 }: HomeworkTopicItemProps) {
+  // On a topic's own page (linkToTasks === false) the info form is the whole
+  // point of the section, so it stays permanently open — no collapse into a
+  // summary, no Edit/Cancel. In the group's topic list it's still edit-on-demand.
+  const alwaysExpanded = !linkToTasks;
   const [editing, setEditing] = useState(false);
   const [state, formAction] = useActionState<TeacherFormState, FormData>(updateHomeworkTopic, {});
 
-  if (editing) {
+  if (alwaysExpanded || editing) {
     return (
       <li className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3">
         <form action={formAction} className="flex flex-col gap-3">
@@ -110,9 +114,11 @@ export default function HomeworkTopicItem({
 
           <div className="flex gap-2">
             <SaveButton />
-            <SlayButton type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
-              Cancel
-            </SlayButton>
+            {!alwaysExpanded && (
+              <SlayButton type="button" variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                Cancel
+              </SlayButton>
+            )}
           </div>
         </form>
       </li>
