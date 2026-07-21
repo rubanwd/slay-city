@@ -24,19 +24,36 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
 
   // RLS (`homework_topics_select`) already restricts this to a topic in one of
   // the child's own groups — a topic from another group simply comes back null.
-  const [topicRes, tasksRes, completionsRes] = await Promise.all([
-    supabase
-      .from("homework_topics")
-      .select("id, title, description, note_text, note_link_url, note_image_url")
-      .eq("id", topicId)
-      .maybeSingle(),
-    supabase
-      .from("homework_tasks")
-      .select("id, task_type, order_index, content")
-      .eq("topic_id", topicId)
-      .order("order_index"),
-    supabase.from("homework_task_completions").select("task_id").eq("child_id", user.id),
-  ]);
+  const [topicRes, tasksRes, completionsRes, vocabWordsRes, vocabTasksRes, vocabPassRes] =
+    await Promise.all([
+      supabase
+        .from("homework_topics")
+        .select("id, title, description, note_text, note_link_url, note_image_url")
+        .eq("id", topicId)
+        .maybeSingle(),
+      supabase
+        .from("homework_tasks")
+        .select("id, task_type, order_index, content")
+        .eq("topic_id", topicId)
+        .order("order_index"),
+      supabase.from("homework_task_completions").select("task_id").eq("child_id", user.id),
+      supabase
+        .from("homework_vocab_words")
+        .select("id, word, transcription, translation, image_url, order_index")
+        .eq("topic_id", topicId)
+        .order("order_index"),
+      supabase
+        .from("homework_vocab_tasks")
+        .select("id, task_type, order_index, content")
+        .eq("topic_id", topicId)
+        .order("order_index"),
+      supabase
+        .from("homework_vocab_completions")
+        .select("id")
+        .eq("topic_id", topicId)
+        .eq("child_id", user.id)
+        .maybeSingle(),
+    ]);
 
   const topic = topicRes.data;
   if (!topic) {
@@ -55,6 +72,22 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
     .map((row) => row.task_id)
     .filter((id) => taskIds.has(id));
 
+  const vocabWords = (vocabWordsRes.data ?? []).map((w) => ({
+    id: w.id,
+    word: w.word,
+    transcription: w.transcription,
+    translation: w.translation,
+    imageUrl: w.image_url,
+    orderIndex: w.order_index,
+  }));
+
+  const vocabTasks: MissionTaskViewModel[] = (vocabTasksRes.data ?? []).map((task) => ({
+    id: task.id,
+    taskType: task.task_type,
+    orderIndex: task.order_index,
+    content: task.content,
+  }));
+
   return (
     <AuthGuard>
       <HomeworkTopicScreen
@@ -66,6 +99,11 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
         }}
         tasks={tasks}
         completedTaskIds={completedTaskIds}
+        vocab={
+          vocabWords.length > 0
+            ? { words: vocabWords, tasks: vocabTasks, passed: Boolean(vocabPassRes.data) }
+            : undefined
+        }
       />
     </AuthGuard>
   );

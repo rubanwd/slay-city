@@ -169,6 +169,124 @@ export type Database = {
           },
         ]
       }
+      homework_vocab_completions: {
+        Row: {
+          child_id: string
+          completed_at: string
+          id: string
+          topic_id: string
+        }
+        Insert: {
+          child_id: string
+          completed_at?: string
+          id?: string
+          topic_id: string
+        }
+        Update: {
+          child_id?: string
+          completed_at?: string
+          id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_vocab_completions_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_vocab_completions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "homework_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_vocab_tasks: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          order_index: number
+          task_type: Database["public"]["Enums"]["mission_task_type"]
+          topic_id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          task_type: Database["public"]["Enums"]["mission_task_type"]
+          topic_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          task_type?: Database["public"]["Enums"]["mission_task_type"]
+          topic_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_vocab_tasks_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "homework_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_vocab_words: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          order_index: number
+          topic_id: string
+          transcription: string | null
+          translation: string
+          updated_at: string
+          word: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          order_index?: number
+          topic_id: string
+          transcription?: string | null
+          translation: string
+          updated_at?: string
+          word: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          order_index?: number
+          topic_id?: string
+          transcription?: string | null
+          translation?: string
+          updated_at?: string
+          word?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_vocab_words_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "homework_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_tasks: {
         Row: {
           content: Json
