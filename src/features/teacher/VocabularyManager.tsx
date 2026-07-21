@@ -86,6 +86,25 @@ function blankDraft(): DraftWord {
   };
 }
 
+/**
+ * A stable fingerprint of everything Publish sends: the words (ignoring their
+ * volatile React keys), the test size and the chosen test variant. Comparing
+ * the current fingerprint to the last published one tells us whether anything
+ * changed since the last submit — used to disable Publish when nothing has.
+ */
+function publishSignature(
+  words: Pick<DraftWord, "word" | "transcription" | "translation" | "imageUrl" | "imageDataUrl">[],
+  taskCount: number,
+  seed: number
+): string {
+  const rows = words
+    .map((w) =>
+      [w.word, w.transcription, w.translation, w.imageUrl ?? "", w.imageDataUrl ?? ""].join("")
+    )
+    .join("");
+  return `${rows}|${taskCount}|${seed}`;
+}
+
 async function dataUrlToUpload(dataUrl: string): Promise<{ blob: Blob; ext: string }> {
   const blob = await (await fetch(dataUrl)).blob();
   const ext = blob.type === "image/jpeg" ? "jpg" : blob.type === "image/webp" ? "webp" : "png";
@@ -123,6 +142,22 @@ export default function VocabularyManager({
   const [extra, setExtra] = useState("");
   const [busyImages, setBusyImages] = useState<Set<string>>(new Set());
   const [imageJob, setImageJob] = useState<ImageJob | null>(null);
+  // Fingerprint of the last state that was published (or that was loaded from
+  // the DB, i.e. already published). Publish is disabled while the current
+  // state still matches it — nothing has changed since the last submit.
+  const [publishedSig, setPublishedSig] = useState<string>(() =>
+    publishSignature(
+      initialWords.map((w) => ({
+        word: w.word,
+        transcription: w.transcription ?? "",
+        translation: w.translation,
+        imageUrl: w.imageUrl,
+        imageDataUrl: null,
+      })),
+      initialTaskCount > 0 ? initialTaskCount : defaultTestTaskCount(initialWords.length),
+      0
+    )
+  );
 
   const [generating, startGenerate] = useTransition();
   const [publishing, startPublish] = useTransition();
@@ -131,6 +166,10 @@ export default function VocabularyManager({
 
   // Requested test size, parsed from the raw text (empty/invalid → 0).
   const taskCountValue = Math.max(0, Math.round(Number(taskCount) || 0));
+
+  // Has anything changed since the last publish/load? Drives the Publish button.
+  const currentSig = publishSignature(words, taskCountValue, testSeed);
+  const dirty = currentSig !== publishedSig;
 
   // Live preview of the test that Publish will build: derived from the current
   // words, the requested task count and the chosen variant, using the exact
@@ -314,6 +353,9 @@ export default function VocabularyManager({
           toast.error(result.error);
           return;
         }
+        // Mark this exact state as the published baseline so Publish disables
+        // again until the teacher makes a further change.
+        setPublishedSig(publishSignature(uploaded, taskCountValue, testSeed));
         toast.success("Vocabulary published to this topic.");
       } catch {
         toast.error("Something went wrong while publishing. Try again.");
@@ -475,10 +517,10 @@ export default function VocabularyManager({
           size="md"
           className="flex-1"
           loading={publishing}
-          disabled={busy || busyImages.size > 0 || words.length === 0}
+          disabled={busy || busyImages.size > 0 || words.length === 0 || !dirty}
           onClick={handlePublish}
         >
-          Publish to Topic
+          {dirty ? "Publish to Topic" : "Published"}
         </SlayButton>
         {hasPublished && (
           <SlayButton type="button" variant="ghost" size="md" disabled={busy} onClick={handleClear}>
