@@ -12,6 +12,8 @@ import TaskRunner from "@/features/mission/TaskRunner";
 import { taskTypeInstructions, type MissionTaskType, type MissionTaskViewModel } from "@/features/mission/types";
 
 import { completeHomeworkTask } from "./actions";
+import VocabularyFlow from "./VocabularyFlow";
+import type { HomeworkWord } from "./vocabulary";
 
 /** Task types that take over the whole panel and manage their own layout/progress. */
 const IMMERSIVE_TASK_TYPES: MissionTaskType[] = ["snake_game", "bubble_pop"];
@@ -22,6 +24,14 @@ export interface HomeworkTopicNote {
   imageUrl: string | null;
 }
 
+/** The optional vocabulary set attached to a topic — words to learn plus a test. */
+export interface HomeworkTopicVocab {
+  words: HomeworkWord[];
+  tasks: MissionTaskViewModel[];
+  /** Whether the child has already passed the vocabulary flow for this topic. */
+  passed: boolean;
+}
+
 export interface HomeworkTopicScreenProps {
   topic: { id: string; title: string; description: string | null };
   /** Extra context the teacher attached — text, a link, and/or an image, all optional. */
@@ -29,9 +39,11 @@ export interface HomeworkTopicScreenProps {
   tasks: MissionTaskViewModel[];
   /** Task ids the child has already completed, so a resumed topic picks up where they left off. */
   completedTaskIds: string[];
+  /** Vocabulary learning set, when the teacher attached one. */
+  vocab?: HomeworkTopicVocab;
 }
 
-type ScreenMode = "intro" | "running" | "finished";
+type ScreenMode = "intro" | "running" | "finished" | "vocab";
 
 function firstIncompleteIndex(tasks: MissionTaskViewModel[], completed: Set<string>): number {
   const index = tasks.findIndex((task) => !completed.has(task.id));
@@ -69,7 +81,13 @@ function TopicNoteCard({ note }: { note: HomeworkTopicNote }) {
  * just the last one), so leaving mid-topic keeps progress; and finishing
  * grants no XP/coins — homework sits outside the map's reward loop.
  */
-export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskIds }: HomeworkTopicScreenProps) {
+export default function HomeworkTopicScreen({
+  topic,
+  note,
+  tasks,
+  completedTaskIds,
+  vocab,
+}: HomeworkTopicScreenProps) {
   const router = useRouter();
   const [completed, setCompleted] = useState<Set<string>>(() => new Set(completedTaskIds));
   const [currentIndex, setCurrentIndex] = useState(() =>
@@ -86,6 +104,7 @@ export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskI
   const currentTask = tasks[currentIndex];
   const isLastTask = currentIndex === total - 1;
   const allDone = total > 0 && completed.size >= total;
+  const hasVocab = Boolean(vocab && vocab.words.length > 0);
 
   const handleTaskComplete = () => {
     if (!currentTask) return;
@@ -116,7 +135,20 @@ export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskI
     setMode("running");
   };
 
-  if (total === 0) {
+  if (mode === "vocab" && vocab) {
+    return (
+      <VocabularyFlow
+        topicId={topic.id}
+        topicTitle={topic.title}
+        words={vocab.words}
+        tasks={vocab.tasks}
+        alreadyPassed={vocab.passed}
+        onExit={() => setMode("intro")}
+      />
+    );
+  }
+
+  if (total === 0 && !hasVocab) {
     return (
       <AppContainer className="justify-center">
         <Section className="items-center gap-4 text-center">
@@ -147,13 +179,40 @@ export default function HomeworkTopicScreen({ topic, note, tasks, completedTaskI
         <Section py="sm" className="gap-4">
           <TopicNoteCard note={note} />
 
-          <div className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4">
-            <ProgressBar completed={completed.size} total={total} />
-          </div>
+          {hasVocab && vocab && (
+            <button
+              type="button"
+              onClick={() => setMode("vocab")}
+              className="flex items-center justify-between gap-3 rounded-2xl border border-cyan/30 bg-cyan/5 px-4 py-4 text-left transition-colors hover:border-cyan/50"
+            >
+              <span className="flex min-w-0 flex-col">
+                <span className="text-body-strong text-white">Learn the Words</span>
+                <span className="mt-0.5 text-small text-white/50">
+                  {vocab.words.length} word{vocab.words.length === 1 ? "" : "s"} + test
+                </span>
+              </span>
+              <span
+                className={[
+                  "shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide",
+                  vocab.passed ? "bg-lime-green/15 text-lime-green" : "bg-cyan/15 text-cyan",
+                ].join(" ")}
+              >
+                {vocab.passed ? "Passed ✓" : "Start"}
+              </span>
+            </button>
+          )}
 
-          <SlayButton variant="green" size="lg" onClick={() => startPractice(allDone)}>
-            {allDone ? "Practice Again" : completed.size > 0 ? "Continue" : "Start"}
-          </SlayButton>
+          {total > 0 && (
+            <>
+              <div className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4">
+                <ProgressBar completed={completed.size} total={total} />
+              </div>
+
+              <SlayButton variant="green" size="lg" onClick={() => startPractice(allDone)}>
+                {allDone ? "Practice Again" : completed.size > 0 ? "Continue" : "Start"}
+              </SlayButton>
+            </>
+          )}
         </Section>
       </AppContainer>
     );
