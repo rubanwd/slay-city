@@ -20,13 +20,13 @@ import { buildVocabularyPrompt, buildWordImagePrompt } from "./vocabularyPrompt"
 const CONTENT_BUCKET = "content";
 
 /**
- * Image model for vocabulary flashcards — a cheap image model on OpenRouter
- * (~$0.01/image vs ~$0.039 for the Gemini model the admin scene art uses).
- * Runs on the existing `OPENROUTER_API_KEY`, so no extra provider/key. Combined
- * with `vocab_image_cache`, repeated words cost nothing. Swap this constant to
- * trade cost for quality (e.g. "google/gemini-2.5-flash-image").
+ * Image model for vocabulary flashcards, on OpenRouter (existing
+ * `OPENROUTER_API_KEY`, no extra provider/key). Gemini's flash image model is
+ * the sweet spot here: cheaper and faster in practice than gpt-5-image-mini
+ * (which billed higher and was slow), and it renders clean kid-friendly
+ * illustrations. The `vocab_image_cache` makes repeated words cost nothing.
  */
-const VOCAB_IMAGE_MODEL = "openai/gpt-5-image-mini";
+const VOCAB_IMAGE_MODEL = "google/gemini-2.5-flash-image";
 
 const MAX_TASK_COUNT = 20;
 
