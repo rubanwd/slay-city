@@ -112,10 +112,13 @@ export default function VocabularyManager({
 }: VocabularyManagerProps) {
   const toast = useAdminToast();
   const [words, setWords] = useState<DraftWord[]>(() => initialWords.map(toDraft));
-  const [taskCount, setTaskCount] = useState<number>(
-    initialTaskCount > 0 ? initialTaskCount : defaultTestTaskCount(initialWords.length)
+  // Count fields are kept as raw text so the teacher can clear them while
+  // typing (a numeric state would snap an empty field back to 0). They're
+  // parsed to numbers only where used, below.
+  const [taskCount, setTaskCount] = useState<string>(
+    String(initialTaskCount > 0 ? initialTaskCount : defaultTestTaskCount(initialWords.length))
   );
-  const [wordCount, setWordCount] = useState<number>(initialWords.length || 6);
+  const [wordCount, setWordCount] = useState<string>(String(initialWords.length || 6));
   const [testSeed, setTestSeed] = useState(0);
   const [extra, setExtra] = useState("");
   const [busyImages, setBusyImages] = useState<Set<string>>(new Set());
@@ -126,6 +129,9 @@ export default function VocabularyManager({
 
   const hasPublished = initialWords.length > 0;
 
+  // Requested test size, parsed from the raw text (empty/invalid → 0).
+  const taskCountValue = Math.max(0, Math.round(Number(taskCount) || 0));
+
   // Live preview of the test that Publish will build: derived from the current
   // words, the requested task count and the chosen variant, using the exact
   // same builder the server runs — so what the teacher sees is what publishes.
@@ -133,8 +139,8 @@ export default function VocabularyManager({
     const source = words
       .filter((w) => w.word.trim() && w.translation.trim())
       .map((w) => ({ word: w.word, translation: w.translation, imageUrl: w.imageUrl }));
-    return buildVocabTest(source, taskCount, testSeed);
-  }, [words, taskCount, testSeed]);
+    return buildVocabTest(source, taskCountValue, testSeed);
+  }, [words, taskCountValue, testSeed]);
 
   function patchWord(key: string, patch: Partial<DraftWord>) {
     setWords((prev) => prev.map((w) => (w.key === key ? { ...w, ...patch } : w)));
@@ -212,7 +218,7 @@ export default function VocabularyManager({
         topicTitle,
         topicDescription,
         extraInstructions: extra.trim() || null,
-        wordCount: clampWordCount(wordCount),
+        wordCount: clampWordCount(Number(wordCount)),
       });
       if (!result.ok) {
         toast.error(result.error);
@@ -228,7 +234,7 @@ export default function VocabularyManager({
         imagePrompt: w.imagePrompt,
       }));
       setWords(drafted);
-      setTaskCount(defaultTestTaskCount(drafted.length));
+      setTaskCount(String(defaultTestTaskCount(drafted.length)));
       setTestSeed(0);
       toast.success(`Drafted ${drafted.length} words. Generating images…`);
       // Fire-and-forget: images stream in while the teacher reviews the words.
@@ -301,7 +307,7 @@ export default function VocabularyManager({
               translation: w.translation,
               imageUrl: w.imageUrl,
             })),
-          taskCount,
+          taskCount: taskCountValue,
           testSeed,
         });
         if (!result.ok) {
@@ -347,10 +353,11 @@ export default function VocabularyManager({
             <span className="text-[11px] text-white/50">Words</span>
             <input
               type="number"
+              inputMode="numeric"
               min={1}
               max={MAX_VOCAB_WORDS}
               value={wordCount}
-              onChange={(e) => setWordCount(Number(e.target.value))}
+              onChange={(e) => setWordCount(e.target.value.replace(/[^0-9]/g, ""))}
               className={`${INPUT_CLASS} !py-2 text-small`}
             />
           </label>
@@ -358,10 +365,11 @@ export default function VocabularyManager({
             <span className="text-[11px] text-white/50">Test tasks</span>
             <input
               type="number"
+              inputMode="numeric"
               min={0}
               max={MAX_VOCAB_WORDS}
               value={taskCount}
-              onChange={(e) => setTaskCount(Number(e.target.value))}
+              onChange={(e) => setTaskCount(e.target.value.replace(/[^0-9]/g, ""))}
               className={`${INPUT_CLASS} !py-2 text-small`}
             />
           </label>
@@ -434,7 +442,7 @@ export default function VocabularyManager({
           </div>
           {previewTasks.length === 0 ? (
             <p className="text-[11px] text-white/40">
-              {taskCount === 0
+              {taskCountValue === 0
                 ? "Test tasks set to 0 — no test will be built."
                 : "Add a word with a translation to build the test."}
             </p>
