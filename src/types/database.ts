@@ -287,6 +287,27 @@ export type Database = {
           },
         ]
       }
+      vocab_image_cache: {
+        Row: {
+          created_at: string
+          image_url: string
+          updated_at: string
+          word_key: string
+        }
+        Insert: {
+          created_at?: string
+          image_url: string
+          updated_at?: string
+          word_key: string
+        }
+        Update: {
+          created_at?: string
+          image_url?: string
+          updated_at?: string
+          word_key?: string
+        }
+        Relationships: []
+      }
       homework_tasks: {
         Row: {
           content: Json

@@ -5,6 +5,7 @@ import {
   clampWordCount,
   defaultTestTaskCount,
   MAX_VOCAB_WORDS,
+  normalizeWordKey,
   parseGeneratedWords,
   VOCAB_TEST_TASK_TYPES,
 } from "./vocabulary";
@@ -138,5 +139,22 @@ describe("parseGeneratedWords", () => {
     expect(parseGeneratedWords(null)).toEqual([]);
     expect(parseGeneratedWords("nope")).toEqual([]);
     expect(parseGeneratedWords({ words: "no" })).toEqual([]);
+  });
+});
+
+describe("normalizeWordKey", () => {
+  it("lowercases, trims and collapses whitespace", () => {
+    expect(normalizeWordKey("  Cat ")).toBe("cat");
+    expect(normalizeWordKey("Ice   Cream")).toBe("ice cream");
+    expect(normalizeWordKey("DOG")).toBe("dog");
+  });
+
+  it("collapses casing/spacing variants to the same key", () => {
+    expect(normalizeWordKey("Cat")).toBe(normalizeWordKey(" cat "));
+  });
+
+  it("is safe on empty/nullish input", () => {
+    expect(normalizeWordKey("")).toBe("");
+    expect(normalizeWordKey(undefined as unknown as string)).toBe("");
   });
 });

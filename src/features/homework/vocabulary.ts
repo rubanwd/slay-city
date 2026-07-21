@@ -66,6 +66,20 @@ export function clampWordCount(requested: number): number {
   return Math.min(MAX_VOCAB_WORDS, Math.max(MIN_VOCAB_WORDS, Math.round(requested)));
 }
 
+/**
+ * Cache key for the shared vocabulary image library: a word's canonical form,
+ * so "Cat", " cat " and "cat" all reuse one generated image. Lowercased,
+ * Unicode-normalized, inner whitespace collapsed, trimmed. Used as the primary
+ * key of `vocab_image_cache` — keep it stable, changing it orphans the cache.
+ */
+export function normalizeWordKey(word: string): string {
+  return String(word ?? "")
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /* ── Deterministic test builder ────────────────────────────────────────────── */
 
 /**

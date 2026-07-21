@@ -164,7 +164,7 @@ export default function VocabularyManager({
           imagePrompt: item.imagePrompt,
         });
         setImageBusy(item.key, false);
-        if (result.ok) patchWord(item.key, { imageDataUrl: result.dataUrl });
+        if (result.ok) patchWord(item.key, { imageUrl: result.imageUrl, imageDataUrl: null });
         else batchFailed++;
         setImageJob((prev) =>
           prev
@@ -223,17 +223,20 @@ export default function VocabularyManager({
   async function handleGenerateImage(word: DraftWord) {
     if (busyImages.has(word.key)) return;
     setImageBusy(word.key, true);
+    // If the word already shows an image, the teacher wants a different one —
+    // bypass the shared cache. A first-time generation reuses the library.
     const result = await generateWordImage({
       topicId,
       word: word.word,
       imagePrompt: word.imagePrompt,
+      forceRegenerate: Boolean(word.imageUrl || word.imageDataUrl),
     });
     setImageBusy(word.key, false);
     if (!result.ok) {
       toast.error(result.error);
       return;
     }
-    patchWord(word.key, { imageDataUrl: result.dataUrl });
+    patchWord(word.key, { imageUrl: result.imageUrl, imageDataUrl: null });
   }
 
   async function handleUploadImage(word: DraftWord, file: File) {
