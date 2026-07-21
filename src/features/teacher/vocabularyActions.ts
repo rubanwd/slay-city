@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { requestOpenRouterImage } from "@/features/admin/openRouterImage";
 import {
   buildVocabTest,
   clampWordCount,
@@ -13,11 +14,19 @@ import {
 
 import { extractJson, requestOpenRouterJson } from "./openRouterChat";
 import { requireTeacher } from "./requireTeacher";
-import { requestFluxImage } from "./togetherImage";
 import { buildVocabularyPrompt, buildWordImagePrompt } from "./vocabularyPrompt";
 
 /** Public storage bucket for content imagery (mirrors uploadContentImage). */
 const CONTENT_BUCKET = "content";
+
+/**
+ * Image model for vocabulary flashcards — a cheap image model on OpenRouter
+ * (~$0.01/image vs ~$0.039 for the Gemini model the admin scene art uses).
+ * Runs on the existing `OPENROUTER_API_KEY`, so no extra provider/key. Combined
+ * with `vocab_image_cache`, repeated words cost nothing. Swap this constant to
+ * trade cost for quality (e.g. "google/gemini-2.5-flash-image").
+ */
+const VOCAB_IMAGE_MODEL = "openai/gpt-5-image-mini";
 
 const MAX_TASK_COUNT = 20;
 
@@ -179,7 +188,10 @@ export async function generateWordImage(input: GenerateImageInput): Promise<Gene
     if (cached?.image_url) return { ok: true, imageUrl: cached.image_url };
   }
 
-  const result = await requestFluxImage(buildWordImagePrompt(word, input.imagePrompt));
+  const result = await requestOpenRouterImage(
+    buildWordImagePrompt(word, input.imagePrompt),
+    VOCAB_IMAGE_MODEL
+  );
   if (!result.ok) return { ok: false, error: result.error };
 
   const upload = await uploadWordImage(supabase, result.dataUrl);

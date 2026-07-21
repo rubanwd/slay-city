@@ -2,11 +2,11 @@
 --
 -- Vocabulary words repeat heavily across topics, groups and teachers (every
 -- "Animals" topic wants a "cat" card). Generating a fresh AI image for each
--- occurrence is the dominant cost of the authoring flow, so we cache one image
--- per normalized word in a shared library: the first time any teacher needs a
--- word's image it is generated + uploaded to the `content/homework` bucket and
--- recorded here; every later request for that word reuses the stored URL for
--- free.
+-- occurrence is the dominant cost of the authoring flow (each image is a paid
+-- OpenRouter generation), so we cache one image per normalized word in a shared
+-- library: the first time any teacher needs a word's image it is generated +
+-- uploaded to the `content/homework` bucket and recorded here; every later
+-- request for that word reuses the stored URL for free.
 --
 -- `word_key` is the normalized word (lowercased, whitespace-collapsed, trimmed
 -- — see `normalizeWordKey` in features/homework/vocabulary.ts) and doubles as
