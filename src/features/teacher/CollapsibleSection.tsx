@@ -6,8 +6,12 @@ export interface CollapsibleSectionProps {
   title: string;
   /** Optional one-line description shown under the title, like Vocabulary Learning. */
   subtitle?: string;
+  /** Optional element shown next to the title, e.g. an unread badge. */
+  badge?: ReactNode;
   /** Whether the section starts open. Defaults to collapsed. */
   defaultOpen?: boolean;
+  /** Called when the section transitions from collapsed to open. */
+  onOpen?: () => void;
   children: ReactNode;
 }
 
@@ -20,21 +24,33 @@ export interface CollapsibleSectionProps {
 export default function CollapsibleSection({
   title,
   subtitle,
+  badge,
   defaultOpen = false,
+  onOpen,
   children,
 }: CollapsibleSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+
+  const toggle = () => {
+    setOpen((o) => {
+      if (!o) onOpen?.();
+      return !o;
+    });
+  };
 
   return (
     <section className="mb-6 rounded-2xl border border-purple/30 bg-purple/5">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         aria-expanded={open}
         className="flex w-full items-center justify-between gap-3 p-4 text-left"
       >
         <span className="min-w-0">
-          <span className="block text-body-strong text-white">{title}</span>
+          <span className="flex items-center gap-2 text-body-strong text-white">
+            {title}
+            {badge}
+          </span>
           {subtitle && <span className="mt-0.5 block text-small text-white/50">{subtitle}</span>}
         </span>
         <svg

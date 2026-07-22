@@ -38,6 +38,28 @@ export async function postTopicMessage(
   return { ok: true };
 }
 
+/**
+ * Mark a topic's Q&A thread read up to now for the signed-in user, clearing its
+ * unread badge. Fire-and-forget from the client when the thread is opened; RLS
+ * (`hw_reads_*_own`) pins the row to the caller.
+ */
+export async function markTopicRead(topicId: string): Promise<void> {
+  if (!topicId) return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("homework_topic_reads")
+    .upsert(
+      { topic_id: topicId, user_id: user.id, last_read_at: new Date().toISOString() },
+      { onConflict: "topic_id,user_id" }
+    );
+}
+
 /** Delete a message. RLS (`hw_messages_delete`) allows the author, the owning teacher, or an admin. */
 export async function deleteTopicMessage(messageId: string): Promise<PostMessageResult> {
   if (!messageId) return { ok: false, error: "Missing message." };
