@@ -287,6 +287,39 @@ export type Database = {
           },
         ]
       }
+      homework_topic_reads: {
+        Row: {
+          last_read_at: string
+          topic_id: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          topic_id: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string
+          topic_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_topic_reads_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "homework_topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_topic_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_vocab_completions: {
         Row: {
           child_id: string
@@ -1062,6 +1095,13 @@ export type Database = {
           body: string
           created_at: string
           id: string
+        }[]
+      }
+      get_unread_topics: {
+        Args: never
+        Returns: {
+          topic_id: string
+          unread_count: number
         }[]
       }
       is_admin: { Args: never; Returns: boolean }

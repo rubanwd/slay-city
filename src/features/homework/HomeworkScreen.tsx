@@ -1,6 +1,8 @@
 import NavLink from "@/components/ui/NavLink";
 import { AppContainer, BottomNav, Section, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 
+import UnreadBadge from "./qa/UnreadBadge";
+
 export interface HomeworkTopicSummary {
   id: string;
   title: string;
@@ -11,6 +13,8 @@ export interface HomeworkTopicSummary {
   totalModules: number;
   /** How many of those modules the child has passed. */
   passedModules: number;
+  /** Unread Q&A messages in this topic's thread — shows a badge when > 0. */
+  unreadCount: number;
 }
 
 export interface HomeworkScreenProps {
@@ -30,7 +34,10 @@ function TopicCard({ topic }: { topic: HomeworkTopicSummary }) {
       <p className="text-[11px] font-bold uppercase tracking-wide text-white/40">
         By {topic.teacherUsername}
       </p>
-      <p className="mt-1 truncate text-body-strong text-white">{topic.title}</p>
+      <div className="mt-1 flex items-center gap-2">
+        <p className="truncate text-body-strong text-white">{topic.title}</p>
+        <UnreadBadge count={topic.unreadCount} />
+      </div>
       {topic.description && (
         <p className="mt-0.5 line-clamp-2 text-small text-white/50">{topic.description}</p>
       )}

@@ -1,5 +1,6 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import { getMyGroups } from "@/features/homework/queries";
+import { getUnreadCounts } from "@/features/homework/qa/queries";
 import HomeworkScreen, { type HomeworkTopicSummary } from "@/features/homework/HomeworkScreen";
 import { createClient } from "@/lib/supabase/server";
 
@@ -56,6 +57,7 @@ export default async function HomeworkPage() {
   const topicsWithGrammar = new Set((grammarPointsRes.data ?? []).map((r) => r.topic_id));
   const vocabPassed = new Set((vocabPassRes.data ?? []).map((r) => r.topic_id));
   const grammarPassed = new Set((grammarPassRes.data ?? []).map((r) => r.topic_id));
+  const unreadByTopic = await getUnreadCounts(supabase);
 
   const topicSummaries: HomeworkTopicSummary[] = topics.map((topic) => {
     const hasVocab = topicsWithVocab.has(topic.id);
@@ -71,6 +73,7 @@ export default async function HomeworkPage() {
       teacherUsername: teacherByGroup.get(topic.group_id) ?? "your teacher",
       totalModules,
       passedModules,
+      unreadCount: unreadByTopic.get(topic.id) ?? 0,
     };
   });
 

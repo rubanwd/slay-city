@@ -7,6 +7,7 @@ import { SlayButton } from "@/components/ui";
 import NavLink from "@/components/ui/NavLink";
 import { INPUT_CLASS, LABEL_CLASS } from "@/features/admin/formStyles";
 import ImageUploadField from "@/features/admin/ImageUploadField";
+import UnreadBadge from "@/features/homework/qa/UnreadBadge";
 
 import { deleteHomeworkTopic, updateHomeworkTopic, type TeacherFormState } from "./actions";
 
@@ -25,6 +26,8 @@ export interface HomeworkTopicItemProps {
   wordCount: number;
   /** How many grammar rule points the topic has. */
   grammarCount: number;
+  /** Unread Q&A messages in this topic's thread — shows a badge when > 0. */
+  unreadCount?: number;
   /** False when already on the topic's own tasks page — the title shouldn't link to itself. */
   linkToTasks?: boolean;
 }
@@ -44,6 +47,7 @@ export default function HomeworkTopicItem({
   topic,
   wordCount,
   grammarCount,
+  unreadCount = 0,
   linkToTasks = true,
 }: HomeworkTopicItemProps) {
   // On a topic's own page (linkToTasks === false) the info form is the whole
@@ -120,7 +124,10 @@ export default function HomeworkTopicItem({
 
   const body = (
     <>
-      <p className="truncate text-body-strong text-white">{topic.title}</p>
+      <div className="flex items-center gap-2">
+        <p className="truncate text-body-strong text-white">{topic.title}</p>
+        <UnreadBadge count={unreadCount} />
+      </div>
       {topic.description && (
         <p className="mt-0.5 truncate text-small text-white/50">{topic.description}</p>
       )}

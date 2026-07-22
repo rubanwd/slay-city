@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { SlayButton } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 
-import { deleteTopicMessage, postTopicMessage } from "./actions";
+import { deleteTopicMessage, markTopicRead, postTopicMessage } from "./actions";
 import type { TopicMessage } from "./queries";
 
 export interface TopicChatProps {
@@ -53,8 +53,16 @@ export default function TopicChat({ topicId, currentUserId, initialMessages }: T
     );
   }, [topicId]);
 
+  // Opening the thread (this component only mounts when the chat is visible —
+  // the student intro, or the teacher's expanded Q&A section) counts as reading
+  // it, clearing the unread badge.
+  useEffect(() => {
+    void markTopicRead(topicId);
+  }, [topicId]);
+
   // Live sync: refetch the whole (short) thread on any change to this topic's
-  // messages. RLS on the table gates which events we're allowed to receive.
+  // messages, and mark it read since the user is looking at it. RLS on the
+  // table gates which events we're allowed to receive.
   useEffect(() => {
     const supabase = supabaseRef.current;
     const channel = supabase
@@ -69,6 +77,7 @@ export default function TopicChat({ topicId, currentUserId, initialMessages }: T
         },
         () => {
           void refetch();
+          void markTopicRead(topicId);
         }
       )
       .subscribe();

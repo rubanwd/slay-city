@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { getUnreadCounts } from "@/features/homework/qa/queries";
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import HomeworkTopicForm from "@/features/teacher/HomeworkTopicForm";
 import HomeworkTopicItem from "@/features/teacher/HomeworkTopicItem";
@@ -49,6 +50,8 @@ export default async function GroupHomeworkPage({ params }: GroupHomeworkPagePro
     grammarByTopic.set(row.topic_id, (grammarByTopic.get(row.topic_id) ?? 0) + 1);
   }
 
+  const unreadByTopic = await getUnreadCounts(supabase);
+
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
@@ -68,6 +71,7 @@ export default async function GroupHomeworkPage({ params }: GroupHomeworkPagePro
                 topic={topic}
                 wordCount={wordsByTopic.get(topic.id) ?? 0}
                 grammarCount={grammarByTopic.get(topic.id) ?? 0}
+                unreadCount={unreadByTopic.get(topic.id) ?? 0}
               />
             ))}
           </ul>

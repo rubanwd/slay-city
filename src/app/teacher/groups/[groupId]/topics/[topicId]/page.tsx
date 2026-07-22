@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 
-import TopicChat from "@/features/homework/qa/TopicChat";
-import { getTopicMessages } from "@/features/homework/qa/queries";
+import { getTopicMessages, getUnreadCounts } from "@/features/homework/qa/queries";
 import CollapsibleSection from "@/features/teacher/CollapsibleSection";
 import GrammarCompletions, {
   type GrammarCompletionRow,
@@ -9,6 +8,7 @@ import GrammarCompletions, {
 import GrammarManager from "@/features/teacher/GrammarManager";
 import HomeworkTopicItem from "@/features/teacher/HomeworkTopicItem";
 import TeacherHeader from "@/features/teacher/TeacherHeader";
+import TopicQaSection from "@/features/teacher/TopicQaSection";
 import VocabularyCompletions, {
   type VocabularyCompletionRow,
 } from "@/features/teacher/VocabularyCompletions";
@@ -108,6 +108,7 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
   const members = membersRes.data ?? [];
 
   const messages = await getTopicMessages(supabase, topicId);
+  const unreadCount = (await getUnreadCounts(supabase)).get(topicId) ?? 0;
 
   const vocabPassed = new Set((vocabCompletionsRes.data ?? []).map((r) => r.child_id));
   const vocabRows: VocabularyCompletionRow[] = members.map((m) => ({
@@ -144,13 +145,6 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="Q&A"
-          subtitle={`Shared thread — questions and answers are visible to everyone in ${group.name}.`}
-        >
-          <TopicChat topicId={topicId} currentUserId={teacherId} initialMessages={messages} />
-        </CollapsibleSection>
-
-        <CollapsibleSection
           title="Vocabulary Learning"
           subtitle="Words the group learns as flashcards, plus an auto-built test to check them."
         >
@@ -177,6 +171,14 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
           />
           <GrammarCompletions rows={grammarRows} />
         </CollapsibleSection>
+
+        <TopicQaSection
+          topicId={topicId}
+          groupName={group.name}
+          teacherId={teacherId}
+          initialMessages={messages}
+          initialUnread={unreadCount}
+        />
       </div>
     </main>
   );
