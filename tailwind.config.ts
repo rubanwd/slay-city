@@ -40,6 +40,7 @@ const config: Config = {
         "lime-green": "rgb(var(--color-lime-green) / <alpha-value>)",
         cyan: "rgb(var(--color-cyan) / <alpha-value>)",
         purple: "rgb(var(--color-purple) / <alpha-value>)",
+        "neon-orange": "rgb(var(--color-neon-orange) / <alpha-value>)",
         black: "rgb(var(--color-black) / <alpha-value>)",
         white: "rgb(var(--color-white) / <alpha-value>)",
       },
