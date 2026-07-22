@@ -180,8 +180,8 @@ export default function WelcomeScreen() {
           <div className="relative rounded-3xl bg-gradient-to-b from-purple/20 via-black to-black p-3 animate-glow">
             {/* eslint-disable-next-line @next/next/no-img-element -- local static placeholder illustration */}
             <img
-              src="/mascot-slay.svg"
-              alt="Slay City mascot — a snake wearing headphones and a hoodie"
+              src="/wardrobe/slay-base.webp"
+              alt="Slay City mascot — a friendly green snake"
               className="w-full aspect-square object-contain"
             />
 

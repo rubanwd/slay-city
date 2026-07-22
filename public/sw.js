@@ -1,9 +1,9 @@
-const CACHE_NAME = "slay-city-v2";
+const CACHE_NAME = "slay-city-v3";
 // Images (map backgrounds, location icons, wardrobe art) live in their own
 // cache that survives app-shell version bumps, so a released update never
 // re-downloads the heavy artwork.
 const IMAGE_CACHE = "slay-city-images-v1";
-const PRECACHE_URLS = ["/", "/manifest.json", "/slay_snake.svg"];
+const PRECACHE_URLS = ["/", "/manifest.json", "/wardrobe/slay-base.webp"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

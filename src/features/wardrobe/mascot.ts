@@ -10,7 +10,7 @@
  */
 
 /** Default mascot art shown when no equipped item provides its own preview. */
-export const DEFAULT_MASCOT_IMAGE = "/slay_snake.svg";
+export const DEFAULT_MASCOT_IMAGE = "/wardrobe/slay-base.webp";
 
 export type EquippedMascotItem = {
   /** Dedicated "mascot wearing this item" art. */

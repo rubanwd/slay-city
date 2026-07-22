@@ -13,7 +13,7 @@ export default function AuthBackdrop() {
 
       {/* eslint-disable-next-line @next/next/no-img-element -- decorative background art, blurred/dimmed */}
       <img
-        src="/slay_snake.svg"
+        src="/wardrobe/slay-base.webp"
         alt=""
         className="absolute -bottom-12 -right-14 h-72 w-72 rotate-6 object-contain opacity-15 blur-[2px]"
       />

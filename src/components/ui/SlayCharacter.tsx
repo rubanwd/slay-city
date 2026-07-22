@@ -24,7 +24,7 @@ const SIZE_PX: Record<SlayCharacterSize, number | string> = {
 export default function SlayCharacter({
   size = "md",
   wiggle = false,
-  src = "/mascot-slay.svg",
+  src = "/wardrobe/slay-base.webp",
   className = "",
   "aria-label": ariaLabel = "Slay City snake character",
 }: SlayCharacterProps) {
