@@ -7,7 +7,6 @@ import {
   parseAntonymMatchContent,
   parseCauseEffectContent,
   parseClockReadingContent,
-  parseDigitSpanContent,
   parseSizeOrderContent,
   parseSpotTheDifferenceContent,
 } from "@/features/mission/types";
@@ -21,33 +20,6 @@ import {
   useEmitContent,
   type TaskEditorProps,
 } from "./fields";
-
-export function DigitSpanEditor({ initialContent, onChange }: TaskEditorProps) {
-  const initial = parseDigitSpanContent(initialContent ?? null);
-  const [prompt, setPrompt] = useState(initial?.prompt ?? "Watch the numbers…");
-  const [digitsText, setDigitsText] = useState(initial ? initial.digits.join(", ") : "4, 7, 2, 9");
-
-  useEmitContent(onChange, {
-    prompt,
-    digits: digitsText
-      .split(",")
-      .map((s) => Number(s.trim()))
-      .filter((n) => Number.isFinite(n) && n >= 0 && n <= 9),
-  });
-
-  return (
-    <div className="flex flex-col gap-3">
-      <TextField label="Prompt" value={prompt} onChange={setPrompt} />
-      <TextField
-        label="Digits (in order)"
-        value={digitsText}
-        onChange={setDigitsText}
-        placeholder="4, 7, 2, 9"
-        hint="Comma-separated single digits (0–9) the child must recall in order. 3–6 works best."
-      />
-    </div>
-  );
-}
 
 export function CauseEffectEditor({ initialContent, onChange }: TaskEditorProps) {
   const initial = parseCauseEffectContent(initialContent ?? null);

@@ -1,14 +1,14 @@
 -- SLAY CITY — remove the task types that were never published.
 --
--- Seven task types (listening, math_challenge, number_pattern, compare_size,
--- shape_match, color_mixing, emotion_match) were left unpublished and are being
--- dropped from the product entirely — gameplay components, admin editors, and
--- content parsers are all removed on the frontend. This migration finishes the
--- job in the database: it purges any rows still using these types and then
--- removes the values from the `mission_task_type` enum.
+-- Eight task types (listening, math_challenge, number_pattern, compare_size,
+-- shape_match, color_mixing, emotion_match, digit_span) were left unpublished
+-- and are being dropped from the product entirely — gameplay components, admin
+-- editors, and content parsers are all removed on the frontend. This migration
+-- finishes the job in the database: it purges any rows still using these types
+-- and then removes the values from the `mission_task_type` enum.
 --
 -- Postgres cannot drop a value from an enum in place, so the type is recreated
--- without the seven values and every column keyed on it is re-pointed at the new
+-- without the eight values and every column keyed on it is re-pointed at the new
 -- type. There are no defaults, views, or function signatures on this enum, so a
 -- straight rename → recreate → re-point → drop is safe.
 
@@ -17,25 +17,25 @@
 delete from public.mission_tasks
 where task_type in (
   'listening', 'math_challenge', 'number_pattern', 'compare_size',
-  'shape_match', 'color_mixing', 'emotion_match'
+  'shape_match', 'color_mixing', 'emotion_match', 'digit_span'
 );
 
 delete from public.task_type_templates
 where task_type in (
   'listening', 'math_challenge', 'number_pattern', 'compare_size',
-  'shape_match', 'color_mixing', 'emotion_match'
+  'shape_match', 'color_mixing', 'emotion_match', 'digit_span'
 );
 
 delete from public.homework_vocab_tasks
 where task_type in (
   'listening', 'math_challenge', 'number_pattern', 'compare_size',
-  'shape_match', 'color_mixing', 'emotion_match'
+  'shape_match', 'color_mixing', 'emotion_match', 'digit_span'
 );
 
 delete from public.homework_grammar_tasks
 where task_type in (
   'listening', 'math_challenge', 'number_pattern', 'compare_size',
-  'shape_match', 'color_mixing', 'emotion_match'
+  'shape_match', 'color_mixing', 'emotion_match', 'digit_span'
 );
 
 -- 2. Recreate the enum without the removed values.
@@ -68,7 +68,6 @@ create type public.mission_task_type as enum (
   'rhyme_match',
   'letter_fill',
   'dialogue_choice',
-  'digit_span',
   'cause_effect',
   'analogy',
   'antonym_match',

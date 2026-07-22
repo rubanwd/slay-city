@@ -49,7 +49,6 @@ const TASK_TYPE_LABELS: Record<MissionTaskType, string> = {
   rhyme_match: "Rhyme Match",
   letter_fill: "Missing Letters",
   dialogue_choice: "Pick the Reply",
-  digit_span: "Digit Span",
   cause_effect: "Cause & Effect",
   analogy: "Analogies",
   antonym_match: "Antonym Match",
@@ -99,7 +98,6 @@ const TASK_INSTRUCTIONS: Record<MissionTaskType, string> = {
   rhyme_match: "Tap the word that rhymes with the word shown.",
   letter_fill: "Tap the missing letters, in order, to complete the word.",
   dialogue_choice: "Read the line, then tap the best reply.",
-  digit_span: "Watch the numbers, then tap them back in the same order.",
   cause_effect: "Read the cause, then tap what happens next.",
   analogy: "Figure out the relationship, then tap the matching word.",
   antonym_match: "Tap the word that means the opposite.",
@@ -770,21 +768,6 @@ export function parseDialogueChoiceContent(content: Json): DialogueChoiceContent
 }
 
 /* ── Third wave of new task type content shapes & parsers ──────────────────── */
-
-export interface DigitSpanContent {
-  prompt: string;
-  digits: number[];
-}
-
-export function parseDigitSpanContent(content: Json): DigitSpanContent | null {
-  if (!isRecord(content)) return null;
-  const digits = asNumberArray(content.digits)
-    .map((n) => Math.round(n))
-    .filter((n) => n >= 0 && n <= 9);
-  if (digits.length < 3) return null;
-
-  return { prompt: asString(content.prompt) ?? "Watch the numbers…", digits };
-}
 
 export interface CauseEffectContent {
   cause: string;

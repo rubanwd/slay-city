@@ -1089,7 +1089,6 @@ export type Database = {
         | "rhyme_match"
         | "letter_fill"
         | "dialogue_choice"
-        | "digit_span"
         | "cause_effect"
         | "analogy"
         | "antonym_match"
@@ -1252,7 +1251,6 @@ export const Constants = {
         "rhyme_match",
         "letter_fill",
         "dialogue_choice",
-        "digit_span",
         "cause_effect",
         "analogy",
         "antonym_match",

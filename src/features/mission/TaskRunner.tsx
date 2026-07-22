@@ -12,7 +12,6 @@ import ClockReadingTask from "./ClockReadingTask";
 import CountingGameTask from "./CountingGameTask";
 import CrosswordTask from "./CrosswordTask";
 import DialogueChoiceTask from "./DialogueChoiceTask";
-import DigitSpanTask from "./DigitSpanTask";
 import EmojiDecodeTask from "./EmojiDecodeTask";
 import FillBlankTask from "./FillBlankTask";
 import FlashcardsTask from "./FlashcardsTask";
@@ -46,7 +45,6 @@ import {
   parseCountingGameContent,
   parseCrosswordContent,
   parseDialogueChoiceContent,
-  parseDigitSpanContent,
   parseEmojiDecodeContent,
   parseFillBlankContent,
   parseFlashcardsContent,
@@ -209,10 +207,6 @@ function renderTaskByType(
     case "dialogue_choice": {
       const content = parseDialogueChoiceContent(rawContent);
       return content ? <DialogueChoiceTask content={content} {...props} /> : null;
-    }
-    case "digit_span": {
-      const content = parseDigitSpanContent(rawContent);
-      return content ? <DigitSpanTask content={content} {...props} /> : null;
     }
     case "cause_effect": {
       const content = parseCauseEffectContent(rawContent);

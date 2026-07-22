@@ -8,7 +8,6 @@ import {
   parseCountingGameContent,
   parseCrosswordContent,
   parseDialogueChoiceContent,
-  parseDigitSpanContent,
   parseEmojiDecodeContent,
   parseFillBlankContent,
   parseFlashcardsContent,
@@ -53,7 +52,6 @@ import {
   AntonymMatchEditor,
   CauseEffectEditor,
   ClockReadingEditor,
-  DigitSpanEditor,
   SizeOrderEditor,
   SpotTheDifferenceEditor,
 } from "./cognitiveEditors";
@@ -120,7 +118,6 @@ export const TASK_EDITORS: Partial<Record<MissionTaskType, TaskEditorEntry>> = {
   rhyme_match: { Editor: RhymeMatchEditor, parse: parseRhymeMatchContent },
   letter_fill: { Editor: LetterFillEditor, parse: parseLetterFillContent },
   dialogue_choice: { Editor: DialogueChoiceEditor, parse: parseDialogueChoiceContent },
-  digit_span: { Editor: DigitSpanEditor, parse: parseDigitSpanContent },
   cause_effect: { Editor: CauseEffectEditor, parse: parseCauseEffectContent },
   analogy: { Editor: AnalogyEditor, parse: parseAnalogyContent },
   antonym_match: { Editor: AntonymMatchEditor, parse: parseAntonymMatchContent },
