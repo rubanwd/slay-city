@@ -25,7 +25,6 @@ export interface MissionViewModel {
 const TASK_TYPE_LABELS: Record<MissionTaskType, string> = {
   vocabulary: "Vocabulary",
   matching: "Matching",
-  listening: "Listening",
   quiz: "Quiz",
   snake_game: "Play Snake Game",
   word_scramble: "Word Scramble",
@@ -44,19 +43,12 @@ const TASK_TYPE_LABELS: Record<MissionTaskType, string> = {
   flashcards: "Flashcards",
   story_sequencing: "Story Sequencing",
   counting_game: "Counting Game",
-  math_challenge: "Math Challenge",
   simon_sequence: "Simon Sequence",
   reaction_tap: "Speed Tap",
   picture_reveal: "Picture Reveal",
   rhyme_match: "Rhyme Match",
-  number_pattern: "Pattern Puzzle",
-  compare_size: "Bigger or Smaller",
   letter_fill: "Missing Letters",
   dialogue_choice: "Pick the Reply",
-  shape_match: "Shape Match",
-  color_mixing: "Color Mixing",
-  digit_span: "Digit Span",
-  emotion_match: "Emotion Match",
   cause_effect: "Cause & Effect",
   analogy: "Analogies",
   antonym_match: "Antonym Match",
@@ -73,7 +65,6 @@ export function taskTypeLabel(taskType: MissionTaskType): string {
 const TASK_INSTRUCTIONS: Record<MissionTaskType, string> = {
   vocabulary: "Read the word, its translation, and the example sentence. Tap Next when you're ready.",
   matching: "Tap a word, then tap the picture or translation that goes with it. Match every pair to finish.",
-  listening: "Listen to the audio, then answer the prompt. Tap Next to continue.",
   quiz: "Read the question and tap the answer you think is correct.",
   snake_game:
     "Use the arrows to steer the snake. Eat the letters in the word's order and avoid your own tail — you can pass through the edges.",
@@ -101,19 +92,12 @@ const TASK_INSTRUCTIONS: Record<MissionTaskType, string> = {
   story_sequencing:
     "Use the up and down arrows to put the steps in the right order, then tap Check.",
   counting_game: "Count the objects, then tap the number that matches.",
-  math_challenge: "Solve the equation and tap the correct answer.",
   simon_sequence: "Watch the tiles light up, then tap them back in the same order.",
   reaction_tap: "Tap every correct word before the timer runs out — avoid the wrong ones.",
   picture_reveal: "Tap Reveal to see more of the picture, then tap what it shows.",
   rhyme_match: "Tap the word that rhymes with the word shown.",
-  number_pattern: "Figure out the pattern and tap what comes next.",
-  compare_size: "Read the prompt and tap the correct one of the two.",
   letter_fill: "Tap the missing letters, in order, to complete the word.",
   dialogue_choice: "Read the line, then tap the best reply.",
-  shape_match: "Tap the shape that matches the one shown.",
-  color_mixing: "Guess what color the two colors make when mixed.",
-  digit_span: "Watch the numbers, then tap them back in the same order.",
-  emotion_match: "Tap the word that names the feeling shown.",
   cause_effect: "Read the cause, then tap what happens next.",
   analogy: "Figure out the relationship, then tap the matching word.",
   antonym_match: "Tap the word that means the opposite.",
@@ -645,25 +629,6 @@ export function parseCountingGameContent(content: Json): CountingGameContent | n
   return { prompt: asString(content.prompt) ?? "How many do you see?", emoji, count, options };
 }
 
-export interface MathChallengeContent {
-  question: string;
-  options: string[];
-  correctIndex: number;
-}
-
-export function parseMathChallengeContent(content: Json): MathChallengeContent | null {
-  if (!isRecord(content)) return null;
-  const question = asString(content.question);
-  const options = asStringArray(content.options);
-  if (!question || options.length < 2) return null;
-
-  const correctIndex =
-    asNumber(content.correctIndex ?? content.correct_index) ?? -1;
-  if (correctIndex < 0 || correctIndex >= options.length) return null;
-
-  return { question, options, correctIndex };
-}
-
 export interface SimonSequenceContent {
   prompt: string;
   colors: string[];
@@ -758,61 +723,6 @@ export function parseRhymeMatchContent(content: Json): RhymeMatchContent | null 
   };
 }
 
-export interface NumberPatternContent {
-  prompt: string;
-  sequence: string[];
-  blankIndex: number;
-  options: string[];
-  correctIndex: number;
-}
-
-export function parseNumberPatternContent(content: Json): NumberPatternContent | null {
-  if (!isRecord(content)) return null;
-  const sequence = asStringArray(content.sequence);
-  if (sequence.length < 3) return null;
-
-  const rawBlank = asNumber(content.blankIndex ?? content.blank_index);
-  if (rawBlank === null) return null;
-  const blankIndex = Math.round(rawBlank);
-  if (blankIndex < 0 || blankIndex >= sequence.length) return null;
-
-  const options = asStringArray(content.options);
-  if (options.length < 2) return null;
-
-  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
-  if (correctIndex < 0 || correctIndex >= options.length) return null;
-
-  return { prompt: asString(content.prompt) ?? "What comes next?", sequence, blankIndex, options, correctIndex };
-}
-
-export interface CompareSizeContent {
-  prompt: string;
-  optionA: string;
-  optionB: string;
-  imageUrlA: string | null;
-  imageUrlB: string | null;
-  correctOption: "a" | "b";
-}
-
-export function parseCompareSizeContent(content: Json): CompareSizeContent | null {
-  if (!isRecord(content)) return null;
-  const optionA = asString(content.optionA ?? content.option_a)?.trim();
-  const optionB = asString(content.optionB ?? content.option_b)?.trim();
-  if (!optionA || !optionB) return null;
-
-  const rawCorrect = content.correctOption ?? content.correct_option;
-  if (rawCorrect !== "a" && rawCorrect !== "b") return null;
-
-  return {
-    prompt: asString(content.prompt) ?? "Tap the correct one",
-    optionA,
-    optionB,
-    imageUrlA: asString(content.imageUrlA ?? content.image_url_a),
-    imageUrlB: asString(content.imageUrlB ?? content.image_url_b),
-    correctOption: rawCorrect,
-  };
-}
-
 export interface LetterFillContent {
   word: string;
   hint: string | null;
@@ -858,102 +768,6 @@ export function parseDialogueChoiceContent(content: Json): DialogueChoiceContent
 }
 
 /* ── Third wave of new task type content shapes & parsers ──────────────────── */
-
-export interface ShapeMatchContent {
-  prompt: string;
-  targetShape: string;
-  options: string[];
-  correctIndex: number;
-}
-
-export function parseShapeMatchContent(content: Json): ShapeMatchContent | null {
-  if (!isRecord(content)) return null;
-  const targetShape = asString(content.targetShape ?? content.target_shape);
-  const options = asStringArray(content.options);
-  if (!targetShape || options.length < 2) return null;
-
-  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
-  if (correctIndex < 0 || correctIndex >= options.length) return null;
-
-  return {
-    prompt: asString(content.prompt) ?? "Tap the shape that matches",
-    targetShape,
-    options,
-    correctIndex,
-  };
-}
-
-export interface ColorMixingContent {
-  prompt: string;
-  colorA: string;
-  colorB: string;
-  hexA: string;
-  hexB: string;
-  options: string[];
-  correctIndex: number;
-}
-
-export function parseColorMixingContent(content: Json): ColorMixingContent | null {
-  if (!isRecord(content)) return null;
-  const colorA = asString(content.colorA ?? content.color_a);
-  const colorB = asString(content.colorB ?? content.color_b);
-  const hexA = asString(content.hexA ?? content.hex_a) ?? "#FF3B3B";
-  const hexB = asString(content.hexB ?? content.hex_b) ?? "#3B82F6";
-  const options = asStringArray(content.options);
-  if (!colorA || !colorB || options.length < 2) return null;
-
-  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
-  if (correctIndex < 0 || correctIndex >= options.length) return null;
-
-  return {
-    prompt: asString(content.prompt) ?? "What color do these make together?",
-    colorA,
-    colorB,
-    hexA,
-    hexB,
-    options,
-    correctIndex,
-  };
-}
-
-export interface DigitSpanContent {
-  prompt: string;
-  digits: number[];
-}
-
-export function parseDigitSpanContent(content: Json): DigitSpanContent | null {
-  if (!isRecord(content)) return null;
-  const digits = asNumberArray(content.digits)
-    .map((n) => Math.round(n))
-    .filter((n) => n >= 0 && n <= 9);
-  if (digits.length < 3) return null;
-
-  return { prompt: asString(content.prompt) ?? "Watch the numbers…", digits };
-}
-
-export interface EmotionMatchContent {
-  prompt: string;
-  emoji: string;
-  options: string[];
-  correctIndex: number;
-}
-
-export function parseEmotionMatchContent(content: Json): EmotionMatchContent | null {
-  if (!isRecord(content)) return null;
-  const emoji = asString(content.emoji);
-  const options = asStringArray(content.options);
-  if (!emoji || options.length < 2) return null;
-
-  const correctIndex = asNumber(content.correctIndex ?? content.correct_index) ?? -1;
-  if (correctIndex < 0 || correctIndex >= options.length) return null;
-
-  return {
-    prompt: asString(content.prompt) ?? "How does this feel?",
-    emoji,
-    options,
-    correctIndex,
-  };
-}
 
 export interface CauseEffectContent {
   cause: string;

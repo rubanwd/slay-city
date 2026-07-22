@@ -9,29 +9,22 @@ import BubblePopTask from "./BubblePopTask";
 import CategorySortTask from "./CategorySortTask";
 import CauseEffectTask from "./CauseEffectTask";
 import ClockReadingTask from "./ClockReadingTask";
-import ColorMixingTask from "./ColorMixingTask";
-import CompareSizeTask from "./CompareSizeTask";
 import CountingGameTask from "./CountingGameTask";
 import CrosswordTask from "./CrosswordTask";
 import DialogueChoiceTask from "./DialogueChoiceTask";
-import DigitSpanTask from "./DigitSpanTask";
 import EmojiDecodeTask from "./EmojiDecodeTask";
-import EmotionMatchTask from "./EmotionMatchTask";
 import FillBlankTask from "./FillBlankTask";
 import FlashcardsTask from "./FlashcardsTask";
 import HangmanTask from "./HangmanTask";
 import LetterFillTask from "./LetterFillTask";
-import MathChallengeTask from "./MathChallengeTask";
 import MatchingTask from "./MatchingTask";
 import MemoryCardsTask from "./MemoryCardsTask";
-import NumberPatternTask from "./NumberPatternTask";
 import OddOneOutTask from "./OddOneOutTask";
 import PictureRevealTask from "./PictureRevealTask";
 import QuizTask from "./QuizTask";
 import ReactionTapTask from "./ReactionTapTask";
 import RhymeMatchTask from "./RhymeMatchTask";
 import SentenceBuilderTask from "./SentenceBuilderTask";
-import ShapeMatchTask from "./ShapeMatchTask";
 import SimonSequenceTask from "./SimonSequenceTask";
 import SizeOrderTask from "./SizeOrderTask";
 import SnakeGameTask from "./SnakeGameTask";
@@ -49,29 +42,22 @@ import {
   parseCategorySortContent,
   parseCauseEffectContent,
   parseClockReadingContent,
-  parseColorMixingContent,
-  parseCompareSizeContent,
   parseCountingGameContent,
   parseCrosswordContent,
   parseDialogueChoiceContent,
-  parseDigitSpanContent,
   parseEmojiDecodeContent,
-  parseEmotionMatchContent,
   parseFillBlankContent,
   parseFlashcardsContent,
   parseHangmanContent,
   parseLetterFillContent,
-  parseMathChallengeContent,
   parseMatchingContent,
   parseMemoryCardsContent,
-  parseNumberPatternContent,
   parseOddOneOutContent,
   parsePictureRevealContent,
   parseQuizContent,
   parseReactionTapContent,
   parseRhymeMatchContent,
   parseSentenceBuilderContent,
-  parseShapeMatchContent,
   parseSimonSequenceContent,
   parseSizeOrderContent,
   parseSnakeGameContent,
@@ -198,10 +184,6 @@ function renderTaskByType(
       const content = parseCountingGameContent(rawContent);
       return content ? <CountingGameTask content={content} {...props} /> : null;
     }
-    case "math_challenge": {
-      const content = parseMathChallengeContent(rawContent);
-      return content ? <MathChallengeTask content={content} {...props} /> : null;
-    }
     case "simon_sequence": {
       const content = parseSimonSequenceContent(rawContent);
       return content ? <SimonSequenceTask content={content} {...props} /> : null;
@@ -218,14 +200,6 @@ function renderTaskByType(
       const content = parseRhymeMatchContent(rawContent);
       return content ? <RhymeMatchTask content={content} {...props} /> : null;
     }
-    case "number_pattern": {
-      const content = parseNumberPatternContent(rawContent);
-      return content ? <NumberPatternTask content={content} {...props} /> : null;
-    }
-    case "compare_size": {
-      const content = parseCompareSizeContent(rawContent);
-      return content ? <CompareSizeTask content={content} {...props} /> : null;
-    }
     case "letter_fill": {
       const content = parseLetterFillContent(rawContent);
       return content ? <LetterFillTask content={content} {...props} /> : null;
@@ -233,22 +207,6 @@ function renderTaskByType(
     case "dialogue_choice": {
       const content = parseDialogueChoiceContent(rawContent);
       return content ? <DialogueChoiceTask content={content} {...props} /> : null;
-    }
-    case "shape_match": {
-      const content = parseShapeMatchContent(rawContent);
-      return content ? <ShapeMatchTask content={content} {...props} /> : null;
-    }
-    case "color_mixing": {
-      const content = parseColorMixingContent(rawContent);
-      return content ? <ColorMixingTask content={content} {...props} /> : null;
-    }
-    case "digit_span": {
-      const content = parseDigitSpanContent(rawContent);
-      return content ? <DigitSpanTask content={content} {...props} /> : null;
-    }
-    case "emotion_match": {
-      const content = parseEmotionMatchContent(rawContent);
-      return content ? <EmotionMatchTask content={content} {...props} /> : null;
     }
     case "cause_effect": {
       const content = parseCauseEffectContent(rawContent);

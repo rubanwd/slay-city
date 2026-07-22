@@ -1065,7 +1065,6 @@ export type Database = {
       mission_task_type:
         | "vocabulary"
         | "matching"
-        | "listening"
         | "quiz"
         | "snake_game"
         | "word_scramble"
@@ -1084,19 +1083,12 @@ export type Database = {
         | "flashcards"
         | "story_sequencing"
         | "counting_game"
-        | "math_challenge"
         | "simon_sequence"
         | "reaction_tap"
         | "picture_reveal"
         | "rhyme_match"
-        | "number_pattern"
-        | "compare_size"
         | "letter_fill"
         | "dialogue_choice"
-        | "shape_match"
-        | "color_mixing"
-        | "digit_span"
-        | "emotion_match"
         | "cause_effect"
         | "analogy"
         | "antonym_match"
@@ -1235,7 +1227,6 @@ export const Constants = {
       mission_task_type: [
         "vocabulary",
         "matching",
-        "listening",
         "quiz",
         "snake_game",
         "word_scramble",
@@ -1254,19 +1245,12 @@ export const Constants = {
         "flashcards",
         "story_sequencing",
         "counting_game",
-        "math_challenge",
         "simon_sequence",
         "reaction_tap",
         "picture_reveal",
         "rhyme_match",
-        "number_pattern",
-        "compare_size",
         "letter_fill",
         "dialogue_choice",
-        "shape_match",
-        "color_mixing",
-        "digit_span",
-        "emotion_match",
         "cause_effect",
         "analogy",
         "antonym_match",
