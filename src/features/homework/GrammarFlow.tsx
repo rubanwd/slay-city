@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 
 import { AppContainer, Section } from "@/components/layout";
-import { SlayButton } from "@/components/ui";
+import { SlayButton, XpAmount } from "@/components/ui";
 import HowToPlayButton from "@/features/mission/HowToPlayButton";
 import ProgressBar from "@/features/mission/ProgressBar";
 import TaskRunner from "@/features/mission/TaskRunner";
@@ -38,8 +38,8 @@ type FlowMode = "intro" | "cards" | "test" | "done";
  * The child's grammar learning flow for one topic, the sibling of
  * {@link VocabularyFlow}: step through every rule card (title, explanation,
  * example), then take the AI-built test. Finishing the whole flow records a
- * pass (`completeHomeworkGrammar`) that both the child and the teacher can see.
- * Grants no XP/coins — homework sits outside the map's reward loop.
+ * pass (`completeHomeworkGrammar`) that both the child and the teacher can see,
+ * and grants XP for a first-time pass (coins stay mission-driven).
  */
 export default function GrammarFlow({
   topicId,
@@ -53,6 +53,7 @@ export default function GrammarFlow({
   const [cardIndex, setCardIndex] = useState(0);
   const [taskIndex, setTaskIndex] = useState(0);
   const [passed, setPassed] = useState(alreadyPassed);
+  const [xpEarned, setXpEarned] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, startSave] = useTransition();
 
@@ -70,6 +71,7 @@ export default function GrammarFlow({
         return;
       }
       setPassed(true);
+      setXpEarned(result.xpEarned);
     });
   };
 
@@ -232,6 +234,13 @@ export default function GrammarFlow({
             ? "Saving your progress…"
             : "You studied every rule and finished the test. Your teacher can see it too."}
         </p>
+        {!isSaving && xpEarned > 0 && (
+          <XpAmount
+            value={`+${xpEarned} XP`}
+            label={`Earned ${xpEarned} XP`}
+            className="rounded-full bg-cyan/10 px-4 py-1.5 text-base"
+          />
+        )}
         {error && <p className="text-center text-neon-pink">{error}</p>}
         <div className="flex w-full gap-2">
           <SlayButton variant="green" className="flex-1" onClick={startFlow}>

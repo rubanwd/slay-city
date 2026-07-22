@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { AppContainer, Section } from "@/components/layout";
-import { SlayButton, SlayCharacter } from "@/components/ui";
+import { CoinIcon, SlayButton, SlayCharacter, XpIcon } from "@/components/ui";
 
 export interface RewardScreenProps {
   /** Coins granted for completing the mission */
@@ -153,10 +153,8 @@ export default function RewardScreen({
         >
           {/* Coins */}
           <div className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/5 py-5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400 text-lg font-black text-black">
-              $
-            </span>
-            <span className="text-2xl font-black text-lime-green">+{coins}</span>
+            <CoinIcon size={40} />
+            <span className="text-2xl font-black text-yellow-300">+{coins}</span>
             <span className="text-small font-bold uppercase tracking-wide text-white/50">
               Coins
             </span>
@@ -164,15 +162,7 @@ export default function RewardScreen({
 
           {/* XP */}
           <div className="flex flex-col items-center gap-1.5 rounded-2xl bg-white/5 py-5">
-            <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 2l2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.9 5.9 21.5 7.2 14.7l-5-4.7 6.8-.8z"
-                fill="rgb(var(--color-purple))"
-                stroke="rgb(var(--color-cyan))"
-                strokeWidth="1"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <XpIcon size={40} className="text-cyan" />
             <span className="text-2xl font-black text-cyan">+{xp}</span>
             <span className="text-small font-bold uppercase tracking-wide text-white/50">XP</span>
           </div>

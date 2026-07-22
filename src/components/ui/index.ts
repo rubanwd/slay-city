@@ -17,3 +17,12 @@ export type { RewardModalProps } from "./RewardModal";
 
 export { default as SlayCharacter } from "./SlayCharacter";
 export type { SlayCharacterProps, SlayCharacterSize } from "./SlayCharacter";
+
+export { default as CoinIcon } from "./CoinIcon";
+export type { CoinIconProps } from "./CoinIcon";
+
+export { default as XpIcon } from "./XpIcon";
+export type { XpIconProps } from "./XpIcon";
+
+export { CoinAmount, XpAmount } from "./CurrencyAmount";
+export type { CurrencyAmountProps } from "./CurrencyAmount";

@@ -1077,6 +1077,20 @@ export type Database = {
     }
     Functions: {
       claim_admin: { Args: never; Returns: boolean }
+      complete_homework_grammar: {
+        Args: { p_topic_id: string }
+        Returns: {
+          already_completed: boolean
+          xp_earned: number
+        }[]
+      }
+      complete_homework_vocab: {
+        Args: { p_topic_id: string }
+        Returns: {
+          already_completed: boolean
+          xp_earned: number
+        }[]
+      }
       complete_mission: {
         Args: { p_mission_id: string }
         Returns: {

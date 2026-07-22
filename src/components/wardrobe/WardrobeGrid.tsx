@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
-import { SlayCharacter } from "@/components/ui";
+import { CoinAmount, CoinIcon, SlayCharacter } from "@/components/ui";
 import {
   equipWardrobeItem,
   purchaseWardrobeItem,
@@ -82,9 +82,7 @@ export default function WardrobeGrid({
           ← Map
         </Link>
         <h1 className="text-xl font-bold text-white">Wardrobe</h1>
-        <span className="text-neon-pink font-bold" aria-label={`${coins} coins`}>
-          ✦ {coins}
-        </span>
+        <CoinAmount value={coins} label={`${coins} coins`} className="text-yellow-300" />
       </header>
 
       {/* Mascot preview — reflects the currently equipped outfit. */}
@@ -236,7 +234,14 @@ function WardrobeCard({
           disabled={disabled || unaffordable}
           className="w-full rounded-lg bg-neon-pink px-2 py-1 text-[11px] font-bold text-black hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 transition"
         >
-          {busy ? "…" : `✦ ${item.cost}`}
+          {busy ? (
+            "…"
+          ) : (
+            <span className="inline-flex items-center gap-1">
+              <CoinIcon />
+              {item.cost}
+            </span>
+          )}
         </button>
       )}
     </div>

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
+import { CoinAmount, XpAmount } from "@/components/ui";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
 import { useImageLoaded } from "@/hooks/useImageLoaded";
 import { resetLocationProgress } from "@/features/mission/actions";
@@ -93,9 +94,11 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
           <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-white whitespace-nowrap">
             Lvl {hud.level} · {hud.xp} XP
           </span>
-          <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-yellow-400">
-            🪙 {hud.coins}
-          </span>
+          <CoinAmount
+            value={hud.coins}
+            label={`${hud.coins} coins`}
+            className="px-3 py-1.5 rounded-full bg-white/10 text-sm text-yellow-300"
+          />
         </div>
       </header>
 
@@ -186,8 +189,11 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
             aria-hidden={!isCompleted}
           >
             <div className="overflow-hidden">
-              <p className="pb-2 text-center text-sm font-bold text-white/60">
-                🪙 +{selected.totalCoins} · ⭐ +{selected.totalXp} earned
+              <p className="flex items-center justify-center gap-2 pb-2 text-center text-sm font-bold text-white/60">
+                <CoinAmount value={`+${selected.totalCoins}`} className="text-yellow-300" />
+                <span aria-hidden="true">·</span>
+                <XpAmount value={`+${selected.totalXp}`} />
+                <span>earned</span>
               </p>
             </div>
           </div>
