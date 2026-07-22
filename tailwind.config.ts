@@ -35,6 +35,9 @@ const config: Config = {
         wide: "var(--ls-wide)",
         widest: "var(--ls-widest)",
       },
+      spacing: {
+        "13": "3.25rem",
+      },
       colors: {
         "neon-pink": "rgb(var(--color-neon-pink) / <alpha-value>)",
         "lime-green": "rgb(var(--color-lime-green) / <alpha-value>)",
