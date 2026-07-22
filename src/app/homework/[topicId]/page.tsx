@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import AuthGuard from "@/components/auth/AuthGuard";
 import HomeworkTopicScreen from "@/features/homework/HomeworkTopicScreen";
+import { getTopicMessages } from "@/features/homework/qa/queries";
 import type { MissionTaskViewModel } from "@/features/mission/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -77,6 +78,8 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
     notFound();
   }
 
+  const messages = await getTopicMessages(supabase, topicId);
+
   const vocabWords = (vocabWordsRes.data ?? []).map((w) => ({
     id: w.id,
     word: w.word,
@@ -117,6 +120,8 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
           linkUrl: topic.note_link_url,
           imageUrl: topic.note_image_url,
         }}
+        currentUserId={user.id}
+        initialMessages={messages}
         vocab={
           vocabWords.length > 0
             ? { words: vocabWords, tasks: vocabTasks, passed: Boolean(vocabPassRes.data) }

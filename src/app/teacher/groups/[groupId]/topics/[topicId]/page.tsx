@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import TopicChat from "@/features/homework/qa/TopicChat";
+import { getTopicMessages } from "@/features/homework/qa/queries";
 import CollapsibleSection from "@/features/teacher/CollapsibleSection";
 import GrammarCompletions, {
   type GrammarCompletionRow,
@@ -105,6 +107,8 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
 
   const members = membersRes.data ?? [];
 
+  const messages = await getTopicMessages(supabase, topicId);
+
   const vocabPassed = new Set((vocabCompletionsRes.data ?? []).map((r) => r.child_id));
   const vocabRows: VocabularyCompletionRow[] = members.map((m) => ({
     childId: m.child_id,
@@ -137,6 +141,13 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
               linkToTasks={false}
             />
           </ul>
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Q&A"
+          subtitle={`Shared thread — questions and answers are visible to everyone in ${group.name}.`}
+        >
+          <TopicChat topicId={topicId} currentUserId={teacherId} initialMessages={messages} />
         </CollapsibleSection>
 
         <CollapsibleSection

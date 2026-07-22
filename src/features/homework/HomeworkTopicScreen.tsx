@@ -9,6 +9,8 @@ import NavLink from "@/components/ui/NavLink";
 import type { MissionTaskViewModel } from "@/features/mission/types";
 
 import GrammarFlow from "./GrammarFlow";
+import TopicChat from "./qa/TopicChat";
+import type { TopicMessage } from "./qa/queries";
 import VocabularyFlow from "./VocabularyFlow";
 import type { HomeworkGrammarPoint } from "./grammar";
 import type { HomeworkWord } from "./vocabulary";
@@ -39,6 +41,10 @@ export interface HomeworkTopicScreenProps {
   topic: { id: string; title: string; description: string | null };
   /** Extra context the teacher attached — text, a link, and/or an image, all optional. */
   note: HomeworkTopicNote;
+  /** The signed-in child's id — for the shared Q&A thread. */
+  currentUserId: string;
+  /** Server-rendered Q&A thread, kept live via Realtime inside `TopicChat`. */
+  initialMessages: TopicMessage[];
   /** Vocabulary learning set, when the teacher attached one. */
   vocab?: HomeworkTopicVocab;
   /** Grammar learning set, when the teacher attached one. */
@@ -107,12 +113,15 @@ function ModuleCard({
 /**
  * The child's screen for one homework topic. A topic offers up to two learning
  * modules — Vocabulary ("Learn the Words") and Grammar ("Learn the Grammar") —
- * each launched from the intro screen into its own full-screen flow. Homework
- * grants no XP/coins; it sits outside the map's reward loop.
+ * each launched from the intro screen into its own full-screen flow, plus a
+ * shared Q&A thread with the group and teacher. Homework grants no XP/coins; it
+ * sits outside the map's reward loop.
  */
 export default function HomeworkTopicScreen({
   topic,
   note,
+  currentUserId,
+  initialMessages,
   vocab,
   grammar,
 }: HomeworkTopicScreenProps) {
@@ -199,6 +208,18 @@ export default function HomeworkTopicScreen({
             </SlayButton>
           </div>
         )}
+
+        <div className="mt-2 flex flex-col gap-2">
+          <h2 className="text-label uppercase tracking-widest text-white/50">Q&amp;A</h2>
+          <p className="text-small text-white/40">
+            Ask your teacher or leave a note — everyone in your group can see it.
+          </p>
+          <TopicChat
+            topicId={topic.id}
+            currentUserId={currentUserId}
+            initialMessages={initialMessages}
+          />
+        </div>
       </Section>
     </AppContainer>
   );

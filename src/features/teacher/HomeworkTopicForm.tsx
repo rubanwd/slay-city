@@ -58,15 +58,10 @@ export default function HomeworkTopicForm({ groupId, nextOrder }: HomeworkTopicF
         <textarea name="description" rows={3} className={INPUT_CLASS} />
       </label>
 
-      <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>Extra Info (optional)</span>
-        <textarea
-          name="note_text"
-          rows={3}
-          placeholder="Anything else the student should know before starting"
-          className={INPUT_CLASS}
-        />
-      </label>
+      <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-small text-white/50">
+        A shared Q&amp;A thread opens on this topic once it&apos;s created — you and the group can
+        ask questions and leave notes there.
+      </p>
 
       <label className="flex flex-col gap-1.5">
         <span className={LABEL_CLASS}>Link (optional)</span>
