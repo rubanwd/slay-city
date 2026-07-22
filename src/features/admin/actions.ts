@@ -192,7 +192,7 @@ export async function deleteMission(formData: FormData): Promise<void> {
 /* ── Mission tasks ─────────────────────────────────────────────────────────── */
 
 /**
- * Adds a task (vocabulary/matching/listening/quiz) to a mission. `content` is
+ * Adds a task (vocabulary/matching/quiz/…) to a mission. `content` is
  * free-form JSON stored on the row; callers pass it as a JSON string.
  */
 export async function createMissionTask(

@@ -3,12 +3,9 @@
 import { useState } from "react";
 
 import {
-  parseCompareSizeContent,
   parseCountingGameContent,
   parseDialogueChoiceContent,
   parseLetterFillContent,
-  parseMathChallengeContent,
-  parseNumberPatternContent,
   parsePictureRevealContent,
   parseReactionTapContent,
   parseRhymeMatchContent,
@@ -18,7 +15,6 @@ import {
 import {
   NumberField,
   OptionsField,
-  SelectField,
   StringListField,
   TextAreaField,
   TextField,
@@ -55,28 +51,6 @@ export function CountingGameEditor({ initialContent, onChange }: TaskEditorProps
         addLabel="+ Add choice"
         min={2}
         hint="Include the correct count among these — it's added automatically if you forget."
-      />
-    </div>
-  );
-}
-
-export function MathChallengeEditor({ initialContent, onChange }: TaskEditorProps) {
-  const initial = parseMathChallengeContent(initialContent ?? null);
-  const [question, setQuestion] = useState(initial?.question ?? "");
-  const [options, setOptions] = useState<string[]>(initial?.options ?? ["", ""]);
-  const [correctIndex, setCorrectIndex] = useState(initial?.correctIndex ?? 0);
-
-  useEmitContent(onChange, { question, options: options.filter((o) => o.trim()), correctIndex });
-
-  return (
-    <div className="flex flex-col gap-3">
-      <TextField label="Question" value={question} onChange={setQuestion} placeholder="5 + 3 = ?" />
-      <OptionsField
-        label="Answers (select the correct one)"
-        options={options}
-        correctIndex={correctIndex}
-        onOptionsChange={setOptions}
-        onCorrectChange={setCorrectIndex}
       />
     </div>
   );
@@ -215,90 +189,6 @@ export function RhymeMatchEditor({ initialContent, onChange }: TaskEditorProps) 
         correctIndex={correctIndex}
         onOptionsChange={setOptions}
         onCorrectChange={setCorrectIndex}
-      />
-    </div>
-  );
-}
-
-export function NumberPatternEditor({ initialContent, onChange }: TaskEditorProps) {
-  const initial = parseNumberPatternContent(initialContent ?? null);
-  const [prompt, setPrompt] = useState(initial?.prompt ?? "What comes next?");
-  const [sequence, setSequence] = useState<string[]>(initial?.sequence ?? ["2", "4", "?", "8"]);
-  const [blankIndex, setBlankIndex] = useState(initial?.blankIndex ?? 2);
-  const [options, setOptions] = useState<string[]>(initial?.options ?? ["", ""]);
-  const [correctIndex, setCorrectIndex] = useState(initial?.correctIndex ?? 0);
-
-  useEmitContent(onChange, {
-    prompt,
-    sequence: sequence.map((s) => s.trim()).filter(Boolean),
-    blankIndex,
-    options: options.filter((o) => o.trim()),
-    correctIndex,
-  });
-
-  return (
-    <div className="flex flex-col gap-3">
-      <TextField label="Prompt" value={prompt} onChange={setPrompt} />
-      <StringListField
-        label="Sequence (in order)"
-        values={sequence}
-        onChange={setSequence}
-        placeholder="6"
-        addLabel="+ Add item"
-        min={3}
-        hint="The tile at the blank position is hidden — set its index below."
-      />
-      <NumberField
-        label="Blank position (0 = first item)"
-        value={blankIndex}
-        onChange={setBlankIndex}
-        min={0}
-        max={Math.max(0, sequence.length - 1)}
-      />
-      <OptionsField
-        label="Options (select the correct one)"
-        options={options}
-        correctIndex={correctIndex}
-        onOptionsChange={setOptions}
-        onCorrectChange={setCorrectIndex}
-      />
-    </div>
-  );
-}
-
-export function CompareSizeEditor({ initialContent, onChange }: TaskEditorProps) {
-  const initial = parseCompareSizeContent(initialContent ?? null);
-  const [prompt, setPrompt] = useState(initial?.prompt ?? "Tap the bigger one");
-  const [optionA, setOptionA] = useState(initial?.optionA ?? "");
-  const [optionB, setOptionB] = useState(initial?.optionB ?? "");
-  const [imageUrlA, setImageUrlA] = useState(initial?.imageUrlA ?? "");
-  const [imageUrlB, setImageUrlB] = useState(initial?.imageUrlB ?? "");
-  const [correctOption, setCorrectOption] = useState<"a" | "b">(initial?.correctOption ?? "a");
-
-  useEmitContent(onChange, {
-    prompt,
-    optionA,
-    optionB,
-    imageUrlA: imageUrlA || null,
-    imageUrlB: imageUrlB || null,
-    correctOption,
-  });
-
-  return (
-    <div className="flex flex-col gap-3">
-      <TextField label="Prompt" value={prompt} onChange={setPrompt} />
-      <TextField label="Option A" value={optionA} onChange={setOptionA} placeholder="Elephant" />
-      <TextField label="Option A image URL (optional)" value={imageUrlA} onChange={setImageUrlA} />
-      <TextField label="Option B" value={optionB} onChange={setOptionB} placeholder="Mouse" />
-      <TextField label="Option B image URL (optional)" value={imageUrlB} onChange={setImageUrlB} />
-      <SelectField
-        label="Correct option"
-        value={correctOption}
-        onChange={(v) => setCorrectOption(v as "a" | "b")}
-        options={[
-          { value: "a", label: "Option A" },
-          { value: "b", label: "Option B" },
-        ]}
       />
     </div>
   );

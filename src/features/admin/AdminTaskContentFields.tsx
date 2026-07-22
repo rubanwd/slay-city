@@ -31,7 +31,7 @@ function isRecord(value: Json | undefined): value is { [key: string]: Json } {
  * what `createMissionTask`/`updateMissionTask` expect.
  *
  * Each task type's guided editor lives in the `taskEditors` registry; a type
- * without a registered editor (e.g. `listening`) shows the raw JSON editor only.
+ * without a registered editor shows the raw JSON editor only.
  */
 export default function AdminTaskContentFields({
   taskType,

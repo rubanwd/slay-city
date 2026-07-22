@@ -7,10 +7,7 @@ import {
   parseAntonymMatchContent,
   parseCauseEffectContent,
   parseClockReadingContent,
-  parseColorMixingContent,
   parseDigitSpanContent,
-  parseEmotionMatchContent,
-  parseShapeMatchContent,
   parseSizeOrderContent,
   parseSpotTheDifferenceContent,
 } from "@/features/mission/types";
@@ -24,73 +21,6 @@ import {
   useEmitContent,
   type TaskEditorProps,
 } from "./fields";
-
-export function ShapeMatchEditor({ initialContent, onChange }: TaskEditorProps) {
-  const initial = parseShapeMatchContent(initialContent ?? null);
-  const [prompt, setPrompt] = useState(initial?.prompt ?? "Tap the shape that matches");
-  const [targetShape, setTargetShape] = useState(initial?.targetShape ?? "★");
-  const [options, setOptions] = useState<string[]>(initial?.options ?? ["★", "●", "■"]);
-  const [correctIndex, setCorrectIndex] = useState(initial?.correctIndex ?? 0);
-
-  useEmitContent(onChange, { prompt, targetShape, options: options.filter((o) => o.trim()), correctIndex });
-
-  return (
-    <div className="flex flex-col gap-3">
-      <TextField label="Prompt" value={prompt} onChange={setPrompt} />
-      <TextField label="Target shape" value={targetShape} onChange={setTargetShape} placeholder="★" hint="An emoji or symbol shown large." />
-      <OptionsField
-        label="Shape choices (select the match)"
-        options={options}
-        correctIndex={correctIndex}
-        onOptionsChange={setOptions}
-        onCorrectChange={setCorrectIndex}
-        min={2}
-      />
-    </div>
-  );
-}
-
-export function ColorMixingEditor({ initialContent, onChange }: TaskEditorProps) {
-  const initial = parseColorMixingContent(initialContent ?? null);
-  const [prompt, setPrompt] = useState(initial?.prompt ?? "What color do these make together?");
-  const [colorA, setColorA] = useState(initial?.colorA ?? "Red");
-  const [hexA, setHexA] = useState(initial?.hexA ?? "#FF3B3B");
-  const [colorB, setColorB] = useState(initial?.colorB ?? "Blue");
-  const [hexB, setHexB] = useState(initial?.hexB ?? "#3B82F6");
-  const [options, setOptions] = useState<string[]>(initial?.options ?? ["Purple", "Green", "Orange"]);
-  const [correctIndex, setCorrectIndex] = useState(initial?.correctIndex ?? 0);
-
-  useEmitContent(onChange, {
-    prompt,
-    colorA,
-    hexA,
-    colorB,
-    hexB,
-    options: options.filter((o) => o.trim()),
-    correctIndex,
-  });
-
-  return (
-    <div className="flex flex-col gap-3">
-      <TextField label="Prompt" value={prompt} onChange={setPrompt} />
-      <div className="grid grid-cols-2 gap-3">
-        <TextField label="Color A name" value={colorA} onChange={setColorA} placeholder="Red" />
-        <TextField label="Color A swatch (hex)" value={hexA} onChange={setHexA} placeholder="#FF3B3B" />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <TextField label="Color B name" value={colorB} onChange={setColorB} placeholder="Blue" />
-        <TextField label="Color B swatch (hex)" value={hexB} onChange={setHexB} placeholder="#3B82F6" />
-      </div>
-      <OptionsField
-        label="Resulting color choices"
-        options={options}
-        correctIndex={correctIndex}
-        onOptionsChange={setOptions}
-        onCorrectChange={setCorrectIndex}
-      />
-    </div>
-  );
-}
 
 export function DigitSpanEditor({ initialContent, onChange }: TaskEditorProps) {
   const initial = parseDigitSpanContent(initialContent ?? null);
@@ -114,30 +44,6 @@ export function DigitSpanEditor({ initialContent, onChange }: TaskEditorProps) {
         onChange={setDigitsText}
         placeholder="4, 7, 2, 9"
         hint="Comma-separated single digits (0–9) the child must recall in order. 3–6 works best."
-      />
-    </div>
-  );
-}
-
-export function EmotionMatchEditor({ initialContent, onChange }: TaskEditorProps) {
-  const initial = parseEmotionMatchContent(initialContent ?? null);
-  const [prompt, setPrompt] = useState(initial?.prompt ?? "How does this feel?");
-  const [emoji, setEmoji] = useState(initial?.emoji ?? "😄");
-  const [options, setOptions] = useState<string[]>(initial?.options ?? ["Happy", "Sad", "Angry"]);
-  const [correctIndex, setCorrectIndex] = useState(initial?.correctIndex ?? 0);
-
-  useEmitContent(onChange, { prompt, emoji, options: options.filter((o) => o.trim()), correctIndex });
-
-  return (
-    <div className="flex flex-col gap-3">
-      <TextField label="Prompt" value={prompt} onChange={setPrompt} />
-      <TextField label="Face emoji" value={emoji} onChange={setEmoji} placeholder="😄" />
-      <OptionsField
-        label="Emotion words (select the correct one)"
-        options={options}
-        correctIndex={correctIndex}
-        onOptionsChange={setOptions}
-        onCorrectChange={setCorrectIndex}
       />
     </div>
   );
