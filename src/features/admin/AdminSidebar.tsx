@@ -107,7 +107,7 @@ export default function AdminSidebar() {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="Admin sections"
+            aria-label="Admin menu"
             onClick={handleBackdrop}
             className={`fixed inset-0 z-50 bg-black/70 transition-opacity duration-200 ${
               shown ? "opacity-100" : "opacity-0"
@@ -119,7 +119,7 @@ export default function AdminSidebar() {
               }`}
             >
               <div className="mb-4 flex items-center justify-between gap-3">
-                <span className="text-label uppercase tracking-widest text-white/50">Sections</span>
+                <span className="text-label uppercase tracking-widest text-white/50">Menu</span>
                 <button
                   type="button"
                   onClick={close}
