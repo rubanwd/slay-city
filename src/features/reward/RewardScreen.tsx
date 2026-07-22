@@ -143,7 +143,12 @@ export default function RewardScreen({
           className="rounded-3xl bg-gradient-to-br from-purple/25 to-neon-pink/15 p-3 ring-2 ring-neon-pink/25"
           style={{ animation: "reward-pop 0.6s ease-out 0.1s both" }}
         >
-          <SlayCharacter size="lg" wiggle aria-label="Slay celebrating" />
+          <SlayCharacter
+            size="lg"
+            wiggle
+            src="/wardrobe/slay-hero.webp"
+            aria-label="Slay celebrating"
+          />
         </div>
 
         {/* Reward cards */}
