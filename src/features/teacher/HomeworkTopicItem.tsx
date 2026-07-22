@@ -82,17 +82,6 @@ export default function HomeworkTopicItem({
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL_CLASS}>Extra Info (optional)</span>
-            <textarea
-              name="note_text"
-              rows={3}
-              defaultValue={topic.note_text ?? ""}
-              placeholder="Anything else the student should know before starting"
-              className={INPUT_CLASS}
-            />
-          </label>
-
-          <label className="flex flex-col gap-1.5">
             <span className={LABEL_CLASS}>Link (optional)</span>
             <input
               name="note_link_url"

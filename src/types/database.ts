@@ -248,6 +248,45 @@ export type Database = {
           },
         ]
       }
+      homework_topic_messages: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          topic_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          topic_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_topic_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "homework_topic_messages_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "homework_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_vocab_completions: {
         Row: {
           child_id: string
@@ -1014,6 +1053,17 @@ export type Database = {
         }[]
       }
       equip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
+      get_topic_messages: {
+        Args: { p_topic_id: string }
+        Returns: {
+          author_id: string
+          author_is_teacher: boolean
+          author_username: string
+          body: string
+          created_at: string
+          id: string
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       is_group_member: { Args: { p_group_id: string }; Returns: boolean }
       is_linked_child: { Args: { p_child_id: string }; Returns: boolean }

@@ -55,7 +55,6 @@ export async function createHomeworkTopic(
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
-  const noteText = String(formData.get("note_text") ?? "").trim();
   const noteLinkUrl = parseOptionalUrl(formData.get("note_link_url"));
   const noteImageUrl = parseOptionalUrl(formData.get("note_image_url"));
 
@@ -70,7 +69,6 @@ export async function createHomeworkTopic(
     title,
     description: description || null,
     order_index: orderIndex,
-    note_text: noteText || null,
     note_link_url: noteLinkUrl,
     note_image_url: noteImageUrl,
   });
@@ -94,7 +92,6 @@ export async function updateHomeworkTopic(
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
-  const noteText = String(formData.get("note_text") ?? "").trim();
   const noteLinkUrl = parseOptionalUrl(formData.get("note_link_url"));
   const noteImageUrl = parseOptionalUrl(formData.get("note_image_url"));
 
@@ -110,7 +107,6 @@ export async function updateHomeworkTopic(
       title,
       description: description || null,
       order_index: orderIndex,
-      note_text: noteText || null,
       note_link_url: noteLinkUrl,
       note_image_url: noteImageUrl,
     })
