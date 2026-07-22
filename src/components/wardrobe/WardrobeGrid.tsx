@@ -186,7 +186,7 @@ function WardrobeCard({
       <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-white/5">
         {item.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- catalog art, remote or static
-          <img src={item.imageUrl} alt="" className="h-full w-full rounded-xl object-cover" />
+          <img src={item.imageUrl} alt="" className="h-full w-full rounded-xl object-contain p-1" />
         ) : (
           <span className="text-4xl">{wardrobeCategoryEmoji(item.category)}</span>
         )}
