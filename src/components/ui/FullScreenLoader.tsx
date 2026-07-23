@@ -13,6 +13,12 @@ export interface FullScreenLoaderProps {
    * off on admin/tooling surfaces, where a mascot on every navigation is noise.
    */
   mascot?: boolean;
+  /**
+   * Which mascot artwork to show — pass the player's resolved equipped look
+   * (see `loadMascotImage`/`readMascotImageCookie`) so this matches Wardrobe.
+   * Defaults to the plain base snake when the caller doesn't know it.
+   */
+  mascotImageUrl?: string;
 }
 
 /**
@@ -25,6 +31,7 @@ export default function FullScreenLoader({
   label,
   fullScreen = true,
   mascot = true,
+  mascotImageUrl = DEFAULT_MASCOT_IMAGE,
 }: FullScreenLoaderProps) {
   return (
     <div
@@ -40,7 +47,7 @@ export default function FullScreenLoader({
         <div className="flex flex-col items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={DEFAULT_MASCOT_IMAGE}
+            src={mascotImageUrl}
             alt=""
             aria-hidden="true"
             className="h-24 w-24 object-contain drop-shadow-[0_0_20px_rgba(157,255,0,0.45)] animate-loader-bob"
