@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { parseFlashcardsContent, parseStorySequencingContent } from "@/features/mission/types";
 
+import TaskImageField from "../TaskImageField";
 import { INPUT_CLASS, LABEL_CLASS } from "../formStyles";
 import { ADD_BTN, REMOVE_BTN, TextField, useEmitContent, type TaskEditorProps } from "./fields";
 
@@ -56,11 +57,12 @@ export function FlashcardsEditor({ initialContent, onChange }: TaskEditorProps) 
               placeholder="Back (e.g. собака)"
               className={INPUT_CLASS}
             />
-            <input
+            <TaskImageField
+              label="Image (optional)"
               value={card.imageUrl}
-              onChange={(e) => update(i, { imageUrl: e.target.value })}
-              placeholder="Image URL (optional)"
-              className={INPUT_CLASS}
+              onChange={(url) => update(i, { imageUrl: url })}
+              subject={card.front}
+              context={card.back}
             />
           </div>
         ))}
