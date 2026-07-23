@@ -10,9 +10,14 @@ import {
   type MatchingMode,
 } from "@/features/mission/types";
 
+import TaskImageField from "../TaskImageField";
+import { INPUT_CLASS, LABEL_CLASS } from "../formStyles";
+
 import {
+  ADD_BTN,
   OptionsField,
   PairListField,
+  REMOVE_BTN,
   SelectField,
   TextField,
   useEmitContent,
@@ -38,7 +43,13 @@ export function VocabularyEditor({ initialContent, onChange }: TaskEditorProps) 
     <div className="flex flex-col gap-3">
       <TextField label="Word" value={word} onChange={setWord} />
       <TextField label="Translation" value={translation} onChange={setTranslation} />
-      <TextField label="Image URL" value={imageUrl} onChange={setImageUrl} />
+      <TaskImageField
+        label="Image (optional)"
+        value={imageUrl}
+        onChange={setImageUrl}
+        subject={word}
+        context={translation}
+      />
       <TextField label="Example Sentence" value={exampleSentence} onChange={setExampleSentence} />
     </div>
   );
@@ -75,12 +86,64 @@ export function MatchingEditor({ initialContent, onChange }: TaskEditorProps) {
           { value: "word-to-translation", label: "Word to Translation" },
         ]}
       />
-      <PairListField
-        label="Pairs"
-        pairs={pairs}
-        onChange={setPairs}
-        matchPlaceholder={mode === "word-to-image" ? "Image URL" : "Translation"}
-      />
+      {mode === "word-to-image" ? (
+        <MatchingImagePairs pairs={pairs} onChange={setPairs} />
+      ) : (
+        <PairListField label="Pairs" pairs={pairs} onChange={setPairs} matchPlaceholder="Translation" />
+      )}
+    </div>
+  );
+}
+
+/** Word/image pair list for matching's word-to-image mode: each pair gets a
+ *  word input plus a full upload-or-generate image control for its picture. */
+function MatchingImagePairs({
+  pairs,
+  onChange,
+}: {
+  pairs: EditablePair[];
+  onChange: (pairs: EditablePair[]) => void;
+}) {
+  const update = (i: number, patch: Partial<EditablePair>) =>
+    onChange(pairs.map((p, idx) => (idx === i ? { ...p, ...patch } : p)));
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className={LABEL_CLASS}>Pairs</span>
+      {pairs.map((pair, i) => (
+        <div key={i} className="flex flex-col gap-2 rounded-xl border border-white/10 p-3">
+          <div className="flex items-center gap-2">
+            <input
+              value={pair.word}
+              onChange={(e) => update(i, { word: e.target.value })}
+              placeholder="Word (e.g. Bread)"
+              className={INPUT_CLASS}
+            />
+            <button
+              type="button"
+              onClick={() => onChange(pairs.filter((_, idx) => idx !== i))}
+              disabled={pairs.length <= 2}
+              className={REMOVE_BTN}
+            >
+              ✕
+            </button>
+          </div>
+          <TaskImageField
+            label="Picture"
+            value={pair.match}
+            onChange={(url) => update(i, { match: url })}
+            subject={pair.word}
+            required
+          />
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...pairs, { word: "", match: "" }])}
+        className={ADD_BTN}
+      >
+        + Add pair
+      </button>
     </div>
   );
 }
@@ -99,10 +162,17 @@ export function QuizEditor({ initialContent, onChange }: TaskEditorProps) {
     correctIndex,
   });
 
+  const subject = options[correctIndex]?.trim() || question;
+
   return (
     <div className="flex flex-col gap-3">
       <TextField label="Question" value={question} onChange={setQuestion} />
-      <TextField label="Image URL" value={imageUrl} onChange={setImageUrl} />
+      <TaskImageField
+        label="Image (optional)"
+        value={imageUrl}
+        onChange={setImageUrl}
+        subject={subject}
+      />
       <OptionsField
         label="Options (select the correct one)"
         options={options}
