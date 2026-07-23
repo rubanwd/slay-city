@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 
+import { loadMascotImage, writeMascotImageCookie } from "./loadMascot";
+
 export type PurchaseResult =
   | { ok: true; coinsRemaining: number }
   | { ok: false; error: string };
@@ -62,6 +64,7 @@ export async function equipWardrobeItem(itemId: string): Promise<EquipResult> {
     return { ok: false, error: translateEquipError(error.message) };
   }
 
+  await writeMascotImageCookie(await loadMascotImage(supabase, user.id));
   revalidatePath("/wardrobe");
   return { ok: true };
 }
@@ -82,6 +85,7 @@ export async function unequipWardrobeItem(itemId: string): Promise<EquipResult> 
     return { ok: false, error: error.message };
   }
 
+  await writeMascotImageCookie(await loadMascotImage(supabase, user.id));
   revalidatePath("/wardrobe");
   return { ok: true };
 }

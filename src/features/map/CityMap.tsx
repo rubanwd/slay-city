@@ -167,7 +167,11 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
         </div>
 
         {activeBackgroundUrl && !bgLoaded && (
-          <FullScreenLoader fullScreen={false} label="Loading map…" />
+          <FullScreenLoader
+            fullScreen={false}
+            label="Loading map…"
+            mascotImageUrl={mascotImageUrl}
+          />
         )}
       </div>
 
