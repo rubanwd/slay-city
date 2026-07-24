@@ -172,6 +172,33 @@ body {
   animation: banner-drop 0.35s ease-out both;
 }
 
+/* ── Flashcard 3D flip ─────────────────────────────────────────────────────
+   The flashcard task rotates a card in 3D space instead of cross-fading:
+   a perspective scene holds a preserve-3d inner layer with the front and
+   back faces stacked and counter-rotated, so only one is ever visible. */
+
+.flip-card-scene {
+  perspective: 1600px;
+}
+
+.flip-card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.flip-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-face--back {
+  transform: rotateY(180deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-loader-bob,
   .animate-loader-shadow,
@@ -181,5 +208,9 @@ body {
   .logo-shimmer,
   .animate-banner-drop {
     animation: none;
+  }
+
+  .flip-card-inner {
+    transition: none;
   }
 }
