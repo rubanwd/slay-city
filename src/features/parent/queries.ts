@@ -103,3 +103,38 @@ export async function getParentProgressSummary(
     recentActivity,
   };
 }
+
+/** The child a parent follows, once the accounts are linked. */
+export interface LinkedChild {
+  id: string;
+  username: string | null;
+}
+
+/**
+ * The child account linked to this parent, or null while none is (the child
+ * hasn't registered yet). Reads the link the dashboard establishes via
+ * `link_child_by_email` — this is the read-only half, used by screens that
+ * show the child's progress without owning the linking flow.
+ */
+export async function getLinkedChild(
+  supabase: SupabaseServerClient,
+  parentId: string
+): Promise<LinkedChild | null> {
+  const { data: links } = await supabase
+    .from("parent_child_links")
+    .select("child_id")
+    .eq("parent_id", parentId)
+    .order("created_at")
+    .limit(1);
+
+  const childId = links?.[0]?.child_id;
+  if (!childId) return null;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id", childId)
+    .maybeSingle();
+
+  return { id: childId, username: profile?.username ?? null };
+}

@@ -10,7 +10,12 @@ import { useImageLoaded } from "@/hooks/useImageLoaded";
 import MapBackground from "./MapBackground";
 import { MAP_ASPECT } from "./mapConstants";
 import MapLocationNode from "./MapLocationNode";
-import { MAX_VISIBLE_LOCATIONS, selectVisibleLocations } from "./mapState";
+import {
+  defaultPreviewDistrictIndex,
+  isDistrictCompleted,
+  MAX_VISIBLE_LOCATIONS,
+  selectVisibleLocations,
+} from "./mapState";
 import type { MapDistrictViewModel } from "./mapState";
 
 /** ‹ / › district stepper — the adults' stand-in for playing through the city. */
@@ -49,17 +54,25 @@ export interface CityMapPreviewProps {
   role: "parent" | "teacher";
   /** One-line explanation under the title, e.g. whose city this is. */
   subtitle: string;
+  /**
+   * Whose progress the ✓ marks and mission counts reflect — a child's name, or
+   * something like "every student". Null when no progress is tracked (no child
+   * linked, no students yet), and then the map shows content only.
+   */
+  progressLabel?: string | null;
 }
 
 /**
  * Read-only city map for the adult consoles: the same frame, artwork and
  * location labels children see on `/map`, with nothing to play.
  *
- * Two things make it a preview rather than the game screen. There is no
- * progress to render — an adult account has none — so no stop is ever
- * "completed" and there is no Start button, mascot or XP/coin HUD; and since
- * progress is also what walks a child from district to district, adults step
- * through the level's districts by hand with the pager below the title.
+ * Two things make it a preview rather than the game screen. There is nothing to
+ * play — no Start button, no mascot, no XP/coin HUD — and the progress shown is
+ * not the viewer's but that of whoever they follow: a parent's child, a
+ * teacher's students (see `loadMapPreview`). Since it is a child's own progress
+ * that walks them from district to district, adults step through the level's
+ * districts by hand with the pager below the title; it opens on the first
+ * district the followed players have not finished.
  *
  * Which level is shown comes from the viewer's own profile (Elementary by
  * default, changeable on their profile screen), so this always mirrors a real
@@ -70,8 +83,11 @@ export default function CityMapPreview({
   levelName,
   role,
   subtitle,
+  progressLabel = null,
 }: CityMapPreviewProps) {
-  const [districtIndex, setDistrictIndex] = useState(0);
+  const [districtIndex, setDistrictIndex] = useState(() =>
+    defaultPreviewDistrictIndex(districts)
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const district = districts[districtIndex] ?? null;
@@ -113,6 +129,9 @@ export default function CityMapPreview({
             />
             <div className="min-w-0 text-center">
               <p className="truncate text-body-strong font-black uppercase tracking-wide text-white">
+                {district && isDistrictCompleted(district) && (
+                  <span className="text-lime-green">✓ </span>
+                )}
                 {district?.name}
               </p>
               <p className="text-label uppercase tracking-widest text-white/40">
@@ -127,6 +146,12 @@ export default function CityMapPreview({
               disabled={districtIndex === districts.length - 1}
             />
           </div>
+
+          {progressLabel && (
+            <p className="shrink-0 border-b border-white/10 px-5 py-1.5 text-center text-label uppercase tracking-widest text-lime-green/80">
+              ✓ completed by {progressLabel}
+            </p>
+          )}
 
           {/*
             Same coordinate space as the child map: a MAP_ASPECT-ratio frame
@@ -170,7 +195,7 @@ export default function CityMapPreview({
                     name={location.name}
                     mapX={location.mapX}
                     mapY={location.mapY}
-                    state="unlocked"
+                    state={location.state}
                     selected={location.id === selected?.id}
                     onSelect={() => setSelectedId(location.id)}
                   />
@@ -194,9 +219,21 @@ export default function CityMapPreview({
                     {selected.name}
                   </h2>
                   {selected.totalMissions > 0 && (
-                    <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-xs font-bold text-white/70 whitespace-nowrap">
-                      {selected.totalMissions}{" "}
-                      {selected.totalMissions === 1 ? "mission" : "missions"}
+                    <span
+                      className={[
+                        "shrink-0 rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap",
+                        selected.state === "completed"
+                          ? "bg-lime-green/15 text-lime-green"
+                          : "bg-white/10 text-white/70",
+                      ].join(" ")}
+                    >
+                      {/* Without followed players every count would read "0 of n" — misleading,
+                          since nobody's progress is being shown at all. */}
+                      {progressLabel
+                        ? `${selected.missionsCompleted}/${selected.totalMissions} missions`
+                        : `${selected.totalMissions} ${
+                            selected.totalMissions === 1 ? "mission" : "missions"
+                          }`}
                     </span>
                   )}
                 </div>
@@ -210,7 +247,7 @@ export default function CityMapPreview({
                     <CoinAmount value={`+${selected.totalCoins}`} className="text-yellow-300" />
                     <span aria-hidden="true">·</span>
                     <XpAmount value={`+${selected.totalXp}`} />
-                    <span>to earn here</span>
+                    <span>{selected.state === "completed" ? "earned here" : "to earn here"}</span>
                   </p>
                 )}
               </>

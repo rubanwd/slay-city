@@ -1,4 +1,4 @@
-import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
+import { BottomNav, ScrollScreen, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import { signOut } from "@/features/auth/actions";
 
 import type { ParentProgressSummary } from "./queries";
@@ -123,7 +123,7 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
   // ── Not linked to a child account yet ──────────────────────────────────
   if (!summary) {
     return (
-      <main className="min-h-screen bg-black text-white">
+      <ScrollScreen footer={<BottomNav role="parent" />}>
         <div className={`mx-auto flex w-full max-w-md flex-col px-5 ${BOTTOM_NAV_CLEARANCE}`}>
           {header}
           <section className="mt-2 flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-5 py-10 text-center">
@@ -149,8 +149,7 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
             </p>
           </section>
         </div>
-        <BottomNav role="parent" />
-      </main>
+      </ScrollScreen>
     );
   }
 
@@ -168,7 +167,7 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
     totalLocations > 0 ? Math.round((locationsUnlocked / totalLocations) * 100) : 0;
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <ScrollScreen footer={<BottomNav role="parent" />}>
       <div className={`mx-auto flex w-full max-w-md flex-col px-5 ${BOTTOM_NAV_CLEARANCE}`}>
         {header}
 
@@ -268,7 +267,6 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
           )}
         </section>
       </div>
-      <BottomNav role="parent" />
-    </main>
+    </ScrollScreen>
   );
 }

@@ -195,6 +195,21 @@ export function isLevelCompleted(districts: MapDistrictViewModel[]): boolean {
 }
 
 /**
+ * Which district the read-only preview map opens on: the first one the followed
+ * players have not finished — where their play is actually happening. Falls
+ * back to the first district when everything is done (or when no progress is
+ * being tracked at all, since then nothing is completed).
+ */
+export function defaultPreviewDistrictIndex(districts: MapDistrictViewModel[]): number {
+  const index = districts.findIndex(
+    (district) =>
+      district.locations.length > 0 &&
+      district.locations.some((location) => location.state !== "completed")
+  );
+  return index === -1 ? 0 : index;
+}
+
+/**
  * Where the mascot stands when the map opens: the earliest stop that still has
  * a mission to play. Falls back to the first location when everything in the
  * district is completed.

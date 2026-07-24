@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildLocationProgress,
   buildMapViewModel,
+  defaultPreviewDistrictIndex,
   defaultSelectedLocation,
   isLevelCompleted,
   selectActiveDistrict,
@@ -308,5 +309,65 @@ describe("buildMapViewModel reward totals", () => {
       ["l1", 30, 20],
       ["l2", 0, 0],
     ]);
+  });
+});
+
+describe("defaultPreviewDistrictIndex", () => {
+  const twoDistricts = [
+    { id: "d1", name: "Central Plaza", order_index: 0, background_image_url: null },
+    { id: "d2", name: "Second District", order_index: 1, background_image_url: null },
+  ];
+  const twoDistrictLocations = [
+    ...locations,
+    {
+      id: "l3",
+      district_id: "d2",
+      name: "Other District First Stop",
+      description: null,
+      order_index: 0,
+      map_x: 10,
+      map_y: 10,
+      icon_url: null,
+    },
+  ];
+
+  it("opens on the first district the followed players have not finished", () => {
+    const vm = buildMapViewModel(twoDistricts, twoDistrictLocations, new Set(["l1", "l2"]), new Map());
+
+    expect(defaultPreviewDistrictIndex(vm)).toBe(1);
+  });
+
+  it("opens on the first district when nothing is completed", () => {
+    const vm = buildMapViewModel(twoDistricts, twoDistrictLocations, new Set(), new Map());
+
+    expect(defaultPreviewDistrictIndex(vm)).toBe(0);
+  });
+
+  it("falls back to the first district once everything is completed", () => {
+    const vm = buildMapViewModel(
+      twoDistricts,
+      twoDistrictLocations,
+      new Set(["l1", "l2", "l3"]),
+      new Map()
+    );
+
+    expect(defaultPreviewDistrictIndex(vm)).toBe(0);
+  });
+
+  it("skips districts that have no locations yet", () => {
+    const vm = buildMapViewModel(
+      [twoDistricts[1], twoDistricts[0]].map((d, i) => ({ ...d, order_index: i })),
+      locations.map((loc) => ({ ...loc, district_id: "d1" })),
+      new Set(),
+      new Map()
+    );
+
+    // d2 sorts first here and is empty, so the first district with something
+    // to show wins.
+    expect(defaultPreviewDistrictIndex(vm)).toBe(1);
+  });
+
+  it("returns 0 for an empty city", () => {
+    expect(defaultPreviewDistrictIndex([])).toBe(0);
   });
 });

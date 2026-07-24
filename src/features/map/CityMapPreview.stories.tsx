@@ -83,6 +83,23 @@ type Story = StoryObj<typeof CityMapPreview>;
 
 export const Parent: Story = {};
 
+/** The child has finished the first stop — the map marks it and counts missions. */
+export const WithChildProgress: Story = {
+  args: {
+    progressLabel: "Piotre",
+    districts: [
+      {
+        ...DISTRICTS[0],
+        locations: [
+          { ...DISTRICTS[0].locations[0], state: "completed", missionsCompleted: 3 },
+          { ...DISTRICTS[0].locations[1], missionsCompleted: 1 },
+        ],
+      },
+      DISTRICTS[1],
+    ],
+  },
+};
+
 export const Teacher: Story = {
   args: { role: "teacher", subtitle: "What your students explore" },
 };

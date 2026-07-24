@@ -1,4 +1,4 @@
-import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
+import { BottomNav, ScrollScreen, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import NavLink from "@/components/ui/NavLink";
 import { signOut } from "@/features/auth/actions";
 
@@ -58,7 +58,7 @@ export default function TeacherDashboard({ groups, username, email }: TeacherDas
 
   if (groups.length === 0) {
     return (
-      <main className="min-h-screen bg-black text-white">
+      <ScrollScreen footer={<BottomNav role="teacher" />}>
         <div className={`mx-auto flex w-full max-w-md flex-col px-5 ${BOTTOM_NAV_CLEARANCE}`}>
           {header}
           <section className="mt-2 flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-5 py-10 text-center">
@@ -86,13 +86,12 @@ export default function TeacherDashboard({ groups, username, email }: TeacherDas
             </p>
           </section>
         </div>
-        <BottomNav role="teacher" />
-      </main>
+      </ScrollScreen>
     );
   }
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <ScrollScreen footer={<BottomNav role="teacher" />}>
       <div className={`mx-auto flex w-full max-w-md flex-col px-5 ${BOTTOM_NAV_CLEARANCE}`}>
         {header}
 
@@ -128,7 +127,6 @@ export default function TeacherDashboard({ groups, username, email }: TeacherDas
           ))}
         </div>
       </div>
-      <BottomNav role="teacher" />
-    </main>
+    </ScrollScreen>
   );
 }
