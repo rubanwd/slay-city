@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -78,9 +77,6 @@ export default function WardrobeGrid({
   return (
     <main className="min-h-screen bg-black flex flex-col mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <Link href="/map" className="text-white/40 text-sm hover:text-white transition-colors">
-          ← Map
-        </Link>
         <h1 className="text-xl font-bold text-white">Wardrobe</h1>
         <CoinAmount value={coins} label={`${coins} coins`} className="text-yellow-300" />
       </header>
