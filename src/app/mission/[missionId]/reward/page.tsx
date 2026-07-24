@@ -36,7 +36,7 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
   // otherwise there is no reward data to display, so send them back to the map.
   const { data: progress } = await supabase
     .from("user_progress")
-    .select("id")
+    .select("id, xp_earned, coins_earned")
     .eq("profile_id", user.id)
     .eq("mission_id", missionId)
     .maybeSingle();
@@ -44,6 +44,12 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
   if (!progress) {
     redirect("/map");
   }
+
+  // Show what was actually granted (which can be a partial share when the player
+  // finished a game early), falling back to the mission's full reward for older
+  // completions recorded before per-completion amounts were tracked.
+  const xpEarned = progress.xp_earned ?? mission.xp_reward;
+  const coinsEarned = progress.coins_earned ?? mission.coin_reward;
 
   const { data: tasks } = await supabase
     .from("mission_tasks")
@@ -119,8 +125,8 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
   return (
     <AuthGuard>
       <RewardScreen
-        coins={mission.coin_reward}
-        xp={mission.xp_reward}
+        coins={coinsEarned}
+        xp={xpEarned}
         missionTitle={mission.title}
         taskNames={taskNames}
         continueHref={continueHref}

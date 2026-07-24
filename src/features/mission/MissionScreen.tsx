@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 import { AppContainer, Section } from "@/components/layout";
 import { SlayButton } from "@/components/ui";
@@ -33,14 +33,20 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, startSubmit] = useTransition();
 
+  // Running share of the mission reward the player has earned. Tasks that can be
+  // finished early (the word search) report a fraction in [0, 1]; every fully
+  // completed task reports 1. Multiplying keeps the mission reward proportional
+  // to how much of it the player actually completed.
+  const rewardFractionRef = useRef(1);
+
   const total = tasks.length;
   const currentTask = tasks[currentIndex];
   const isLastTask = currentIndex === total - 1;
 
-  const finishMission = () => {
+  const finishMission = (rewardFraction: number) => {
     setError(null);
     startSubmit(async () => {
-      const result = await submitMissionCompletion(mission.id);
+      const result = await submitMissionCompletion(mission.id, rewardFraction);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -49,9 +55,11 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
     });
   };
 
-  const handleTaskComplete = () => {
+  const handleTaskComplete = (rewardFraction = 1) => {
+    const fraction = Math.min(1, Math.max(0, rewardFraction));
+    rewardFractionRef.current *= fraction;
     if (isLastTask) {
-      finishMission();
+      finishMission(rewardFractionRef.current);
     } else {
       setCurrentIndex((index) => index + 1);
     }
@@ -142,7 +150,11 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
           {error && (
             <div className="flex flex-col items-center gap-3">
               <p className="text-neon-pink text-center">{error}</p>
-              <SlayButton variant="pink" onClick={finishMission} loading={isSubmitting}>
+              <SlayButton
+                variant="pink"
+                onClick={() => finishMission(rewardFractionRef.current)}
+                loading={isSubmitting}
+              >
                 Try Again
               </SlayButton>
             </div>

@@ -293,7 +293,7 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                 ].join(" ")}
               >
-                <span className="truncate">▶ Start {selected.name}</span>
+                <span className="truncate">▶ Start</span>
               </Link>
             ) : (
               <div
@@ -301,7 +301,7 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
                 aria-disabled="true"
               >
                 <span className="truncate">
-                  {isCompleted ? `✓ ${selected.name} completed` : "Coming soon"}
+                  {isCompleted ? "✓ Completed" : "Coming soon"}
                 </span>
               </div>
             )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SlayButton } from "@/components/ui";
 
@@ -8,7 +8,12 @@ import type { WordSearchContent } from "./types";
 
 export interface WordSearchTaskProps {
   content: WordSearchContent;
-  onComplete: () => void;
+  /**
+   * Called when the player moves on. The argument is the share of words found
+   * (0–1); the mission still counts as completed, but the reward is scaled by
+   * this fraction. Finding every word passes 1.
+   */
+  onComplete: (rewardFraction?: number) => void;
   actionLabel?: string;
 }
 
@@ -68,6 +73,69 @@ function generateGrid(words: string[], size: number): Generated {
 
 const cellKey = (r: number, c: number) => `${r},${c}`;
 
+const HINT_TEXT =
+  "Words are hidden horizontally, vertically, and diagonally — and can read forwards or backwards. Tap the first letter of a word, then tap its last letter.";
+
+/** A small "?" icon beside the prompt that toggles a how-to-play tooltip. */
+function HintButton() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-label="How to play"
+        aria-expanded={open}
+        className={[
+          "flex h-7 w-7 items-center justify-center rounded-full border transition-colors",
+          open
+            ? "border-cyan bg-cyan/15 text-cyan"
+            : "border-white/20 text-white/70 hover:bg-white/10 hover:text-white",
+        ].join(" ")}
+      >
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+          <path
+            d="M6 6a2 2 0 1 1 2.6 1.9c-.4.15-.6.5-.6.9v.7"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+          <circle cx="8" cy="11.6" r="0.95" fill="currentColor" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          role="tooltip"
+          className="absolute left-1/2 top-9 z-30 w-64 -translate-x-1/2 rounded-2xl border border-white/15 bg-[#1a1a1a] p-4 shadow-xl shadow-black/50"
+        >
+          <p className="mb-1.5 text-label uppercase tracking-widest text-cyan">How to play</p>
+          <p className="text-small leading-relaxed text-white/80">{HINT_TEXT}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * A word-search puzzle. The child taps the first and last letter of a word; if
  * the straight line between them spells one of the hidden words (in either
@@ -87,7 +155,9 @@ export default function WordSearchTask({
   const [found, setFound] = useState<Set<string>>(new Set());
   const [foundCells, setFoundCells] = useState<Set<string>>(new Set());
 
-  const won = found.size === placed.length && placed.length > 0;
+  const total = placed.length;
+  const won = found.size === total && total > 0;
+  const rewardFraction = total > 0 ? found.size / total : 1;
 
   const lineCells = (a: { r: number; c: number }, b: { r: number; c: number }) => {
     const dr = Math.sign(b.r - a.r);
@@ -128,10 +198,13 @@ export default function WordSearchTask({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-center font-semibold text-white">{prompt}</p>
+      <div className="flex items-center justify-center gap-2">
+        <p className="text-center text-base font-semibold text-white sm:text-lg">{prompt}</p>
+        <HintButton />
+      </div>
 
       <div
-        className="mx-auto grid w-full max-w-sm gap-0.5"
+        className="mx-auto grid w-full max-w-sm gap-1"
         style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
       >
         {grid.map((row, r) =>
@@ -145,7 +218,7 @@ export default function WordSearchTask({
                 type="button"
                 onClick={() => tapCell(r, c)}
                 className={[
-                  "flex aspect-square items-center justify-center rounded-[4px] text-[11px] font-black uppercase transition-colors sm:text-sm",
+                  "flex aspect-square items-center justify-center rounded-md text-base font-black uppercase transition-colors sm:text-lg",
                   isFound
                     ? "bg-lime-green/25 text-lime-green"
                     : isFirst
@@ -176,16 +249,22 @@ export default function WordSearchTask({
         ))}
       </div>
 
-      {won && <p className="text-center font-bold text-lime-green">Every word found! 🎉</p>}
+      {won ? (
+        <p className="text-center font-bold text-lime-green">Every word found! 🎉</p>
+      ) : (
+        <p className="text-center text-small text-white/60">
+          Found {found.size} of {total}. Finish now to keep going — you&apos;ll earn a reward for the
+          words you found.
+        </p>
+      )}
 
       <SlayButton
         variant="green"
         size="lg"
         className="w-full"
-        onClick={onComplete}
-        disabled={!won}
+        onClick={() => onComplete(rewardFraction)}
       >
-        {actionLabel}
+        {won ? actionLabel : `${actionLabel} (${found.size}/${total})`}
       </SlayButton>
     </div>
   );
