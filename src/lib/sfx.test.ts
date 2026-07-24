@@ -5,9 +5,14 @@ import {
   APPLAUSE_CLAP_COUNT,
   APPLAUSE_DURATION_S,
   buildApplauseClaps,
+  buildFireworkPops,
   DRUM_ROLL_ACCENT_GAP_S,
   DRUM_ROLL_TAP_COUNT,
   drumRollTapOffsets,
+  FIREWORK_POP_COUNT,
+  FIREWORK_START_DELAY_S,
+  GONG_DURATION_S,
+  GONG_PARTIAL_RATIOS,
   MAP_TRAVEL_DURATION_S,
   playMapTravelSfx,
   playMissionStartSfx,
@@ -48,6 +53,19 @@ describe("sound effect shapes", () => {
     });
   });
 
+  describe("mission start gong", () => {
+    it("starts on the fundamental (ratio 1) and only adds partials above it", () => {
+      expect(GONG_PARTIAL_RATIOS[0]).toBe(1);
+      for (let i = 1; i < GONG_PARTIAL_RATIOS.length; i += 1) {
+        expect(GONG_PARTIAL_RATIOS[i]).toBeGreaterThan(1);
+      }
+    });
+
+    it("rings for a long, positive duration — not a short percussive click", () => {
+      expect(GONG_DURATION_S).toBeGreaterThan(1);
+    });
+  });
+
   describe("reward applause", () => {
     it("swell ramps up, holds, then ramps back down", () => {
       expect(applauseSwell(0)).toBe(0);
@@ -81,6 +99,28 @@ describe("sound effect shapes", () => {
       const random = () => values[i++];
       const claps = buildApplauseClaps(2, 1, random);
       expect(claps.map((c) => c.startOffset)).toEqual([0.1, 0.9]);
+    });
+  });
+
+  describe("reward firework pops", () => {
+    it("builds the expected count, all after the start delay and within the total duration", () => {
+      const pops = buildFireworkPops(FIREWORK_POP_COUNT, APPLAUSE_DURATION_S, () => 0.5);
+      expect(pops).toHaveLength(FIREWORK_POP_COUNT);
+      for (const pop of pops) {
+        expect(pop.startOffset).toBeGreaterThanOrEqual(FIREWORK_START_DELAY_S);
+        expect(pop.startOffset).toBeLessThanOrEqual(APPLAUSE_DURATION_S);
+        expect(typeof pop.hasWhistle).toBe("boolean");
+      }
+    });
+
+    it("is sorted by start offset", () => {
+      const values = [0.9, 0, 0.1, 1, 0.5, 0.5, 0.2, 0];
+      let i = 0;
+      const random = () => values[i++ % values.length];
+      const pops = buildFireworkPops(4, 1, random);
+      const offsets = pops.map((p) => p.startOffset);
+      const sorted = [...offsets].sort((a, b) => a - b);
+      expect(offsets).toEqual(sorted);
     });
   });
 });
