@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
@@ -16,7 +17,12 @@ import type { SnakeGameContent } from "./types";
 
 export interface SnakeGameTaskProps {
   content: SnakeGameContent;
-  onComplete: () => void;
+  /**
+   * Called with a completion score from 0 to 1 — the fraction of letters
+   * collected. Winning the round always reports 1; moving on early reports
+   * however much of the word was actually collected.
+   */
+  onComplete: (score?: number) => void;
   actionLabel?: string;
 }
 
@@ -184,22 +190,26 @@ export default function SnakeGameTask({
   const snakeCells = new Map(game.snake.map((cell, index) => [key(cell), index]));
   const letterCells = new Map(game.letters.map((cell) => [key(cell), cell]));
 
+  // Ends the round immediately with credit for whatever was collected so far —
+  // the mission still counts as finished either way.
+  const finishEarly = () => onComplete(game.collected / word.length);
+
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="shrink-0 flex flex-col items-center gap-1 text-center">
-        <p className="font-semibold text-white">{prompt}</p>
-        {translation && <p className="text-small text-white/60">{translation}</p>}
+        <p className="text-lg font-semibold text-white">{prompt}</p>
+        {translation && <p className="text-base text-white/60">{translation}</p>}
       </div>
 
       {/* Word progress: every letter starts visible, and each one clears as it's collected. */}
-      <div className="shrink-0 flex flex-wrap justify-center gap-1.5">
+      <div className="shrink-0 flex flex-wrap justify-center gap-2">
         {word.split("").map((char, index) => {
           const done = index < game.collected;
           return (
             <span
               key={index}
               className={[
-                "flex h-9 w-8 items-center justify-center rounded-lg border text-body-strong font-black transition-colors",
+                "flex h-11 w-10 items-center justify-center rounded-lg border text-xl font-black transition-colors",
                 done
                   ? "border-white/10 bg-white/[0.03]"
                   : "border-white/15 bg-white/5 text-white",
@@ -221,7 +231,7 @@ export default function SnakeGameTask({
           ].join(" ")}
         >
           <div
-            className="grid h-full w-full gap-px p-px"
+            className="grid h-full w-full gap-0.5 p-0.5"
             style={{ gridTemplateColumns: `repeat(${GRID}, minmax(0, 1fr))` }}
           >
             {Array.from({ length: GRID * GRID }, (_, index) => {
@@ -234,7 +244,7 @@ export default function SnakeGameTask({
                   <div
                     key={index}
                     className={[
-                      "rounded-[3px]",
+                      "rounded-[4px]",
                       snakeIndex === 0 ? "bg-lime-green" : "bg-lime-green/50",
                     ].join(" ")}
                   />
@@ -245,67 +255,108 @@ export default function SnakeGameTask({
                 return (
                   <div
                     key={index}
-                    className="flex items-center justify-center rounded-[3px] bg-white/15 text-[10px] leading-none font-black text-white"
+                    className="flex items-center justify-center rounded-[4px] bg-white/15 text-base leading-none font-black text-white sm:text-lg"
                   >
                     {letter.char}
                   </div>
                 );
               }
 
-              return <div key={index} className="rounded-[3px] bg-white/[0.03]" />;
+              return <div key={index} className="rounded-[4px] bg-white/[0.03]" />;
             })}
           </div>
-
-          {game.status !== "playing" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/75 p-4 text-center">
-              {game.status === "idle" && (
-                <>
-                  <p className="text-body-strong font-black text-white">Ready?</p>
-                  <p className="text-small text-white/60">
-                    All the letters are on the board. Eat them in the word&apos;s order, avoid
-                    your own tail, and you can pass through the edges.
-                  </p>
-                  <SlayButton variant="green" size="md" onClick={() => reset("playing")}>
-                    Start
-                  </SlayButton>
-                </>
-              )}
-              {game.status === "dead" && (
-                <>
-                  <p className="text-body-strong font-black text-neon-pink">Oops! Game over.</p>
-                  <SlayButton variant="pink" size="md" onClick={() => reset("playing")}>
-                    Try Again
-                  </SlayButton>
-                </>
-              )}
-              {game.status === "won" && (
-                <>
-                  <p className="text-h3 font-black text-lime-green">{word}</p>
-                  <p className="text-small text-white/70">You collected every letter!</p>
-                </>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
       {/* D-pad */}
-      <div className="shrink-0 mx-auto grid w-44 grid-cols-3 grid-rows-3 gap-2">
-        <DPadButton direction="up" label="▲" className="col-start-2 row-start-1" onPress={turn} />
-        <DPadButton direction="left" label="◀" className="col-start-1 row-start-2" onPress={turn} />
-        <DPadButton direction="right" label="▶" className="col-start-3 row-start-2" onPress={turn} />
-        <DPadButton direction="down" label="▼" className="col-start-2 row-start-3" onPress={turn} />
+      <div className="shrink-0 flex flex-col items-center gap-2">
+        <div className="mx-auto grid w-52 grid-cols-3 grid-rows-3 gap-2">
+          <DPadButton direction="up" label="▲" className="col-start-2 row-start-1" onPress={turn} />
+          <DPadButton direction="left" label="◀" className="col-start-1 row-start-2" onPress={turn} />
+          <DPadButton direction="right" label="▶" className="col-start-3 row-start-2" onPress={turn} />
+          <DPadButton direction="down" label="▼" className="col-start-2 row-start-3" onPress={turn} />
+        </div>
+
+        {/* Lets a child move on mid-round instead of only after winning or dying. */}
+        {game.status === "playing" && (
+          <button
+            type="button"
+            onClick={finishEarly}
+            className="text-base font-semibold text-white/50 underline underline-offset-2 transition-colors hover:text-white/80"
+          >
+            Finish now — {game.collected}/{word.length} letters
+          </button>
+        )}
       </div>
 
-      <SlayButton
-        variant="green"
-        size="lg"
-        className="w-full shrink-0"
-        onClick={onComplete}
-        disabled={game.status !== "won"}
-      >
-        {actionLabel}
-      </SlayButton>
+      {game.status !== "playing" && typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-6 backdrop-blur-xl"
+          >
+            <div
+              className={[
+                "flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl border bg-[#1a1a1a] px-6 py-8 text-center shadow-2xl",
+                game.status === "dead" && "border-neon-pink/50 shadow-[0_0_40px_8px_rgba(255,45,142,0.25)]",
+                game.status === "won" && "border-lime-green/50 shadow-[0_0_40px_8px_rgba(157,255,0,0.25)]",
+                game.status === "idle" && "border-white/15",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {game.status === "idle" && (
+                <>
+                  <p className="text-3xl font-black text-white">Ready?</p>
+                  <p className="text-base leading-relaxed text-white/70">
+                    All the letters are on the board. Use the arrows to steer the snake up, down,
+                    left, or right. Eat the letters in the word&apos;s order, avoid your own tail,
+                    and pass through the edges to wrap around.
+                  </p>
+                  <SlayButton variant="green" size="lg" className="w-full" onClick={() => reset("playing")}>
+                    Start
+                  </SlayButton>
+                  <button
+                    type="button"
+                    onClick={finishEarly}
+                    className="text-sm font-semibold text-white/40 underline underline-offset-2 transition-colors hover:text-white/70"
+                  >
+                    Skip this game
+                  </button>
+                </>
+              )}
+              {game.status === "dead" && (
+                <>
+                  <p className="text-2xl font-black text-neon-pink">Oops! Game over.</p>
+                  <p className="text-base text-white/70">
+                    You collected {game.collected} of {word.length} letters.
+                  </p>
+                  <SlayButton variant="pink" size="lg" className="w-full" onClick={() => reset("playing")}>
+                    Try Again
+                  </SlayButton>
+                  <button
+                    type="button"
+                    onClick={finishEarly}
+                    className="text-sm font-semibold text-white/40 underline underline-offset-2 transition-colors hover:text-white/70"
+                  >
+                    Finish now instead
+                  </button>
+                </>
+              )}
+              {game.status === "won" && (
+                <>
+                  <p className="text-3xl font-black text-lime-green">{word}</p>
+                  <p className="text-base text-white/70">You collected every letter!</p>
+                  <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete(1)}>
+                    {actionLabel}
+                  </SlayButton>
+                </>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
@@ -331,7 +382,7 @@ function DPadButton({
         event.preventDefault();
         onPress(direction);
       }}
-      className={`flex h-12 w-12 touch-none items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/80 transition-colors select-none hover:border-white/40 active:bg-cyan/20 focus-visible:ring-2 focus-visible:ring-cyan focus-visible:outline-none ${className}`}
+      className={`flex h-14 w-14 touch-none items-center justify-center rounded-xl border border-white/15 bg-white/5 text-xl text-white/80 transition-colors select-none hover:border-white/40 active:bg-cyan/20 focus-visible:ring-2 focus-visible:ring-cyan focus-visible:outline-none ${className}`}
     >
       {label}
     </button>

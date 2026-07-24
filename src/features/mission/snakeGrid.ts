@@ -1,6 +1,7 @@
 /** Board geometry and movement rules for the Snake task, kept free of React so they stay unit-testable. */
 
-export const GRID = 12;
+/** Kept small so each letter tile is large and legible on a phone screen. */
+export const GRID = 8;
 
 export type Direction = "up" | "down" | "left" | "right";
 

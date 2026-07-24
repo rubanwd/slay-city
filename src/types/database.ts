@@ -1113,7 +1113,7 @@ export type Database = {
         }[]
       }
       complete_mission: {
-        Args: { p_mission_id: string }
+        Args: { p_mission_id: string; p_score?: number }
         Returns: {
           already_completed: boolean
           coins_earned: number
