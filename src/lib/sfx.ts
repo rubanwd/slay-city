@@ -46,15 +46,92 @@ function playTone(
   };
 }
 
+interface NoiseBurstOptions {
+  peakGain: number;
+  bandpassFrequency: number;
+  bandpassQ?: number;
+  /** Optional highpass ahead of the bandpass, to strip low rumble from the hit. */
+  highpassFrequency?: number;
+  destination?: AudioNode;
+}
+
+/** Plays one short, filtered burst of noise — the building block for percussive hits. */
+function playNoiseBurst(
+  ctx: AudioContext,
+  startTime: number,
+  duration: number,
+  { peakGain, bandpassFrequency, bandpassQ = 1, highpassFrequency, destination }: NoiseBurstOptions
+): void {
+  const frames = Math.max(1, Math.floor(ctx.sampleRate * duration));
+  const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+  fillWithNoise(buffer.getChannelData(0));
+
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+
+  const bandpass = ctx.createBiquadFilter();
+  bandpass.type = "bandpass";
+  bandpass.frequency.value = bandpassFrequency;
+  bandpass.Q.value = bandpassQ;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(peakGain, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+  const nodes: AudioNode[] = [source, bandpass, gain];
+  let chain: AudioNode = source;
+  if (highpassFrequency) {
+    const highpass = ctx.createBiquadFilter();
+    highpass.type = "highpass";
+    highpass.frequency.value = highpassFrequency;
+    chain.connect(highpass);
+    chain = highpass;
+    nodes.push(highpass);
+  }
+  chain.connect(bandpass).connect(gain).connect(destination ?? ctx.destination);
+
+  source.start(startTime);
+  source.stop(startTime + duration + 0.01);
+  source.onended = () => {
+    nodes.forEach((node) => node.disconnect());
+  };
+}
+
 // ---------------------------------------------------------------------------
-// Mission start: a rising two-note "let's go" blip.
+// Mission start: an accelerating snare drum roll landing on a low accent hit
+// — a countdown-style "here we go!" instead of a plain jingle.
 // ---------------------------------------------------------------------------
 
-/** Notes of the mission-start blip, low to high (C5 → G5). */
-export const MISSION_START_NOTES = [523.25, 783.99];
-export const MISSION_START_NOTE_DURATION_S = 0.16;
-/** Notes overlap slightly rather than queuing end-to-end, so the blip feels snappy. */
-export const MISSION_START_NOTE_STAGGER_S = MISSION_START_NOTE_DURATION_S * 0.8;
+/** Number of taps in the roll, not counting the final accent hit. */
+export const DRUM_ROLL_TAP_COUNT = 14;
+const DRUM_ROLL_START_INTERVAL_S = 0.075;
+/** Each tap's gap shrinks by this factor — what makes the roll accelerate. */
+const DRUM_ROLL_ACCEL = 0.88;
+const DRUM_ROLL_TAP_DURATION_S = 0.045;
+const DRUM_ROLL_TAP_PEAK_GAIN = 0.2;
+/** Gap between the last tap and the accent hit that closes the roll. */
+export const DRUM_ROLL_ACCENT_GAP_S = 0.09;
+const DRUM_ROLL_ACCENT_DURATION_S = 0.24;
+const DRUM_ROLL_ACCENT_PEAK_GAIN = 0.38;
+const DRUM_ROLL_ACCENT_SUB_FREQUENCY = 95;
+const DRUM_ROLL_ACCENT_SUB_GAIN = 0.35;
+
+/** Start offset (seconds, from roll start) of each tap — accelerating gaps. */
+export function drumRollTapOffsets(
+  count = DRUM_ROLL_TAP_COUNT,
+  startInterval = DRUM_ROLL_START_INTERVAL_S,
+  accel = DRUM_ROLL_ACCEL
+): number[] {
+  const offsets: number[] = [];
+  let t = 0;
+  let interval = startInterval;
+  for (let i = 0; i < count; i += 1) {
+    offsets.push(t);
+    t += interval;
+    interval *= accel;
+  }
+  return offsets;
+}
 
 /** Plays when the player taps Start on a location's mission. */
 export async function playMissionStartSfx(): Promise<void> {
@@ -62,11 +139,27 @@ export async function playMissionStartSfx(): Promise<void> {
   if (!ctx) return;
 
   const now = ctx.currentTime;
-  MISSION_START_NOTES.forEach((freq, i) => {
-    playTone(ctx, freq, now + i * MISSION_START_NOTE_STAGGER_S, MISSION_START_NOTE_DURATION_S, {
-      type: "triangle",
-      peakGain: 0.3,
+  const offsets = drumRollTapOffsets();
+
+  offsets.forEach((offset) => {
+    playNoiseBurst(ctx, now + offset, DRUM_ROLL_TAP_DURATION_S, {
+      peakGain: DRUM_ROLL_TAP_PEAK_GAIN,
+      bandpassFrequency: 2400,
+      bandpassQ: 0.9,
+      highpassFrequency: 700,
     });
+  });
+
+  const accentTime = now + offsets[offsets.length - 1] + DRUM_ROLL_ACCENT_GAP_S;
+  playNoiseBurst(ctx, accentTime, DRUM_ROLL_ACCENT_DURATION_S, {
+    peakGain: DRUM_ROLL_ACCENT_PEAK_GAIN,
+    bandpassFrequency: 1800,
+    bandpassQ: 0.7,
+    highpassFrequency: 400,
+  });
+  playTone(ctx, DRUM_ROLL_ACCENT_SUB_FREQUENCY, accentTime, DRUM_ROLL_ACCENT_DURATION_S, {
+    type: "sine",
+    peakGain: DRUM_ROLL_ACCENT_SUB_GAIN,
   });
 }
 
@@ -118,99 +211,85 @@ export async function playMapTravelSfx(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Reward fanfare: a rising "wooaah" swoop that lands on a big chord hit, then
-// trails off into a sparkly shimmer — the properly triumphant "WOW!" for the
-// one screen in the app that should feel like a payoff.
+// Reward applause: a crowd of short, randomised "clap" noise grains that
+// swell in and settle out — a round of applause for finishing the mission.
 // ---------------------------------------------------------------------------
 
-/** How long the rising swoop takes to build before it lands on the hit. */
-export const REWARD_SWOOP_DURATION_S = 0.38;
-const REWARD_SWOOP_START_FREQUENCY = 220;
-const REWARD_SWOOP_END_FREQUENCY = 1100;
-const REWARD_SWOOP_PEAK_GAIN = 0.3;
-/** The hit lands slightly before the swoop finishes climbing, for punch. */
-const REWARD_HIT_TIME_FRACTION = 0.85;
+export const APPLAUSE_DURATION_S = 1.4;
+export const APPLAUSE_CLAP_COUNT = 45;
+const APPLAUSE_MIN_FREQUENCY = 1500;
+const APPLAUSE_MAX_FREQUENCY = 4200;
+const APPLAUSE_MIN_CLAP_DURATION_S = 0.03;
+const APPLAUSE_MAX_CLAP_DURATION_S = 0.07;
+const APPLAUSE_PEAK_GAIN = 0.18;
 
-/** Notes of the impact chord, low to high (C5 E5 G5 C6). */
-export const REWARD_CHORD_NOTES = [523.25, 659.25, 783.99, 1046.5];
-export const REWARD_CHORD_DURATION_S = 0.9;
-const REWARD_CHORD_PEAK_GAIN = 0.22;
-const REWARD_SUB_THUMP_FREQUENCY = 80;
-const REWARD_SUB_THUMP_DURATION_S = 0.25;
-const REWARD_SUB_THUMP_PEAK_GAIN = 0.5;
+export interface ApplauseClap {
+  /** Seconds after the applause starts that this clap fires. */
+  startOffset: number;
+  duration: number;
+  gain: number;
+  frequency: number;
+}
 
-/** Sparkle notes that glitter in after the hit, high to higher (G6 B6 E7 G7). */
-export const REWARD_SPARKLE_NOTES = [1568.0, 1975.5, 2637.0, 3136.0];
-export const REWARD_SPARKLE_NOTE_GAP_S = 0.09;
-const REWARD_SPARKLE_NOTE_DURATION_S = 0.3;
-const REWARD_SPARKLE_PEAK_GAIN = 0.09;
+/**
+ * Shapes the crowd's overall volume over the applause: a quick swell in, a
+ * brief hold at full volume, then a gentle settle — rather than a flat wall
+ * of claps starting and stopping abruptly.
+ */
+export function applauseSwell(fraction: number): number {
+  const attackEnd = 0.18;
+  const releaseStart = 0.65;
+  if (fraction < attackEnd) return fraction / attackEnd;
+  if (fraction < releaseStart) return 1;
+  return Math.max(0, 1 - (fraction - releaseStart) / (1 - releaseStart));
+}
+
+/**
+ * Builds the individual clap "grains" that make up the applause: randomised
+ * timing, duration and pitch (`random` is injectable so this stays testable),
+ * each scaled by `applauseSwell` so the crowd builds and settles naturally.
+ */
+export function buildApplauseClaps(
+  count = APPLAUSE_CLAP_COUNT,
+  totalDuration = APPLAUSE_DURATION_S,
+  random: () => number = Math.random
+): ApplauseClap[] {
+  return Array.from({ length: count }, () => {
+    const startOffset = random() * totalDuration;
+    const swell = applauseSwell(startOffset / totalDuration);
+    return {
+      startOffset,
+      duration:
+        APPLAUSE_MIN_CLAP_DURATION_S +
+        random() * (APPLAUSE_MAX_CLAP_DURATION_S - APPLAUSE_MIN_CLAP_DURATION_S),
+      gain: APPLAUSE_PEAK_GAIN * (0.5 + random() * 0.5) * swell,
+      frequency: APPLAUSE_MIN_FREQUENCY + random() * (APPLAUSE_MAX_FREQUENCY - APPLAUSE_MIN_FREQUENCY),
+    };
+  }).sort((a, b) => a.startOffset - b.startOffset);
+}
 
 /** Plays once when the Rewards screen for a completed mission appears. */
-export async function playRewardFanfareSfx(): Promise<void> {
+export async function playRewardApplauseSfx(): Promise<void> {
   const ctx = await resumeSharedAudioContext();
   if (!ctx) return;
 
-  // Several layers stack right at the hit, so route everything through a
-  // limiter instead of the raw destination to keep that moment from clipping.
+  // Dozens of overlapping claps can stack louder than any one envelope
+  // expects, so route them through a limiter instead of the raw destination.
   const limiter = ctx.createDynamicsCompressor();
-  limiter.threshold.value = -16;
-  limiter.knee.value = 12;
-  limiter.ratio.value = 10;
-  limiter.attack.value = 0.003;
-  limiter.release.value = 0.25;
+  limiter.threshold.value = -20;
+  limiter.knee.value = 10;
+  limiter.ratio.value = 12;
+  limiter.attack.value = 0.002;
+  limiter.release.value = 0.15;
   limiter.connect(ctx.destination);
 
   const now = ctx.currentTime;
-
-  // Phase 1 — the "wooaah": a rising sawtooth swoop, brightening as it climbs.
-  const swoop = ctx.createOscillator();
-  swoop.type = "sawtooth";
-  swoop.frequency.setValueAtTime(REWARD_SWOOP_START_FREQUENCY, now);
-  swoop.frequency.exponentialRampToValueAtTime(REWARD_SWOOP_END_FREQUENCY, now + REWARD_SWOOP_DURATION_S);
-
-  const swoopFilter = ctx.createBiquadFilter();
-  swoopFilter.type = "lowpass";
-  swoopFilter.frequency.setValueAtTime(500, now);
-  swoopFilter.frequency.exponentialRampToValueAtTime(4500, now + REWARD_SWOOP_DURATION_S);
-
-  const swoopGain = ctx.createGain();
-  swoopGain.gain.setValueAtTime(0.0001, now);
-  swoopGain.gain.exponentialRampToValueAtTime(REWARD_SWOOP_PEAK_GAIN, now + REWARD_SWOOP_DURATION_S * 0.9);
-  swoopGain.gain.exponentialRampToValueAtTime(0.0001, now + REWARD_SWOOP_DURATION_S);
-
-  swoop.connect(swoopFilter).connect(swoopGain).connect(limiter);
-  swoop.start(now);
-  swoop.stop(now + REWARD_SWOOP_DURATION_S + 0.02);
-  swoop.onended = () => {
-    swoop.disconnect();
-    swoopFilter.disconnect();
-    swoopGain.disconnect();
-  };
-
-  // Phase 2 — the hit: a bright chord plus a sub thump for weight, landing
-  // right as the swoop peaks.
-  const hitTime = now + REWARD_SWOOP_DURATION_S * REWARD_HIT_TIME_FRACTION;
-  REWARD_CHORD_NOTES.forEach((freq) => {
-    playTone(ctx, freq, hitTime, REWARD_CHORD_DURATION_S, {
-      type: "sawtooth",
-      peakGain: REWARD_CHORD_PEAK_GAIN,
+  buildApplauseClaps().forEach(({ startOffset, duration, gain, frequency }) => {
+    playNoiseBurst(ctx, now + startOffset, duration, {
+      peakGain: gain,
+      bandpassFrequency: frequency,
+      bandpassQ: 1.2,
       destination: limiter,
     });
-  });
-  playTone(ctx, REWARD_SUB_THUMP_FREQUENCY, hitTime, REWARD_SUB_THUMP_DURATION_S, {
-    type: "sine",
-    peakGain: REWARD_SUB_THUMP_PEAK_GAIN,
-    destination: limiter,
-  });
-
-  // Phase 3 — sparkle: a quick high glitter trailing off after the hit.
-  REWARD_SPARKLE_NOTES.forEach((freq, i) => {
-    playTone(
-      ctx,
-      freq,
-      hitTime + i * REWARD_SPARKLE_NOTE_GAP_S,
-      REWARD_SPARKLE_NOTE_DURATION_S,
-      { type: "sine", peakGain: REWARD_SPARKLE_PEAK_GAIN, destination: limiter }
-    );
   });
 }
