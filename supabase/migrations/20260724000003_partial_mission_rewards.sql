@@ -11,9 +11,13 @@ alter table public.user_progress
   add column if not exists xp_earned integer,
   add column if not exists coins_earned integer;
 
--- Drop the old single-argument version so the new default-argument overload is
--- unambiguous when PostgREST calls it by named argument.
+-- Drop every existing overload before recreating: the single-argument original
+-- (uuid) and the two-argument (uuid, numeric) variant that an earlier, reverted
+-- change left applied to production under a different parameter name (p_score).
+-- A plain CREATE OR REPLACE cannot rename an input parameter, so the old
+-- signatures must be dropped first for this to apply cleanly on every database.
 drop function if exists public.complete_mission(uuid);
+drop function if exists public.complete_mission(uuid, numeric);
 
 create or replace function public.complete_mission(
   p_mission_id uuid,
