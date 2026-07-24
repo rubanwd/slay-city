@@ -381,8 +381,10 @@ export function parseWordSearchContent(content: Json): WordSearchContent | null 
     .filter((w) => w.length >= 2);
   if (words.length === 0) return null;
   const longest = words.reduce((max, w) => Math.max(max, w.length), 0);
-  const rawSize = asNumber(content.size) ?? longest + 2;
-  const size = Math.min(14, Math.max(longest, Math.round(rawSize)));
+  // Keep the board compact: at most one row/column of padding beyond the longest
+  // word. Fewer cells means larger cells and more room for the prompt text.
+  const requested = asNumber(content.size) ?? longest + 1;
+  const size = Math.max(longest, Math.min(longest + 1, Math.round(requested)));
   return { prompt: asString(content.prompt) ?? "Find the hidden words", words, size };
 }
 

@@ -75,7 +75,12 @@ export interface TaskRunnerProps {
   taskType: MissionTaskType;
   /** Raw JSONB content, parsed here by the same parser the type uses everywhere. */
   content: Json;
-  onComplete: () => void;
+  /**
+   * Called when the task is done. A task that can be finished partially (e.g.
+   * the word search) passes a reward fraction in [0, 1]; all others call it
+   * with no argument, which counts as full completion.
+   */
+  onComplete: (rewardFraction?: number) => void;
   actionLabel: string;
 }
 
@@ -99,7 +104,7 @@ export default function TaskRunner({ taskType, content, onComplete, actionLabel 
 function renderTaskByType(
   taskType: MissionTaskType,
   rawContent: Json,
-  onComplete: () => void,
+  onComplete: (rewardFraction?: number) => void,
   actionLabel: string
 ): React.ReactElement | null {
   const props = { onComplete, actionLabel };

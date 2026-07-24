@@ -855,6 +855,7 @@ export type Database = {
       }
       user_progress: {
         Row: {
+          coins_earned: number | null
           completed_at: string | null
           created_at: string
           id: string
@@ -862,8 +863,10 @@ export type Database = {
           mission_id: string
           profile_id: string
           score: number | null
+          xp_earned: number | null
         }
         Insert: {
+          coins_earned?: number | null
           completed_at?: string | null
           created_at?: string
           id?: string
@@ -871,8 +874,10 @@ export type Database = {
           mission_id: string
           profile_id: string
           score?: number | null
+          xp_earned?: number | null
         }
         Update: {
+          coins_earned?: number | null
           completed_at?: string | null
           created_at?: string
           id?: string
@@ -880,6 +885,7 @@ export type Database = {
           mission_id?: string
           profile_id?: string
           score?: number | null
+          xp_earned?: number | null
         }
         Relationships: [
           {
@@ -1113,7 +1119,7 @@ export type Database = {
         }[]
       }
       complete_mission: {
-        Args: { p_mission_id: string }
+        Args: { p_mission_id: string; p_reward_fraction?: number }
         Returns: {
           already_completed: boolean
           coins_earned: number

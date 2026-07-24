@@ -30,7 +30,13 @@ export type MissionCompletionResult =
  * unique index) against granting rewards twice.
  */
 export async function submitMissionCompletion(
-  missionId: string
+  missionId: string,
+  /**
+   * Share of the mission's reward to grant, in [0, 1]. Below 1 when the player
+   * chose to finish a game early (e.g. found only some of the word-search
+   * words). Clamped server-side, so it can only ever reduce the reward.
+   */
+  rewardFraction = 1
 ): Promise<MissionCompletionResult> {
   const supabase = await createClient();
 
@@ -43,6 +49,7 @@ export async function submitMissionCompletion(
 
   const { data, error } = await supabase.rpc("complete_mission", {
     p_mission_id: missionId,
+    p_reward_fraction: Math.min(1, Math.max(0, rewardFraction)),
   });
 
   if (error) {
