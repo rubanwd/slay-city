@@ -153,13 +153,33 @@ body {
   animation: watermark-breathe 7s ease-out infinite;
 }
 
+/* ── Map milestone banner ──────────────────────────────────────────────────
+   Drops in from above the map when the player is routed back from a mission
+   that just cleared a location or a whole district. */
+
+@keyframes banner-drop {
+  0% {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-banner-drop {
+  animation: banner-drop 0.35s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-loader-bob,
   .animate-loader-shadow,
   .animate-loader-dot,
   .animate-label-float,
   .watermark-breathe,
-  .logo-shimmer {
+  .logo-shimmer,
+  .animate-banner-drop {
     animation: none;
   }
 }

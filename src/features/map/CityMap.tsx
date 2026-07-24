@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
@@ -13,7 +13,12 @@ import { playMapTravelSfx, playMissionStartSfx } from "@/lib/sfx";
 
 import MapBackground from "./MapBackground";
 import { MAP_ASPECT } from "./mapConstants";
-import { defaultSelectedLocation, MAX_VISIBLE_LOCATIONS, selectVisibleLocations } from "./mapState";
+import {
+  defaultSelectedLocation,
+  isDistrictCompleted,
+  MAX_VISIBLE_LOCATIONS,
+  selectVisibleLocations,
+} from "./mapState";
 import type { MapDistrictViewModel } from "./mapState";
 import MapLocationNode from "./MapLocationNode";
 import MascotMarker from "./MascotMarker";
@@ -80,6 +85,41 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
   // its missions are already done.
   const isCompleted = Boolean(selected && !selected.missionId && selected.state === "completed");
 
+  // The reward screen lands the player here with ?focus=<locationId> and, on
+  // a location/district clear, &milestone=location|district — so the map can
+  // walk the mascot straight to what was just finished and explain what
+  // changed, instead of the player wondering why they're back here. Read via
+  // window.location (not useSearchParams) so this stays a plain client effect
+  // with no Suspense boundary required.
+  const [milestoneBanner, setMilestoneBanner] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const focus = params.get("focus");
+    const milestone = params.get("milestone");
+    const name = params.get("name");
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- deferred to the client on purpose: the URL is only meaningful post-hydration, so setting it during render would mismatch SSR
+    if (focus) setSelectedId(focus);
+
+    if (milestone === "district") {
+      setMilestoneBanner(`🏙️ District cleared! Welcome to ${district?.name ?? "the next district"}.`);
+    } else if (milestone === "location") {
+      setMilestoneBanner(`✓ ${name ?? "Location"} complete!`);
+    }
+
+    if (focus || milestone) {
+      window.history.replaceState(null, "", "/map");
+    }
+    // Only ever read the URL the map was opened with, once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!milestoneBanner) return;
+    const timer = window.setTimeout(() => setMilestoneBanner(null), 4500);
+    return () => window.clearTimeout(timer);
+  }, [milestoneBanner]);
+
   const activeBackgroundUrl = district?.backgroundUrl ?? null;
 
   // Hold a loader over the map area until the (large, remote) district
@@ -88,7 +128,7 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
   const bgLoaded = useImageLoaded(activeBackgroundUrl);
 
   return (
-    <main className="h-dvh bg-black flex flex-col overflow-hidden mx-auto w-full max-w-md md:border-x md:border-white/10">
+    <main className="relative h-dvh bg-black flex flex-col overflow-hidden mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-between gap-2 px-5 py-3 border-b border-white/10 shrink-0">
         <h1 className="text-lg font-black text-lime-green leading-tight uppercase">Slay City</h1>
         <div className="flex items-center gap-2">
@@ -102,6 +142,14 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
           />
         </div>
       </header>
+
+      {milestoneBanner && (
+        <div role="status" className="absolute inset-x-4 top-16 z-20 flex justify-center">
+          <p className="animate-banner-drop rounded-full border-2 border-lime-green bg-black/85 px-4 py-2 text-center text-sm font-extrabold text-lime-green shadow-[0_0_16px_rgba(157,255,0,0.45)]">
+            {milestoneBanner}
+          </p>
+        </div>
+      )}
 
       {/*
         The coordinate space is a MAP_ASPECT-ratio frame — identical to the
@@ -146,6 +194,11 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
                 aria-hidden="true"
               >
                 {district.name}
+                {/* Every location here is done — the whole game is finished
+                    (there's no further district to advance to). */}
+                {isDistrictCompleted(district) && (
+                  <span className="ml-1.5 text-lime-green">✓ cleared</span>
+                )}
               </span>
             )}
 
@@ -182,6 +235,25 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
 
       {selected && (
         <div className={`px-5 pt-4 ${BOTTOM_NAV_CLEARANCE} border-t border-white/10 shrink-0`}>
+          {/*
+            Always-visible name + "done so far" count for the selected stop,
+            so the player never has to guess how many missions are left here —
+            not just once it's fully cleared.
+          */}
+          <div className="flex items-center justify-between gap-2 pb-2">
+            <h2 className="min-w-0 truncate text-base font-black text-white">{selected.name}</h2>
+            {selected.totalMissions > 0 && (
+              <span
+                className={[
+                  "shrink-0 rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap",
+                  isCompleted ? "bg-lime-green/15 text-lime-green" : "bg-white/10 text-white/70",
+                ].join(" ")}
+              >
+                {selected.missionsCompleted}/{selected.totalMissions} missions
+              </span>
+            )}
+          </div>
+
           {/*
             The reward line and the restart button exist only for completed
             stops, so tapping between stops used to snap this panel — and with
