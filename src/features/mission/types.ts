@@ -67,7 +67,7 @@ const TASK_INSTRUCTIONS: Record<MissionTaskType, string> = {
   matching: "Tap a word, then tap the picture or translation that goes with it. Match every pair to finish.",
   quiz: "Read the question and tap the answer you think is correct.",
   snake_game:
-    "Use the arrows to steer the snake. Eat the letters in the word's order and avoid your own tail — you can pass through the edges.",
+    "Use the ▲▼◀▶ arrows to steer the snake up, down, left, or right. Eat the letters in the word's order, avoid your own tail, and pass through the edges to wrap around. You can move on at any time — the letters you've collected still count.",
   word_scramble:
     "Tap the letters in the right order to spell the word. Tap a placed letter to send it back.",
   hangman:

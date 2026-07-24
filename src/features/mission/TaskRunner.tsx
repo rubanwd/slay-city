@@ -75,7 +75,12 @@ export interface TaskRunnerProps {
   taskType: MissionTaskType;
   /** Raw JSONB content, parsed here by the same parser the type uses everywhere. */
   content: Json;
-  onComplete: () => void;
+  /**
+   * Called when the task is done. Most task types report full credit
+   * implicitly; a task that can be moved on from early (like the Snake game)
+   * passes a 0–1 score for how much of it was actually completed.
+   */
+  onComplete: (score?: number) => void;
   actionLabel: string;
 }
 
@@ -99,7 +104,7 @@ export default function TaskRunner({ taskType, content, onComplete, actionLabel 
 function renderTaskByType(
   taskType: MissionTaskType,
   rawContent: Json,
-  onComplete: () => void,
+  onComplete: (score?: number) => void,
   actionLabel: string
 ): React.ReactElement | null {
   const props = { onComplete, actionLabel };

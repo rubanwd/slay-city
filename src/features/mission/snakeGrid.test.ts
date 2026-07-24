@@ -20,9 +20,11 @@ describe("nextHead", () => {
   });
 
   it("preserves how far along the other axis the snake entered the edge", () => {
-    // Exiting the right edge at row 7 must re-enter the left edge on row 7.
-    expect(nextHead({ x: LAST, y: 7 }, "right")).toEqual({ x: 0, y: 7 });
-    expect(nextHead({ x: 9, y: 0 }, "up")).toEqual({ x: 9, y: LAST });
+    // Exiting the right edge at an interior row must re-enter the left edge on that same row.
+    const midRow = Math.floor(GRID / 2);
+    expect(nextHead({ x: LAST, y: midRow }, "right")).toEqual({ x: 0, y: midRow });
+    const midCol = Math.floor(GRID / 2);
+    expect(nextHead({ x: midCol, y: 0 }, "up")).toEqual({ x: midCol, y: LAST });
   });
 
   it("keeps every cell on the board across a full lap in each direction", () => {
