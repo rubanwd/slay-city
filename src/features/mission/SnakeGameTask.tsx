@@ -231,7 +231,7 @@ export default function SnakeGameTask({
           ].join(" ")}
         >
           <div
-            className="grid h-full w-full gap-0.5 p-0.5"
+            className="grid h-full w-full gap-px p-px"
             style={{ gridTemplateColumns: `repeat(${GRID}, minmax(0, 1fr))` }}
           >
             {Array.from({ length: GRID * GRID }, (_, index) => {
@@ -244,7 +244,7 @@ export default function SnakeGameTask({
                   <div
                     key={index}
                     className={[
-                      "rounded-[4px]",
+                      "rounded-[3px]",
                       snakeIndex === 0 ? "bg-lime-green" : "bg-lime-green/50",
                     ].join(" ")}
                   />
@@ -255,14 +255,14 @@ export default function SnakeGameTask({
                 return (
                   <div
                     key={index}
-                    className="flex items-center justify-center rounded-[4px] bg-white/15 text-base leading-none font-black text-white sm:text-lg"
+                    className="flex items-center justify-center rounded-[3px] bg-white/15 text-[10px] leading-none font-black text-white"
                   >
                     {letter.char}
                   </div>
                 );
               }
 
-              return <div key={index} className="rounded-[4px] bg-white/[0.03]" />;
+              return <div key={index} className="rounded-[3px] bg-white/[0.03]" />;
             })}
           </div>
         </div>
