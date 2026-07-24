@@ -9,6 +9,7 @@ import { CoinAmount, XpAmount } from "@/components/ui";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
 import { useImageLoaded } from "@/hooks/useImageLoaded";
 import { resetLocationProgress } from "@/features/mission/actions";
+import { playMapTravelSfx, playMissionStartSfx } from "@/lib/sfx";
 
 import MapBackground from "./MapBackground";
 import { MAP_ASPECT } from "./mapConstants";
@@ -156,7 +157,11 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
                 mapY={loc.mapY}
                 state={loc.state}
                 selected={loc.id === selected?.id}
-                onSelect={() => setSelectedId(loc.id)}
+                onSelect={() => {
+                  // Only worth a sound when the mascot actually walks somewhere new.
+                  if (loc.id !== selectedId) void playMapTravelSfx();
+                  setSelectedId(loc.id);
+                }}
               />
             ))}
 
@@ -206,6 +211,9 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
             {selected.missionId ? (
               <Link
                 href={`/mission/${selected.missionId}`}
+                onClick={() => {
+                  void playMissionStartSfx();
+                }}
                 className={[
                   "flex flex-1 min-w-0 items-center justify-center gap-2 h-14 rounded-2xl",
                   "bg-lime-green text-black font-extrabold uppercase tracking-wide text-lg",

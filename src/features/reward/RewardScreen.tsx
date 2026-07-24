@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { AppContainer, Section } from "@/components/layout";
 import { CoinIcon, SlayButton, SlayCharacter, XpIcon } from "@/components/ui";
+import { playRewardFanfareSfx } from "@/lib/sfx";
 
 export interface RewardScreenProps {
   /** Coins granted for completing the mission */
@@ -66,6 +67,12 @@ export default function RewardScreen({
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- deferred to the client on purpose to avoid a hydration mismatch from random values
     setDrops(buildRainDrops(48));
+  }, []);
+
+  // Celebratory "ta-da" the moment this screen lands — the one payoff sound
+  // in the whole loop, so it plays once and never re-fires on re-render.
+  useEffect(() => {
+    void playRewardFanfareSfx();
   }, []);
 
   return (
