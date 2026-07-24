@@ -64,10 +64,8 @@ export default async function MapPage() {
     (progressRes.data ?? []).filter((row) => row.completed_at !== null).map((row) => row.mission_id)
   );
 
-  const { completedLocationIds, nextMissionIdByLocation } = buildLocationProgress(
-    missionsRes.data ?? [],
-    completedMissionIds
-  );
+  const { completedLocationIds, nextMissionIdByLocation, missionCountsByLocation } =
+    buildLocationProgress(missionsRes.data ?? [], completedMissionIds);
 
   const rewardsByLocation = sumLocationRewards(missionsRes.data ?? []);
 
@@ -76,7 +74,8 @@ export default async function MapPage() {
     locations,
     completedLocationIds,
     nextMissionIdByLocation,
-    rewardsByLocation
+    rewardsByLocation,
+    missionCountsByLocation
   );
   const activeDistrict = selectActiveDistrict(mapDistricts);
 

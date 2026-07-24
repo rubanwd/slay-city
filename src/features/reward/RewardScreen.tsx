@@ -18,6 +18,14 @@ export interface RewardScreenProps {
   taskNames: string[];
   /** Where the Continue button sends the player */
   continueHref?: string;
+  /** The location this mission belongs to, for the progress line below. */
+  locationName?: string | null;
+  /** How many of the location's missions are done now, including this one. */
+  missionsCompletedAtLocation?: number;
+  /** How many missions the location has in total. */
+  totalMissionsAtLocation?: number;
+  /** Whether this completion also finished the whole location or district. */
+  milestone?: "location" | "district" | null;
 }
 
 /* Brand palette used for the falling rain dots */
@@ -57,6 +65,10 @@ export default function RewardScreen({
   missionTitle,
   taskNames,
   continueHref = "/map",
+  locationName = null,
+  missionsCompletedAtLocation = 0,
+  totalMissionsAtLocation = 0,
+  milestone = null,
 }: RewardScreenProps) {
   const router = useRouter();
   const [drops, setDrops] = useState<RainDrop[]>([]);
@@ -198,6 +210,45 @@ export default function RewardScreen({
           >
             {taskNames.join(" · ")}
           </p>
+        )}
+
+        {/* Where this leaves the player — spells out next steps instead of
+            silently dropping them back on the map with no explanation. */}
+        {milestone === "district" ? (
+          <div
+            className="w-full rounded-2xl border-2 border-lime-green bg-lime-green/10 px-4 py-3"
+            style={{ animation: "reward-rise 0.5s ease-out 0.5s both" }}
+          >
+            <p className="text-body font-black uppercase tracking-wide text-lime-green">
+              🏙️ District cleared!
+            </p>
+            <p className="text-small text-white/70">
+              Every location here is done. A new district just unlocked on the map.
+            </p>
+          </div>
+        ) : milestone === "location" ? (
+          <div
+            className="w-full rounded-2xl border-2 border-lime-green bg-lime-green/10 px-4 py-3"
+            style={{ animation: "reward-rise 0.5s ease-out 0.5s both" }}
+          >
+            <p className="text-body font-black uppercase tracking-wide text-lime-green">
+              ✓ {locationName} complete!
+            </p>
+            <p className="text-small text-white/70">
+              You&apos;ve finished every mission here. Head back to the map to pick your next stop.
+            </p>
+          </div>
+        ) : (
+          locationName &&
+          totalMissionsAtLocation > 0 && (
+            <p
+              className="text-small font-bold text-white/60"
+              style={{ animation: "reward-rise 0.5s ease-out 0.5s both" }}
+            >
+              {missionsCompletedAtLocation}/{totalMissionsAtLocation} missions done at{" "}
+              <span className="text-white">{locationName}</span> — keep going!
+            </p>
+          )
         )}
 
         {/* Continue */}

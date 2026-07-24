@@ -2,18 +2,26 @@ import type { District, Location, Mission } from "@/types";
 
 export type LocationState = "unlocked" | "completed";
 
+export interface LocationMissionCount {
+  completed: number;
+  total: number;
+}
+
 export interface LocationProgress {
   /** Locations where every published mission has been completed. */
   completedLocationIds: Set<string>;
   /** The next not-yet-completed mission at each location, in `order_index` order. */
   nextMissionIdByLocation: Map<string, string>;
+  /** How many of each location's published missions are done vs. how many exist. */
+  missionCountsByLocation: Map<string, LocationMissionCount>;
 }
 
 /**
  * A location can have several missions played in sequence. Given every
  * published mission and the set of mission ids the player has already
  * completed, this picks — per location — the next uncompleted mission (by
- * `order_index`), and flags a location "completed" once none remain.
+ * `order_index`), flags a location "completed" once none remain, and counts
+ * completed vs. total missions so the UI can show progress like "2/4".
  */
 export function buildLocationProgress(
   missions: Pick<Mission, "id" | "location_id" | "order_index">[],
@@ -28,11 +36,14 @@ export function buildLocationProgress(
 
   const completedLocationIds = new Set<string>();
   const nextMissionIdByLocation = new Map<string, string>();
+  const missionCountsByLocation = new Map<string, LocationMissionCount>();
 
   for (const [locationId, locationMissions] of missionsByLocation) {
-    const next = [...locationMissions]
-      .sort((a, b) => a.order_index - b.order_index)
-      .find((mission) => !completedMissionIds.has(mission.id));
+    const sorted = [...locationMissions].sort((a, b) => a.order_index - b.order_index);
+    const next = sorted.find((mission) => !completedMissionIds.has(mission.id));
+    const completedCount = sorted.filter((mission) => completedMissionIds.has(mission.id)).length;
+
+    missionCountsByLocation.set(locationId, { completed: completedCount, total: sorted.length });
 
     if (next) {
       nextMissionIdByLocation.set(locationId, next.id);
@@ -41,7 +52,7 @@ export function buildLocationProgress(
     }
   }
 
-  return { completedLocationIds, nextMissionIdByLocation };
+  return { completedLocationIds, nextMissionIdByLocation, missionCountsByLocation };
 }
 
 export interface LocationRewardTotals {
@@ -82,6 +93,10 @@ export interface MapLocationViewModel {
   totalXp: number;
   /** Total coins every mission at this location grants, once completed. */
   totalCoins: number;
+  /** How many of this location's published missions the player has finished. */
+  missionsCompleted: number;
+  /** How many published missions exist at this location in total. */
+  totalMissions: number;
 }
 
 export interface MapDistrictViewModel {
@@ -105,7 +120,8 @@ export function buildMapViewModel(
   locations: Pick<Location, "id" | "district_id" | "name" | "description" | "order_index" | "map_x" | "map_y" | "icon_url">[],
   completedLocationIds: ReadonlySet<string>,
   missionIdByLocation: ReadonlyMap<string, string>,
-  rewardsByLocation: ReadonlyMap<string, LocationRewardTotals> = new Map()
+  rewardsByLocation: ReadonlyMap<string, LocationRewardTotals> = new Map(),
+  missionCountsByLocation: ReadonlyMap<string, LocationMissionCount> = new Map()
 ): MapDistrictViewModel[] {
   const sortedDistricts = [...districts].sort((a, b) => a.order_index - b.order_index);
 
@@ -124,6 +140,8 @@ export function buildMapViewModel(
         iconUrl: loc.icon_url ?? null,
         totalXp: rewardsByLocation.get(loc.id)?.xp ?? 0,
         totalCoins: rewardsByLocation.get(loc.id)?.coins ?? 0,
+        missionsCompleted: missionCountsByLocation.get(loc.id)?.completed ?? 0,
+        totalMissions: missionCountsByLocation.get(loc.id)?.total ?? 0,
       }));
 
     return {
@@ -149,6 +167,17 @@ export function selectActiveDistrict(
     districts.find((district) => district.locations.some((loc) => loc.missionId !== null)) ??
     districts[districts.length - 1] ??
     null
+  );
+}
+
+/**
+ * True once every location in a district has all of its missions done — the
+ * signal used to celebrate a district clear and to know the map is about to
+ * hand the player off to the next district.
+ */
+export function isDistrictCompleted(district: Pick<MapDistrictViewModel, "locations">): boolean {
+  return (
+    district.locations.length > 0 && district.locations.every((loc) => loc.state === "completed")
   );
 }
 
