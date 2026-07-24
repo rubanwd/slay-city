@@ -13,6 +13,7 @@ import {
   updateMission,
   type AdminFormState,
 } from "./actions";
+import MissionImageButton from "./MissionImageButton";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 import type { LocationOption } from "./locationOptions";
 
@@ -31,6 +32,9 @@ export interface AdminMissionItemProps {
   mission: AdminMissionItemData;
   /** Every location, so the mission can be moved to another one while editing. */
   locations?: LocationOption[];
+  /** Image slots across this mission's tasks, and how many are still empty. */
+  imageTotal?: number;
+  imageMissing?: number;
 }
 
 function SaveButton() {
@@ -42,7 +46,12 @@ function SaveButton() {
   );
 }
 
-export default function AdminMissionItem({ mission, locations }: AdminMissionItemProps) {
+export default function AdminMissionItem({
+  mission,
+  locations,
+  imageTotal = 0,
+  imageMissing = 0,
+}: AdminMissionItemProps) {
   const [editing, setEditing] = useState(false);
   const [state, formAction] = useActionState<AdminFormState, FormData>(updateMission, {});
 
@@ -217,6 +226,8 @@ export default function AdminMissionItem({ mission, locations }: AdminMissionIte
           Tasks
         </NavLink>
       </div>
+
+      <MissionImageButton missionId={mission.id} total={imageTotal} missing={imageMissing} />
     </li>
   );
 }
