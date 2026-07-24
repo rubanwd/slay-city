@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { AppContainer, Section } from "@/components/layout";
 import { SlayButton } from "@/components/ui";
@@ -32,10 +32,6 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
   const [currentIndex, setCurrentIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, startSubmit] = useTransition();
-  // One score (0–1) per completed task, so a task finished early (e.g. the
-  // Snake game) only dents the mission's overall reward rather than voiding it.
-  const taskScores = useRef<number[]>([]);
-  const overallScore = useRef(1);
 
   const total = tasks.length;
   const currentTask = tasks[currentIndex];
@@ -44,7 +40,7 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
   const finishMission = () => {
     setError(null);
     startSubmit(async () => {
-      const result = await submitMissionCompletion(mission.id, overallScore.current);
+      const result = await submitMissionCompletion(mission.id);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -53,13 +49,10 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
     });
   };
 
-  const handleTaskComplete = (score = 1) => {
-    const scores = [...taskScores.current, score];
+  const handleTaskComplete = () => {
     if (isLastTask) {
-      overallScore.current = scores.reduce((sum, s) => sum + s, 0) / scores.length;
       finishMission();
     } else {
-      taskScores.current = scores;
       setCurrentIndex((index) => index + 1);
     }
   };
@@ -116,14 +109,14 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
               />
             )}
             {location && (
-              <span className="truncate text-xs font-bold uppercase tracking-[0.15em] text-white/50">
+              <span className="truncate text-[11px] font-bold uppercase tracking-[0.15em] text-white/50">
                 {location.name}
               </span>
             )}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <HowToPlayButton text={taskTypeInstructions(currentTask.taskType)} />
-            <span className="text-base font-bold text-white/50 whitespace-nowrap">
+            <span className="text-sm font-bold text-white/50 whitespace-nowrap">
               {currentIndex + 1}/{total}
             </span>
           </div>
