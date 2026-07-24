@@ -7,9 +7,11 @@ import {
   playMapTravelSfx,
   playMissionStartSfx,
   playRewardFanfareSfx,
-  REWARD_FANFARE_NOTE_DURATION_S,
-  REWARD_FANFARE_NOTE_GAP_S,
-  REWARD_FANFARE_NOTES,
+  REWARD_CHORD_DURATION_S,
+  REWARD_CHORD_NOTES,
+  REWARD_SPARKLE_NOTE_GAP_S,
+  REWARD_SPARKLE_NOTES,
+  REWARD_SWOOP_DURATION_S,
 } from "./sfx";
 
 describe("sound effect shapes", () => {
@@ -26,13 +28,23 @@ describe("sound effect shapes", () => {
     expect(MAP_TRAVEL_DURATION_S).toBeLessThan(1);
   });
 
-  it("reward fanfare climbs through at least three notes", () => {
-    expect(REWARD_FANFARE_NOTES.length).toBeGreaterThanOrEqual(3);
-    for (let i = 1; i < REWARD_FANFARE_NOTES.length; i += 1) {
-      expect(REWARD_FANFARE_NOTES[i]).toBeGreaterThan(REWARD_FANFARE_NOTES[i - 1]);
+  it("reward swoop builds for a short, positive duration", () => {
+    expect(REWARD_SWOOP_DURATION_S).toBeGreaterThan(0);
+    expect(REWARD_SWOOP_DURATION_S).toBeLessThan(1);
+  });
+
+  it("reward chord hit has at least three notes and a positive duration", () => {
+    expect(REWARD_CHORD_NOTES.length).toBeGreaterThanOrEqual(3);
+    expect(REWARD_CHORD_DURATION_S).toBeGreaterThan(0);
+  });
+
+  it("reward sparkle climbs through at least three notes above the chord", () => {
+    expect(REWARD_SPARKLE_NOTES.length).toBeGreaterThanOrEqual(3);
+    for (let i = 1; i < REWARD_SPARKLE_NOTES.length; i += 1) {
+      expect(REWARD_SPARKLE_NOTES[i]).toBeGreaterThan(REWARD_SPARKLE_NOTES[i - 1]);
     }
-    expect(REWARD_FANFARE_NOTE_GAP_S).toBeGreaterThan(0);
-    expect(REWARD_FANFARE_NOTE_DURATION_S).toBeGreaterThan(0);
+    expect(Math.min(...REWARD_SPARKLE_NOTES)).toBeGreaterThan(Math.max(...REWARD_CHORD_NOTES));
+    expect(REWARD_SPARKLE_NOTE_GAP_S).toBeGreaterThan(0);
   });
 });
 

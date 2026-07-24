@@ -40,6 +40,8 @@ interface ToneOptions {
   peakGain?: number;
   /** Optional pitch glide target — the oscillator slides from `frequency` to this. */
   glideTo?: number;
+  /** Where the tone's gain node connects to. Defaults to the context's speakers. */
+  destination?: AudioNode;
 }
 
 /** Plays a single tone with a quick-attack, exponential-decay envelope. */
@@ -48,7 +50,7 @@ function playTone(
   frequency: number,
   startTime: number,
   duration: number,
-  { type = "sine", peakGain = 0.25, glideTo }: ToneOptions = {}
+  { type = "sine", peakGain = 0.25, glideTo, destination }: ToneOptions = {}
 ): void {
   const osc = ctx.createOscillator();
   osc.type = type;
@@ -62,7 +64,7 @@ function playTone(
   gain.gain.linearRampToValueAtTime(peakGain, startTime + Math.min(0.02, duration * 0.2));
   gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
-  osc.connect(gain).connect(ctx.destination);
+  osc.connect(gain).connect(destination ?? ctx.destination);
   osc.start(startTime);
   osc.stop(startTime + duration + 0.02);
   osc.onended = () => {
@@ -145,16 +147,32 @@ export async function playMapTravelSfx(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Reward fanfare: an ascending "ta-da" arpeggio with a sparkly tail.
+// Reward fanfare: a rising "wooaah" swoop that lands on a big chord hit, then
+// trails off into a sparkly shimmer — the properly triumphant "WOW!" for the
+// one screen in the app that should feel like a payoff.
 // ---------------------------------------------------------------------------
 
-/** Notes of the reward fanfare, low to high (C5 E5 G5 C6). */
-export const REWARD_FANFARE_NOTES = [523.25, 659.25, 783.99, 1046.5];
-export const REWARD_FANFARE_NOTE_GAP_S = 0.11;
-export const REWARD_FANFARE_NOTE_DURATION_S = 0.4;
-/** The shimmer layered on top of each note sits a fifth above it, much quieter. */
-const REWARD_FANFARE_SHIMMER_RATIO = 1.5;
-const REWARD_FANFARE_SHIMMER_GAIN = 0.08;
+/** How long the rising swoop takes to build before it lands on the hit. */
+export const REWARD_SWOOP_DURATION_S = 0.38;
+const REWARD_SWOOP_START_FREQUENCY = 220;
+const REWARD_SWOOP_END_FREQUENCY = 1100;
+const REWARD_SWOOP_PEAK_GAIN = 0.3;
+/** The hit lands slightly before the swoop finishes climbing, for punch. */
+const REWARD_HIT_TIME_FRACTION = 0.85;
+
+/** Notes of the impact chord, low to high (C5 E5 G5 C6). */
+export const REWARD_CHORD_NOTES = [523.25, 659.25, 783.99, 1046.5];
+export const REWARD_CHORD_DURATION_S = 0.9;
+const REWARD_CHORD_PEAK_GAIN = 0.22;
+const REWARD_SUB_THUMP_FREQUENCY = 80;
+const REWARD_SUB_THUMP_DURATION_S = 0.25;
+const REWARD_SUB_THUMP_PEAK_GAIN = 0.5;
+
+/** Sparkle notes that glitter in after the hit, high to higher (G6 B6 E7 G7). */
+export const REWARD_SPARKLE_NOTES = [1568.0, 1975.5, 2637.0, 3136.0];
+export const REWARD_SPARKLE_NOTE_GAP_S = 0.09;
+const REWARD_SPARKLE_NOTE_DURATION_S = 0.3;
+const REWARD_SPARKLE_PEAK_GAIN = 0.09;
 
 /** Plays once when the Rewards screen for a completed mission appears. */
 export async function playRewardFanfareSfx(): Promise<void> {
@@ -162,19 +180,67 @@ export async function playRewardFanfareSfx(): Promise<void> {
   if (!ctx) return;
   if (!(await resumeIfSuspended(ctx))) return;
 
+  // Several layers stack right at the hit, so route everything through a
+  // limiter instead of the raw destination to keep that moment from clipping.
+  const limiter = ctx.createDynamicsCompressor();
+  limiter.threshold.value = -16;
+  limiter.knee.value = 12;
+  limiter.ratio.value = 10;
+  limiter.attack.value = 0.003;
+  limiter.release.value = 0.25;
+  limiter.connect(ctx.destination);
+
   const now = ctx.currentTime;
-  REWARD_FANFARE_NOTES.forEach((freq, i) => {
-    const startTime = now + i * REWARD_FANFARE_NOTE_GAP_S;
-    playTone(ctx, freq, startTime, REWARD_FANFARE_NOTE_DURATION_S, {
-      type: "triangle",
-      peakGain: 0.28,
+
+  // Phase 1 — the "wooaah": a rising sawtooth swoop, brightening as it climbs.
+  const swoop = ctx.createOscillator();
+  swoop.type = "sawtooth";
+  swoop.frequency.setValueAtTime(REWARD_SWOOP_START_FREQUENCY, now);
+  swoop.frequency.exponentialRampToValueAtTime(REWARD_SWOOP_END_FREQUENCY, now + REWARD_SWOOP_DURATION_S);
+
+  const swoopFilter = ctx.createBiquadFilter();
+  swoopFilter.type = "lowpass";
+  swoopFilter.frequency.setValueAtTime(500, now);
+  swoopFilter.frequency.exponentialRampToValueAtTime(4500, now + REWARD_SWOOP_DURATION_S);
+
+  const swoopGain = ctx.createGain();
+  swoopGain.gain.setValueAtTime(0.0001, now);
+  swoopGain.gain.exponentialRampToValueAtTime(REWARD_SWOOP_PEAK_GAIN, now + REWARD_SWOOP_DURATION_S * 0.9);
+  swoopGain.gain.exponentialRampToValueAtTime(0.0001, now + REWARD_SWOOP_DURATION_S);
+
+  swoop.connect(swoopFilter).connect(swoopGain).connect(limiter);
+  swoop.start(now);
+  swoop.stop(now + REWARD_SWOOP_DURATION_S + 0.02);
+  swoop.onended = () => {
+    swoop.disconnect();
+    swoopFilter.disconnect();
+    swoopGain.disconnect();
+  };
+
+  // Phase 2 — the hit: a bright chord plus a sub thump for weight, landing
+  // right as the swoop peaks.
+  const hitTime = now + REWARD_SWOOP_DURATION_S * REWARD_HIT_TIME_FRACTION;
+  REWARD_CHORD_NOTES.forEach((freq) => {
+    playTone(ctx, freq, hitTime, REWARD_CHORD_DURATION_S, {
+      type: "sawtooth",
+      peakGain: REWARD_CHORD_PEAK_GAIN,
+      destination: limiter,
     });
+  });
+  playTone(ctx, REWARD_SUB_THUMP_FREQUENCY, hitTime, REWARD_SUB_THUMP_DURATION_S, {
+    type: "sine",
+    peakGain: REWARD_SUB_THUMP_PEAK_GAIN,
+    destination: limiter,
+  });
+
+  // Phase 3 — sparkle: a quick high glitter trailing off after the hit.
+  REWARD_SPARKLE_NOTES.forEach((freq, i) => {
     playTone(
       ctx,
-      freq * REWARD_FANFARE_SHIMMER_RATIO,
-      startTime,
-      REWARD_FANFARE_NOTE_DURATION_S * 0.7,
-      { type: "sine", peakGain: REWARD_FANFARE_SHIMMER_GAIN }
+      freq,
+      hitTime + i * REWARD_SPARKLE_NOTE_GAP_S,
+      REWARD_SPARKLE_NOTE_DURATION_S,
+      { type: "sine", peakGain: REWARD_SPARKLE_PEAK_GAIN, destination: limiter }
     );
   });
 }
