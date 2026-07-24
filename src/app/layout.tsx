@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AudioUnlock } from "@/components/AudioUnlock";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import "./globals.css";
@@ -40,6 +41,7 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col bg-black text-white antialiased">
         <ServiceWorkerRegistration />
+        <AudioUnlock />
         <InstallPrompt />
         {children}
       </body>
