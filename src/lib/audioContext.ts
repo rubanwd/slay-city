@@ -31,8 +31,12 @@ export async function resumeSharedAudioContext(): Promise<AudioContext | null> {
   const ctx = getSharedAudioContext();
   if (!ctx) return null;
 
-  // A context created before the first gesture starts suspended.
-  if (ctx.state === "suspended") {
+  // A context created before the first gesture starts "suspended". On iOS,
+  // backgrounding the PWA (switching to another app and back) instead knocks
+  // it into a non-standard "interrupted" state that isn't part of the
+  // AudioContextState type — so check for "not running" rather than name the
+  // exact state, or that case would silently fall through and stay dead.
+  if (ctx.state !== "running") {
     try {
       await ctx.resume();
     } catch {
