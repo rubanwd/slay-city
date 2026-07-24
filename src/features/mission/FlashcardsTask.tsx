@@ -62,39 +62,47 @@ export default function FlashcardsTask({
             flipped ? "is-flipped" : "",
           ].join(" ")}
         >
-          {/* Front face */}
+          {/* Front face
+              `overflow-hidden` lives on the inner wrapper, not this element — WebKit
+              (iOS Safari) fails to hide the backface when overflow-hidden sits on
+              the same element as backface-visibility: hidden, which made both
+              faces render on top of each other. */}
           <div
             className={[
-              "flip-card-face absolute inset-0 flex flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl border-2 border-cyan bg-gradient-to-br from-cyan/25 via-black to-purple/25 p-6 text-center",
+              "flip-card-face absolute inset-0 rounded-3xl border-2 border-cyan",
               "shadow-[0_0_40px_-10px_rgba(0,240,255,0.5)]",
             ].join(" ")}
           >
-            <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-cyan/30 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-12 -right-12 h-44 w-44 rounded-full bg-purple/30 blur-3xl" />
-            {card.imageUrl && (
-              <div className="relative z-10 h-28 w-28 overflow-hidden rounded-2xl bg-white/5">
-                <img src={card.imageUrl} alt="" className="h-full w-full object-cover" />
-              </div>
-            )}
-            <span className="relative z-10 text-h1 font-black text-white">{card.front}</span>
-            <span className="relative z-10 text-label uppercase tracking-widest text-white/40">
-              Tap to flip
-            </span>
+            <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-cyan/25 via-black to-purple/25 p-6 text-center">
+              <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-cyan/30 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-12 -right-12 h-44 w-44 rounded-full bg-purple/30 blur-3xl" />
+              {card.imageUrl && (
+                <div className="relative z-10 h-28 w-28 overflow-hidden rounded-2xl bg-white/5">
+                  <img src={card.imageUrl} alt="" className="h-full w-full object-cover" />
+                </div>
+              )}
+              <span className="relative z-10 text-h1 font-black text-white">{card.front}</span>
+              <span className="relative z-10 text-label uppercase tracking-widest text-white/40">
+                Tap to flip
+              </span>
+            </div>
           </div>
 
-          {/* Back face */}
+          {/* Back face — same inner-wrapper split as the front face above. */}
           <div
             className={[
-              "flip-card-face flip-card-face--back absolute inset-0 flex flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl border-2 border-lime-green bg-gradient-to-br from-lime-green/25 via-black to-neon-pink/25 p-6 text-center",
+              "flip-card-face flip-card-face--back absolute inset-0 rounded-3xl border-2 border-lime-green",
               "shadow-[0_0_40px_-10px_rgba(157,255,0,0.5)]",
             ].join(" ")}
           >
-            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-lime-green/30 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-neon-pink/30 blur-3xl" />
-            <span className="relative z-10 text-h1 font-black text-white">{card.back}</span>
-            <span className="relative z-10 text-label uppercase tracking-widest text-white/40">
-              Answer
-            </span>
+            <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-lime-green/25 via-black to-neon-pink/25 p-6 text-center">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-lime-green/30 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-neon-pink/30 blur-3xl" />
+              <span className="relative z-10 text-h1 font-black text-white">{card.back}</span>
+              <span className="relative z-10 text-label uppercase tracking-widest text-white/40">
+                Answer
+              </span>
+            </div>
           </div>
         </div>
       </button>
