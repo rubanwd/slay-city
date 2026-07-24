@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
@@ -76,15 +77,29 @@ const cellKey = (r: number, c: number) => `${r},${c}`;
 const HINT_TEXT =
   "Words are hidden horizontally, vertically, and diagonally — and can read forwards or backwards. Tap the first letter of a word, then tap its last letter.";
 
-/** A small "?" icon beside the prompt that toggles a how-to-play tooltip. */
+const TOOLTIP_WIDTH = 256; // px — matches w-64
+const VIEWPORT_MARGIN = 16; // px — keeps the tooltip clear of the screen edge
+
+/**
+ * A small "?" icon beside the prompt that toggles a how-to-play tooltip.
+ *
+ * The icon isn't pinned to a screen edge (the prompt above it varies in
+ * length), so the tooltip is positioned in viewport coordinates — measured
+ * from the button and clamped to stay fully on-screen — rather than centered
+ * on the button itself, which could push it half off-screen.
+ */
 function HintButton() {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (btnRef.current?.contains(target) || tooltipRef.current?.contains(target)) return;
+      setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
@@ -97,11 +112,26 @@ function HintButton() {
     };
   }, [open]);
 
+  const toggle = () => {
+    if (!open) {
+      const rect = btnRef.current?.getBoundingClientRect();
+      if (rect) {
+        const left = Math.min(
+          Math.max(rect.left + rect.width / 2 - TOOLTIP_WIDTH / 2, VIEWPORT_MARGIN),
+          window.innerWidth - TOOLTIP_WIDTH - VIEWPORT_MARGIN
+        );
+        setCoords({ top: rect.bottom + 8, left });
+      }
+    }
+    setOpen((prev) => !prev);
+  };
+
   return (
-    <div ref={ref} className="relative shrink-0">
+    <div className="shrink-0">
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={toggle}
         aria-label="How to play"
         aria-expanded={open}
         className={[
@@ -123,15 +153,19 @@ function HintButton() {
         </svg>
       </button>
 
-      {open && (
-        <div
-          role="tooltip"
-          className="absolute left-1/2 top-9 z-30 w-64 -translate-x-1/2 rounded-2xl border border-white/15 bg-[#1a1a1a] p-4 shadow-xl shadow-black/50"
-        >
-          <p className="mb-1.5 text-label uppercase tracking-widest text-cyan">How to play</p>
-          <p className="text-small leading-relaxed text-white/80">{HINT_TEXT}</p>
-        </div>
-      )}
+      {open && coords && typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            role="tooltip"
+            style={{ top: coords.top, left: coords.left, width: TOOLTIP_WIDTH }}
+            className="fixed z-30 rounded-2xl border border-white/15 bg-[#1a1a1a] p-4 shadow-xl shadow-black/50"
+          >
+            <p className="mb-1.5 text-label uppercase tracking-widest text-cyan">How to play</p>
+            <p className="text-small leading-relaxed text-white/80">{HINT_TEXT}</p>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
