@@ -4,6 +4,7 @@ import {
   buildLocationProgress,
   buildMapViewModel,
   defaultSelectedLocation,
+  isLevelCompleted,
   selectActiveDistrict,
   selectVisibleLocations,
   sumLocationRewards,
@@ -129,6 +130,66 @@ describe("selectActiveDistrict", () => {
 
   it("returns null when there are no districts", () => {
     expect(selectActiveDistrict([])).toBeNull();
+  });
+});
+
+describe("isLevelCompleted", () => {
+  const twoDistricts = [
+    { id: "d1", name: "Central Plaza", order_index: 0, background_image_url: null },
+    { id: "d2", name: "Second District", order_index: 1, background_image_url: null },
+  ];
+  const twoDistrictLocations = [
+    ...locations,
+    {
+      id: "l3",
+      district_id: "d2",
+      name: "Other District First Stop",
+      description: null,
+      order_index: 0,
+      map_x: 10,
+      map_y: 10,
+      icon_url: null,
+    },
+  ];
+
+  it("is true only once every district in the level is cleared", () => {
+    const vm = buildMapViewModel(
+      twoDistricts,
+      twoDistrictLocations,
+      new Set(["l1", "l2", "l3"]),
+      new Map()
+    );
+
+    expect(isLevelCompleted(vm)).toBe(true);
+  });
+
+  it("is false while any district still has a playable stop", () => {
+    const vm = buildMapViewModel(
+      twoDistricts,
+      twoDistrictLocations,
+      new Set(["l1", "l2"]),
+      new Map([["l3", "m9"]])
+    );
+
+    expect(isLevelCompleted(vm)).toBe(false);
+  });
+
+  it("is false for a level with no districts", () => {
+    expect(isLevelCompleted([])).toBe(false);
+  });
+
+  it("is false for a level whose districts have no locations at all", () => {
+    const vm = buildMapViewModel(twoDistricts, [], new Set(), new Map());
+
+    expect(isLevelCompleted(vm)).toBe(false);
+  });
+
+  it("ignores empty districts when the ones with stops are all cleared", () => {
+    // A district with no locations yet must not hold the level open — there is
+    // nothing in it to play.
+    const vm = buildMapViewModel(twoDistricts, locations, new Set(["l1", "l2"]), new Map());
+
+    expect(isLevelCompleted(vm)).toBe(true);
   });
 });
 

@@ -3,10 +3,12 @@ import CityMap from "@/features/map/CityMap";
 import {
   buildLocationProgress,
   buildMapViewModel,
+  isLevelCompleted,
   selectActiveDistrict,
   sumLocationRewards,
 } from "@/features/map/mapState";
 import { hasAnyGroup } from "@/features/homework/queries";
+import { KNOWLEDGE_LEVEL_LABELS, nextKnowledgeLevel } from "@/features/levels/levels";
 import { getMyLevel } from "@/features/levels/queries";
 import { resolveMascotImage } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
@@ -86,6 +88,16 @@ export default async function MapPage() {
   );
   const activeDistrict = selectActiveDistrict(mapDistricts);
 
+  // Every district of this level is done. The player is only ever still here
+  // when no higher level had content to move them to (`complete_mission`
+  // promotes them automatically when one does), so the map offers a replay.
+  const nextLevel = nextKnowledgeLevel(level);
+  const levelStatus = {
+    completed: isLevelCompleted(mapDistricts),
+    levelName: KNOWLEDGE_LEVEL_LABELS[level],
+    nextLevelName: nextLevel ? KNOWLEDGE_LEVEL_LABELS[nextLevel] : null,
+  };
+
   const stats = statsRes.data;
 
   // The current-location marker wears the player's most recently equipped item;
@@ -117,6 +129,7 @@ export default async function MapPage() {
         }}
         mascotImageUrl={mascotImageUrl}
         showHomework={showHomework}
+        levelStatus={levelStatus}
       />
     </AuthGuard>
   );

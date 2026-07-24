@@ -8,6 +8,7 @@ import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import { CoinAmount, XpAmount } from "@/components/ui";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
 import { useImageLoaded } from "@/hooks/useImageLoaded";
+import { restartMyLevel } from "@/features/levels/actions";
 import { resetLocationProgress } from "@/features/mission/actions";
 import { playMapTravelSfx, playMissionStartSfx } from "@/lib/sfx";
 
@@ -50,6 +51,33 @@ function RestartLocationButton() {
   );
 }
 
+function ReplayLevelButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className={[
+        "mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-lime-green px-4 py-3",
+        "text-sm font-extrabold uppercase tracking-wide text-lime-green",
+        "hover:bg-lime-green/10 active:bg-lime-green/5 disabled:opacity-50 transition-colors",
+      ].join(" ")}
+    >
+      {pending ? "Resetting…" : "↻ Play this level again"}
+    </button>
+  );
+}
+
+/** What to say when the player has finished every district in their level. */
+export interface LevelStatus {
+  /** True once every district of the player's level is cleared. */
+  completed: boolean;
+  /** Display name of the level they just finished, e.g. "Elementary". */
+  levelName: string;
+  /** The level above it, or null at the top of the ladder. */
+  nextLevelName: string | null;
+}
+
 export interface HudStats {
   xp: number;
   coins: number;
@@ -65,9 +93,21 @@ export interface CityMapProps {
   mascotImageUrl: string;
   /** Shows the bottom nav's Homework tab — true when the child is in a teacher group. */
   showHomework?: boolean;
+  /**
+   * Set when the player has cleared their whole level. Reaching the map in
+   * this state means no next level had content — the server moves them up
+   * automatically as soon as one does.
+   */
+  levelStatus?: LevelStatus | null;
 }
 
-export default function CityMap({ district, hud, mascotImageUrl, showHomework }: CityMapProps) {
+export default function CityMap({
+  district,
+  hud,
+  mascotImageUrl,
+  showHomework,
+  levelStatus,
+}: CityMapProps) {
   const locations = selectVisibleLocations(district?.locations ?? [], MAX_VISIBLE_LOCATIONS);
 
   // The mascot starts on the earliest stop that still has a mission; tapping
@@ -101,7 +141,11 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
     // eslint-disable-next-line react-hooks/set-state-in-effect -- deferred to the client on purpose: the URL is only meaningful post-hydration, so setting it during render would mismatch SSR
     if (focus) setSelectedId(focus);
 
-    if (milestone === "district") {
+    if (milestone === "level") {
+      setMilestoneBanner(
+        name ? `🏆 Level cleared! Welcome to ${name}.` : "🏆 Level cleared! Amazing work."
+      );
+    } else if (milestone === "district") {
       setMilestoneBanner(`🏙️ District cleared! Welcome to ${district?.name ?? "the next district"}.`);
     } else if (milestone === "location") {
       setMilestoneBanner(`✓ ${name ?? "Location"} complete!`);
@@ -232,6 +276,45 @@ export default function CityMap({ district, hud, mascotImageUrl, showHomework }:
           />
         )}
       </div>
+
+      {/*
+        End of the level. The server promotes the player the moment a higher
+        level has content, so seeing this means there is nothing above them
+        yet — offer the replay instead of leaving them on a map where every
+        stop reads "Completed".
+      */}
+      {levelStatus?.completed && (
+        <div className="shrink-0 border-t border-white/10 px-5 pt-4">
+          <div className="rounded-2xl border-2 border-lime-green bg-lime-green/10 px-4 py-3">
+            <p className="text-base font-black uppercase tracking-wide text-lime-green">
+              🏆 {levelStatus.levelName} cleared!
+            </p>
+            <p className="text-sm text-white/70">
+              {levelStatus.nextLevelName
+                ? `You finished every district here. ${levelStatus.nextLevelName} is coming soon — it opens automatically as soon as it has content.`
+                : "You finished every district in the city. That's the whole ladder!"}
+            </p>
+
+            <form
+              action={async () => {
+                const result = await restartMyLevel();
+                if (!result.ok) window.alert(result.error);
+              }}
+              onSubmit={(event) => {
+                if (
+                  !window.confirm(
+                    `Replay ${levelStatus.levelName}? Every mission in this level starts over — your XP and coins stay.`
+                  )
+                ) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <ReplayLevelButton />
+            </form>
+          </div>
+        </div>
+      )}
 
       {selected && (
         <div className={`px-5 pt-4 ${BOTTOM_NAV_CLEARANCE} border-t border-white/10 shrink-0`}>

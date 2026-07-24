@@ -1109,6 +1109,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advance_my_level_if_cleared: {
+        Args: never
+        Returns: Database["public"]["Enums"]["knowledge_level"]
+      }
       available_knowledge_levels: {
         Args: never
         Returns: Database["public"]["Enums"]["knowledge_level"][]
@@ -1156,6 +1160,10 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      knowledge_level_completed: {
+        Args: { p_level: Database["public"]["Enums"]["knowledge_level"]; p_profile: string }
+        Returns: boolean
+      }
       is_group_member: { Args: { p_group_id: string }; Returns: boolean }
       is_linked_child: { Args: { p_child_id: string }; Returns: boolean }
       is_teacher: { Args: never; Returns: boolean }
@@ -1192,6 +1200,7 @@ export type Database = {
           item_id: string
         }[]
       }
+      reset_level_progress: { Args: never; Returns: undefined }
       reset_location_progress: {
         Args: { p_location_id: string }
         Returns: undefined

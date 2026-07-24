@@ -64,6 +64,15 @@ export function sortKnowledgeLevels(levels: readonly KnowledgeLevel[]): Knowledg
 }
 
 /**
+ * The next level up the ladder, or null at the top. Says nothing about whether
+ * that level has content — it names what comes next so a finished level can
+ * promise it ("Pre-Intermediate is coming soon").
+ */
+export function nextKnowledgeLevel(level: KnowledgeLevel): KnowledgeLevel | null {
+  return KNOWLEDGE_LEVELS[knowledgeLevelOrder(level) + 1] ?? null;
+}
+
+/**
  * The level a picker should start on: the child's current level when it is
  * still selectable, otherwise the first available one. Null when nothing is
  * available at all (no published content anywhere yet).

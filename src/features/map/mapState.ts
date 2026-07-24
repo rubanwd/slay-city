@@ -182,6 +182,19 @@ export function isDistrictCompleted(district: Pick<MapDistrictViewModel, "locati
 }
 
 /**
+ * True once every district of the level is cleared — the whole level is done.
+ *
+ * A level with no districts (or with districts that have no locations yet) is
+ * never "completed": there was nothing to finish. Reaching this state on the
+ * map means there was no next level with content to move on to, since
+ * `advance_my_level_if_cleared` promotes the player the moment there is.
+ */
+export function isLevelCompleted(districts: MapDistrictViewModel[]): boolean {
+  const playable = districts.filter((district) => district.locations.length > 0);
+  return playable.length > 0 && playable.every(isDistrictCompleted);
+}
+
+/**
  * Where the mascot stands when the map opens: the earliest stop that still has
  * a mission to play. Falls back to the first location when everything in the
  * district is completed.

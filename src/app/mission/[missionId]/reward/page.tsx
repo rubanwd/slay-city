@@ -3,8 +3,15 @@ import { notFound, redirect } from "next/navigation";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { taskTypeLabel } from "@/features/mission/types";
 import { buildLocationProgress } from "@/features/map/mapState";
+import {
+  KNOWLEDGE_LEVEL_LABELS,
+  knowledgeLevelOrder,
+  nextKnowledgeLevel,
+} from "@/features/levels/levels";
+import { getMyLevel, isLevelCleared } from "@/features/levels/queries";
 import RewardScreen from "@/features/reward/RewardScreen";
 import { createClient } from "@/lib/supabase/server";
+import type { KnowledgeLevel } from "@/types";
 
 interface MissionRewardPageProps {
   params: Promise<{ missionId: string }>;
@@ -23,7 +30,9 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
 
   const { data: mission } = await supabase
     .from("missions")
-    .select("id, title, xp_reward, coin_reward, location_id, locations(id, name, district_id)")
+    .select(
+      "id, title, xp_reward, coin_reward, location_id, locations(id, name, district_id, districts(level))"
+    )
     .eq("id", missionId)
     .eq("is_published", true)
     .maybeSingle();
@@ -61,7 +70,12 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
   const taskNames = (tasks ?? []).map((task) => taskTypeLabel(task.task_type));
 
   // The FK relationship comes back as a single related row (or null).
-  const location = mission.locations as { id: string; name: string; district_id: string } | null;
+  const location = mission.locations as {
+    id: string;
+    name: string;
+    district_id: string;
+    districts: { level: KnowledgeLevel } | null;
+  } | null;
 
   // Work out where this completion leaves the player: how many missions are
   // left at this location, and whether finishing it also cleared the whole
@@ -69,7 +83,12 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
   // instead of silently dropping the player back on the map.
   let missionsCompletedAtLocation = 0;
   let totalMissionsAtLocation = 0;
-  let milestone: "location" | "district" | null = null;
+  let milestone: "location" | "district" | "level" | null = null;
+  // Set when this completion finished the whole level, and — separately —
+  // when the server has already promoted the player to the next one.
+  let clearedLevelName: string | null = null;
+  let nextLevelName: string | null = null;
+  let advancedToLevelName: string | null = null;
 
   if (location) {
     const { data: districtLocations } = await supabase
@@ -114,12 +133,31 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
     } else if (isLocationComplete) {
       milestone = "location";
     }
+
+    // Clearing the level implies clearing this district, so only look when the
+    // district is done. `complete_mission` has already moved the player up if
+    // a higher level has content — comparing their level to this one's says
+    // whether that happened, and the reward screen explains either outcome.
+    const missionLevel = location.districts?.level ?? null;
+    if (isDistrictComplete && missionLevel && (await isLevelCleared(supabase, user.id, missionLevel))) {
+      milestone = "level";
+      clearedLevelName = KNOWLEDGE_LEVEL_LABELS[missionLevel];
+
+      const next = nextKnowledgeLevel(missionLevel);
+      nextLevelName = next ? KNOWLEDGE_LEVEL_LABELS[next] : null;
+
+      const currentLevel = await getMyLevel(supabase, user.id);
+      if (knowledgeLevelOrder(currentLevel) > knowledgeLevelOrder(missionLevel)) {
+        advancedToLevelName = KNOWLEDGE_LEVEL_LABELS[currentLevel];
+      }
+    }
   }
 
   const continueParams = new URLSearchParams();
   if (location) continueParams.set("focus", location.id);
   if (milestone) continueParams.set("milestone", milestone);
   if (milestone === "location" && location) continueParams.set("name", location.name);
+  if (milestone === "level" && advancedToLevelName) continueParams.set("name", advancedToLevelName);
   const continueHref = continueParams.size > 0 ? `/map?${continueParams.toString()}` : "/map";
 
   return (
@@ -134,6 +172,9 @@ export default async function MissionRewardPage({ params }: MissionRewardPagePro
         missionsCompletedAtLocation={missionsCompletedAtLocation}
         totalMissionsAtLocation={totalMissionsAtLocation}
         milestone={milestone}
+        clearedLevelName={clearedLevelName}
+        nextLevelName={nextLevelName}
+        advancedToLevelName={advancedToLevelName}
       />
     </AuthGuard>
   );

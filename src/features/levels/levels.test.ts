@@ -8,6 +8,7 @@ import {
   isKnowledgeLevel,
   knowledgeLevelLabel,
   knowledgeLevelOrder,
+  nextKnowledgeLevel,
   resolveSelectableLevel,
   sortKnowledgeLevels,
 } from "./levels";
@@ -89,6 +90,19 @@ describe("sortKnowledgeLevels", () => {
     expect(knowledgeLevelOrder("pre_intermediate")).toBeLessThan(
       knowledgeLevelOrder("intermediate")
     );
+  });
+});
+
+describe("nextKnowledgeLevel", () => {
+  it("walks up the ladder one step at a time", () => {
+    expect(nextKnowledgeLevel("beginner")).toBe("elementary");
+    expect(nextKnowledgeLevel("elementary")).toBe("pre_intermediate");
+    expect(nextKnowledgeLevel("pre_intermediate")).toBe("intermediate");
+    expect(nextKnowledgeLevel("intermediate")).toBe("upper_intermediate");
+  });
+
+  it("returns null at the top", () => {
+    expect(nextKnowledgeLevel("upper_intermediate")).toBeNull();
   });
 });
 

@@ -24,8 +24,17 @@ export interface RewardScreenProps {
   missionsCompletedAtLocation?: number;
   /** How many missions the location has in total. */
   totalMissionsAtLocation?: number;
-  /** Whether this completion also finished the whole location or district. */
-  milestone?: "location" | "district" | null;
+  /** Whether this completion also finished the whole location, district, or level. */
+  milestone?: "location" | "district" | "level" | null;
+  /** The level just finished — set with `milestone: "level"`. */
+  clearedLevelName?: string | null;
+  /** The level above the one just finished, or null at the top of the ladder. */
+  nextLevelName?: string | null;
+  /**
+   * The level the player was moved up to, when the next level already had
+   * content. Null means they stay put — the next level is still coming soon.
+   */
+  advancedToLevelName?: string | null;
 }
 
 /* Brand palette used for the falling rain dots */
@@ -148,6 +157,9 @@ export default function RewardScreen({
   missionsCompletedAtLocation = 0,
   totalMissionsAtLocation = 0,
   milestone = null,
+  clearedLevelName = null,
+  nextLevelName = null,
+  advancedToLevelName = null,
 }: RewardScreenProps) {
   const router = useRouter();
   const [drops, setDrops] = useState<RainDrop[]>([]);
@@ -300,7 +312,23 @@ export default function RewardScreen({
 
         {/* Where this leaves the player — spells out next steps instead of
             silently dropping them back on the map with no explanation. */}
-        {milestone === "district" ? (
+        {milestone === "level" ? (
+          <div
+            className="w-full rounded-2xl border-2 border-lime-green bg-lime-green/10 px-4 py-3"
+            style={{ animation: "reward-rise 0.5s ease-out 0.5s both" }}
+          >
+            <p className="text-body font-black uppercase tracking-wide text-lime-green">
+              🏆 {clearedLevelName} cleared!
+            </p>
+            <p className="text-small text-white/70">
+              {advancedToLevelName
+                ? `You finished every district in ${clearedLevelName}. You're moving up to ${advancedToLevelName} — a whole new map is waiting.`
+                : nextLevelName
+                  ? `You finished every district in ${clearedLevelName}. ${nextLevelName} is coming soon — until then you can replay this level from the map.`
+                  : `You finished every district in ${clearedLevelName} — that's the whole city!`}
+            </p>
+          </div>
+        ) : milestone === "district" ? (
           <div
             className="w-full rounded-2xl border-2 border-lime-green bg-lime-green/10 px-4 py-3"
             style={{ animation: "reward-rise 0.5s ease-out 0.5s both" }}

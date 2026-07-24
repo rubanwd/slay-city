@@ -9,6 +9,32 @@ import { isKnowledgeLevel, knowledgeLevelLabel } from "./levels";
 export type ChangeLevelResult = { ok: true } | { ok: false; error: string };
 
 /**
+ * Clears the player's progress across their whole current level so they can
+ * play it again. Offered on the map when a level is finished and the next one
+ * has no content yet — the alternative to a dead end.
+ *
+ * XP, coins and streaks are kept; the missions simply pay out again as they
+ * are replayed, exactly like the per-location restart.
+ */
+export async function restartMyLevel(): Promise<ChangeLevelResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to replay a level." };
+  }
+
+  const { error } = await supabase.rpc("reset_level_progress");
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/**
  * Switches the signed-in child to another knowledge level, changing which
  * districts their map shows. Progress is per-mission, so nothing is lost:
  * switching back restores exactly what they had finished there.
