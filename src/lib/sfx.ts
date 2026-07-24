@@ -251,12 +251,12 @@ export async function playMapTravelSfx(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export const APPLAUSE_DURATION_S = 1.7;
-export const APPLAUSE_CLAP_COUNT = 55;
+export const APPLAUSE_CLAP_COUNT = 70;
 const APPLAUSE_MIN_FREQUENCY = 1500;
 const APPLAUSE_MAX_FREQUENCY = 4200;
 const APPLAUSE_MIN_CLAP_DURATION_S = 0.03;
 const APPLAUSE_MAX_CLAP_DURATION_S = 0.07;
-const APPLAUSE_PEAK_GAIN = 0.18;
+const APPLAUSE_PEAK_GAIN = 0.32;
 
 export interface ApplauseClap {
   /** Seconds after the applause starts that this clap fires. */
@@ -305,7 +305,7 @@ export function buildApplauseClaps(
 
 const CROWD_ROAR_BANDPASS_FREQUENCY = 1100;
 const CROWD_ROAR_BANDPASS_Q = 0.5;
-const CROWD_ROAR_PEAK_GAIN = 0.15;
+const CROWD_ROAR_PEAK_GAIN = 0.3;
 const CROWD_ROAR_ENVELOPE_POINTS = 64;
 
 /** A wash of crowd "roar" underneath the claps — reuses the applause swell so it rises and falls with them. */
@@ -347,7 +347,7 @@ function playCrowdRoar(
 // Firework pops: a handful of loud bangs (some with a whistle-up lead-in and
 // a crackle tail) scattered through the applause, like fireworks going off.
 
-export const FIREWORK_POP_COUNT = 6;
+export const FIREWORK_POP_COUNT = 9;
 /** Pops only start once the crowd's already going, not right at the top. */
 export const FIREWORK_START_DELAY_S = 0.3;
 const FIREWORK_WHISTLE_CHANCE = 0.5;
@@ -355,7 +355,7 @@ const FIREWORK_WHISTLE_DURATION_S = 0.22;
 const FIREWORK_WHISTLE_START_FREQUENCY = 700;
 const FIREWORK_WHISTLE_END_FREQUENCY = 1800;
 const FIREWORK_POP_DURATION_S = 0.14;
-const FIREWORK_POP_PEAK_GAIN = 0.35;
+const FIREWORK_POP_PEAK_GAIN = 0.55;
 const FIREWORK_SUB_THUMP_FREQUENCY = 65;
 const FIREWORK_CRACKLE_COUNT = 3;
 const FIREWORK_CRACKLE_GAP_S = 0.03;
@@ -403,7 +403,7 @@ function playFireworkPop(
   });
   playTone(ctx, FIREWORK_SUB_THUMP_FREQUENCY, popTime, FIREWORK_POP_DURATION_S, {
     type: "sine",
-    peakGain: 0.3,
+    peakGain: 0.45,
     destination,
   });
 
@@ -422,14 +422,15 @@ export async function playRewardApplauseSfx(): Promise<void> {
   const ctx = await resumeSharedAudioContext();
   if (!ctx) return;
 
-  // Dozens of overlapping claps and pops can stack louder than any one
-  // envelope expects, so route everything through a limiter.
+  // This is meant to be loud — a concert crowd, not a polite clap — so the
+  // layers below run hot; a hard limiter keeps that from turning into
+  // clipping while still squashing everything up toward full volume.
   const limiter = ctx.createDynamicsCompressor();
-  limiter.threshold.value = -20;
-  limiter.knee.value = 10;
-  limiter.ratio.value = 14;
-  limiter.attack.value = 0.002;
-  limiter.release.value = 0.2;
+  limiter.threshold.value = -24;
+  limiter.knee.value = 6;
+  limiter.ratio.value = 20;
+  limiter.attack.value = 0.001;
+  limiter.release.value = 0.15;
   limiter.connect(ctx.destination);
 
   const now = ctx.currentTime;
