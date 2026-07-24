@@ -4,6 +4,8 @@ import NavLink from "@/components/ui/NavLink";
 import { useRouter } from "next/navigation";
 import { useState, type DragEvent } from "react";
 
+import type { KnowledgeLevel } from "@/types";
+
 import { useAdminToast } from "./AdminToast";
 import { reorderDistricts } from "./actions";
 
@@ -14,6 +16,8 @@ export interface AdminDistrictItemData {
   order_index: number;
   is_published: boolean;
   background_image_url: string | null;
+  /** The knowledge level this district belongs to. */
+  level: KnowledgeLevel;
 }
 
 export interface AdminDistrictListProps {

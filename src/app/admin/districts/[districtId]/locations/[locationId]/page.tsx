@@ -9,6 +9,7 @@ import AdminMissionForm from "@/features/admin/AdminMissionForm";
 import AdminMissionItem, { type AdminMissionItemData } from "@/features/admin/AdminMissionItem";
 import { requireAdminPage } from "@/features/admin/guard";
 import { toLocationOptions } from "@/features/admin/locationOptions";
+import { DEFAULT_KNOWLEDGE_LEVEL, knowledgeLevelLabel } from "@/features/levels/levels";
 import { countImageSlots } from "@/features/admin/taskImageSlots";
 import type { MissionTaskType } from "@/features/admin/taskTypes";
 import type { Json } from "@/types/database";
@@ -25,7 +26,7 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
   const { data: location } = await supabase
     .from("locations")
     .select(
-      "id, district_id, name, description, order_index, is_published, map_x, map_y, icon_url, districts(name, background_image_url)"
+      "id, district_id, name, description, order_index, is_published, map_x, map_y, icon_url, districts(name, background_image_url, level)"
     )
     .eq("id", locationId)
     .maybeSingle();
@@ -75,6 +76,7 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
   }
   const districtName = districts?.name ?? "District";
   const districtBackgroundUrl = districts?.background_image_url ?? null;
+  const districtLevel = districts?.level ?? DEFAULT_KNOWLEDGE_LEVEL;
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -82,8 +84,8 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
         <AdminHeader title={location.name} backHref={`/admin/districts/${districtId}`} />
 
         <nav className="mb-3 flex items-center gap-1.5 text-xs text-white/40">
-          <NavLink href="/admin/districts" className="hover:text-white/70">
-            Districts
+          <NavLink href={`/admin/levels/${districtLevel}`} className="hover:text-white/70">
+            {knowledgeLevelLabel(districtLevel)}
           </NavLink>
           <span>›</span>
           <NavLink href={`/admin/districts/${districtId}`} className="hover:text-white/70">

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { isKnowledgeLevel } from "@/features/levels/levels";
 import { isWardrobeCategory } from "@/features/wardrobe/categories";
 import type { Database } from "@/types/database";
 
@@ -587,6 +588,17 @@ export async function removeGroupMember(formData: FormData): Promise<void> {
 
 /* ── Districts & locations ─────────────────────────────────────────────────── */
 
+/**
+ * Districts are reachable from three trees — the level pages, the district
+ * detail pages, and the child-facing map — and every district write can move a
+ * row between them, so all three are revalidated together.
+ */
+function revalidateDistricts(): void {
+  revalidatePath("/admin/levels", "layout");
+  revalidatePath("/admin/districts", "layout");
+  revalidatePath("/map", "layout");
+}
+
 export async function createDistrict(
   _prevState: AdminFormState,
   formData: FormData
@@ -600,9 +612,11 @@ export async function createDistrict(
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
   const isPublished = formData.get("is_published") === "on";
   const backgroundImageUrl = String(formData.get("background_image_url") ?? "").trim();
+  const level = formData.get("level");
 
   if (!name) return { error: "District name is required." };
   if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
+  if (!isKnowledgeLevel(level)) return { error: "Choose a knowledge level for this district." };
 
   const { error } = await supabase.from("districts").insert({
     name,
@@ -610,12 +624,12 @@ export async function createDistrict(
     order_index: orderIndex,
     is_published: isPublished,
     background_image_url: backgroundImageUrl || null,
+    level,
   });
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/districts", "layout");
-  revalidatePath("/map", "layout");
+  revalidateDistricts();
   return { success: `District "${name}" created.` };
 }
 
@@ -634,10 +648,12 @@ export async function updateDistrict(
   const orderIndex = parseNonNegativeInt(formData.get("order_index"));
   const isPublished = formData.get("is_published") === "on";
   const backgroundImageUrl = String(formData.get("background_image_url") ?? "").trim();
+  const level = formData.get("level");
 
   if (!id) return { error: "A district is required." };
   if (!name) return { error: "District name is required." };
   if (orderIndex === null) return { error: "Order must be a non-negative whole number." };
+  if (!isKnowledgeLevel(level)) return { error: "Choose a knowledge level for this district." };
 
   const { error } = await supabase
     .from("districts")
@@ -647,13 +663,13 @@ export async function updateDistrict(
       order_index: orderIndex,
       is_published: isPublished,
       background_image_url: backgroundImageUrl || null,
+      level,
     })
     .eq("id", id);
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/districts", "layout");
-  revalidatePath("/map", "layout");
+  revalidateDistricts();
   return { success: `District "${name}" updated.` };
 }
 
@@ -680,8 +696,7 @@ export async function reorderDistricts(ids: string[]): Promise<AdminFormState> {
   const failed = results.find((r) => r.error);
   if (failed?.error) return { error: failed.error.message };
 
-  revalidatePath("/admin/districts", "layout");
-  revalidatePath("/map", "layout");
+  revalidateDistricts();
   return { success: "District order saved." };
 }
 
@@ -721,8 +736,8 @@ export async function createLocation(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/districts", "layout");
-  revalidatePath("/map", "layout");
+  // A location can be the one that makes its level go live for kids.
+  revalidateDistricts();
   return { success: `Location "${name}" created.` };
 }
 
@@ -768,15 +783,15 @@ export async function updateLocation(
 
   if (error) return { error: error.message };
 
-  revalidatePath("/admin/districts", "layout");
-  revalidatePath("/map", "layout");
+  // Publishing/unpublishing a location can flip whether its level is live.
+  revalidateDistricts();
   return { success: `Location "${name}" updated.` };
 }
 
 /**
  * Deletes a district. Foreign-key cascades remove its locations, their
- * missions, tasks, and related progress. Redirects to the district list, since
- * the current detail page no longer exists afterwards.
+ * missions, tasks, and related progress. Redirects to the district's level,
+ * since the current detail page no longer exists afterwards.
  */
 export async function deleteDistrict(formData: FormData): Promise<void> {
   const supabase = await createClient();
@@ -786,12 +801,19 @@ export async function deleteDistrict(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
 
+  // Read the level before deleting so the redirect can land on the level the
+  // district was in, rather than the top of the tree.
+  const { data: district } = await supabase
+    .from("districts")
+    .select("level")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabase.from("districts").delete().eq("id", id);
   if (error) return;
 
-  revalidatePath("/admin/districts", "layout");
-  revalidatePath("/map", "layout");
-  redirect("/admin/districts");
+  revalidateDistricts();
+  redirect(district ? `/admin/levels/${district.level}` : "/admin/levels");
 }
 
 /**
@@ -810,9 +832,8 @@ export async function deleteLocation(formData: FormData): Promise<void> {
   const { error } = await supabase.from("locations").delete().eq("id", id);
   if (error) return;
 
-  revalidatePath("/admin/districts", "layout");
-  revalidatePath("/map", "layout");
-  redirect(districtId ? `/admin/districts/${districtId}` : "/admin/districts");
+  revalidateDistricts();
+  redirect(districtId ? `/admin/districts/${districtId}` : "/admin/levels");
 }
 
 /* ── Wardrobe items ────────────────────────────────────────────────────────── */

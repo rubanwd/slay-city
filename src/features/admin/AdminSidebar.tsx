@@ -18,7 +18,7 @@ type SidebarItem = {
  * complete shortcut list to every top-level admin area.
  */
 const ITEMS: SidebarItem[] = [
-  { href: "/admin/districts", title: "Districts, Locations, Missions", accent: "text-cyan" },
+  { href: "/admin/levels", title: "Levels, Districts, Missions", accent: "text-cyan" },
   { href: "/admin/task-types", title: "Task Types", accent: "text-lime-green" },
   { href: "/admin/wardrobe", title: "Wardrobe", accent: "text-neon-pink" },
   { href: "/admin/admins", title: "Manage Admins", accent: "text-purple" },

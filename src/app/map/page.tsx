@@ -7,6 +7,7 @@ import {
   sumLocationRewards,
 } from "@/features/map/mapState";
 import { hasAnyGroup } from "@/features/homework/queries";
+import { getMyLevel } from "@/features/levels/queries";
 import { resolveMascotImage } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
 
@@ -23,12 +24,18 @@ export default async function MapPage() {
     return null;
   }
 
+  // The map only ever shows the districts of the level the child is studying.
+  // Switching level (profile screen) swaps the whole map; per-mission progress
+  // is untouched, so coming back restores exactly what was finished there.
+  const level = await getMyLevel(supabase, user.id);
+
   const [districtsRes, locationsRes, missionsRes, progressRes, statsRes, equippedRes, showHomework] =
     await Promise.all([
       supabase
         .from("districts")
         .select("id, name, order_index, background_image_url")
         .eq("is_published", true)
+        .eq("level", level)
         .order("order_index"),
       supabase
         .from("locations")

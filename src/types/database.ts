@@ -107,6 +107,7 @@ export type Database = {
           description: string | null
           id: string
           is_published: boolean
+          level: Database["public"]["Enums"]["knowledge_level"]
           name: string
           order_index: number
           updated_at: string
@@ -117,6 +118,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean
+          level?: Database["public"]["Enums"]["knowledge_level"]
           name: string
           order_index?: number
           updated_at?: string
@@ -127,6 +129,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean
+          level?: Database["public"]["Enums"]["knowledge_level"]
           name?: string
           order_index?: number
           updated_at?: string
@@ -707,6 +710,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           id: string
+          level: Database["public"]["Enums"]["knowledge_level"]
           role: Database["public"]["Enums"]["user_role"]
           username: string
         }
@@ -715,6 +719,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           id: string
+          level?: Database["public"]["Enums"]["knowledge_level"]
           role?: Database["public"]["Enums"]["user_role"]
           username: string
         }
@@ -723,6 +728,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           id?: string
+          level?: Database["public"]["Enums"]["knowledge_level"]
           role?: Database["public"]["Enums"]["user_role"]
           username?: string
         }
@@ -1103,6 +1109,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      available_knowledge_levels: {
+        Args: never
+        Returns: Database["public"]["Enums"]["knowledge_level"][]
+      }
       claim_admin: { Args: never; Returns: boolean }
       complete_homework_grammar: {
         Args: { p_topic_id: string }
@@ -1188,11 +1198,21 @@ export type Database = {
       }
       reset_my_progress: { Args: never; Returns: undefined }
       revoke_teacher: { Args: { p_profile_id: string }; Returns: boolean }
+      set_my_knowledge_level: {
+        Args: { p_level: Database["public"]["Enums"]["knowledge_level"] }
+        Returns: undefined
+      }
       teaches_child: { Args: { p_child_id: string }; Returns: boolean }
       unequip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
     }
     Enums: {
       ai_content_draft_status: "pending" | "approved" | "rejected"
+      knowledge_level:
+        | "beginner"
+        | "elementary"
+        | "pre_intermediate"
+        | "intermediate"
+        | "upper_intermediate"
       mission_task_type:
         | "vocabulary"
         | "matching"
@@ -1355,6 +1375,13 @@ export const Constants = {
   public: {
     Enums: {
       ai_content_draft_status: ["pending", "approved", "rejected"],
+      knowledge_level: [
+        "beginner",
+        "elementary",
+        "pre_intermediate",
+        "intermediate",
+        "upper_intermediate",
+      ],
       mission_task_type: [
         "vocabulary",
         "matching",

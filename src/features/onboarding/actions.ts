@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import { isKnowledgeLevel, knowledgeLevelLabel } from "@/features/levels/levels";
+import { getAvailableLevels } from "@/features/levels/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export type OnboardingState = {
@@ -20,6 +22,7 @@ export async function createProfile(
 ): Promise<OnboardingState> {
   const username = String(formData.get("username") ?? "").trim();
   const ageRaw = String(formData.get("age") ?? "").trim();
+  const levelRaw = String(formData.get("level") ?? "").trim();
 
   if (username.length < 2 || username.length > 20) {
     return { error: "Username must be 2-20 characters." };
@@ -45,12 +48,26 @@ export async function createProfile(
     return { error: "Your session expired. Please log in again." };
   }
 
+  // The picker only ever offers levels that have content, but the choice
+  // arrives from the browser — re-check it here rather than trusting the form.
+  const availableLevels = await getAvailableLevels(supabase);
+  if (availableLevels.length === 0) {
+    return { error: "No levels are open yet. Please try again later." };
+  }
+  if (!isKnowledgeLevel(levelRaw)) {
+    return { error: "Choose your level." };
+  }
+  if (!availableLevels.includes(levelRaw)) {
+    return { error: `${knowledgeLevelLabel(levelRaw)} has no content yet. Pick another level.` };
+  }
+
   // No avatar_url: the player's avatar everywhere is their mascot wearing the
   // wardrobe item they have equipped, so there is nothing to pick at signup.
   const { error: profileError } = await supabase.from("profiles").insert({
     id: user.id,
     username,
     age,
+    level: levelRaw,
     role: "child",
   });
 

@@ -3,6 +3,7 @@ import NavLink from "@/components/ui/NavLink";
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminSnakePlayground from "@/features/admin/AdminSnakePlayground";
 import { requireAdminPage } from "@/features/admin/guard";
+import { KNOWLEDGE_LEVELS } from "@/features/levels/levels";
 
 /**
  * Admin content manager landing at `/admin`. Admin-only (enforced by middleware
@@ -25,10 +26,10 @@ export default async function AdminPage() {
 
   const cards = [
     {
-      href: "/admin/districts",
-      title: "Districts, Locations, Missions",
-      count: districtsRes.count ?? 0,
-      description: "Districts, their locations, and the missions inside them.",
+      href: "/admin/levels",
+      title: "Levels, Districts, Missions",
+      count: KNOWLEDGE_LEVELS.length,
+      description: "Knowledge levels, the districts inside them, and their locations and missions.",
       accent: "text-cyan",
     },
     {

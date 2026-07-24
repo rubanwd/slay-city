@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
+import { KNOWLEDGE_LEVELS, KNOWLEDGE_LEVEL_LABELS } from "@/features/levels/levels";
 
 import type { AdminDistrictItemData } from "./AdminDistrictList";
 import MapBackgroundField from "./MapBackgroundField";
@@ -50,6 +51,18 @@ export default function AdminDistrictHeader({ district, locations }: AdminDistri
         <form action={formAction} className="flex flex-col gap-3">
           <input type="hidden" name="id" value={district.id} />
 
+          {/* Moving a district to another level moves everything inside it —
+              its locations, missions and tasks travel with it. */}
+          <label className="flex flex-col gap-1.5">
+            <span className={LABEL_CLASS}>Level</span>
+            <select name="level" defaultValue={district.level} className={INPUT_CLASS}>
+              {KNOWLEDGE_LEVELS.map((level) => (
+                <option key={level} value={level} className="bg-[#1a1a1a]">
+                  {KNOWLEDGE_LEVEL_LABELS[level]}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="flex flex-col gap-1.5">
             <span className={LABEL_CLASS}>District Name</span>
             <input name="name" defaultValue={district.name} className={INPUT_CLASS} />
@@ -114,6 +127,9 @@ export default function AdminDistrictHeader({ district, locations }: AdminDistri
                 ].join(" ")}
               >
                 {district.is_published ? "Published" : "Draft"}
+              </span>
+              <span className="shrink-0 rounded-md bg-purple/20 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-purple">
+                {KNOWLEDGE_LEVEL_LABELS[district.level]}
               </span>
             </div>
             <button

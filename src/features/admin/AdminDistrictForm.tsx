@@ -4,6 +4,8 @@ import { useActionState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
+import { KNOWLEDGE_LEVELS, KNOWLEDGE_LEVEL_LABELS } from "@/features/levels/levels";
+import type { KnowledgeLevel } from "@/types";
 
 import MapBackgroundField from "./MapBackgroundField";
 import { useAdminModalControls } from "./AdminModal";
@@ -20,8 +22,17 @@ function SubmitButton() {
   );
 }
 
-/** "New District" form, opened from the districts list's Add District modal. */
-export default function AdminDistrictForm() {
+export interface AdminDistrictFormProps {
+  /**
+   * The level the new district lands in. Set when the form is opened from a
+   * level page (the usual path), which hides the level picker — the level is
+   * already implied by where the admin is. Left unset the form asks for it.
+   */
+  fixedLevel?: KnowledgeLevel;
+}
+
+/** "New District" form, opened from a level's Add District modal. */
+export default function AdminDistrictForm({ fixedLevel }: AdminDistrictFormProps = {}) {
   const [state, formAction] = useActionState<AdminFormState, FormData>(createDistrict, {});
   const modal = useAdminModalControls();
   const toast = useAdminToast();
@@ -39,6 +50,20 @@ export default function AdminDistrictForm() {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {fixedLevel ? (
+        <input type="hidden" name="level" value={fixedLevel} />
+      ) : (
+        <label className="flex flex-col gap-1.5">
+          <span className={LABEL_CLASS}>Level</span>
+          <select name="level" defaultValue="elementary" className={INPUT_CLASS}>
+            {KNOWLEDGE_LEVELS.map((level) => (
+              <option key={level} value={level} className="bg-[#1a1a1a]">
+                {KNOWLEDGE_LEVEL_LABELS[level]}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       <label className="flex flex-col gap-1.5">
         <span className={LABEL_CLASS}>District Name</span>
         <input name="name" type="text" required placeholder="Downtown" className={INPUT_CLASS} />

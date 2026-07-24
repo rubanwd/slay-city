@@ -1,49 +1,10 @@
-import AdminCreateModal from "@/features/admin/AdminCreateModal";
-import AdminDistrictForm from "@/features/admin/AdminDistrictForm";
-import AdminDistrictList, {
-  type AdminDistrictItemData,
-} from "@/features/admin/AdminDistrictList";
-import AdminHeader from "@/features/admin/AdminHeader";
-import { requireAdminPage } from "@/features/admin/guard";
+import { redirect } from "next/navigation";
 
-/** Manage districts: view, add, and edit them. */
-export default async function AdminDistrictsPage() {
-  const { supabase } = await requireAdminPage();
-
-  const [{ data: districts }, { data: locations }] = await Promise.all([
-    supabase
-      .from("districts")
-      .select("id, name, description, order_index, is_published, background_image_url")
-      .order("order_index"),
-    supabase.from("locations").select("id, district_id"),
-  ]);
-
-  const districtRows: AdminDistrictItemData[] = districts ?? [];
-
-  // Plain object, not a Map — it crosses into a client component.
-  const locationCounts: Record<string, number> = {};
-  for (const loc of locations ?? []) {
-    locationCounts[loc.district_id] = (locationCounts[loc.district_id] ?? 0) + 1;
-  }
-
-  return (
-    <main className="min-h-screen bg-black text-white">
-      <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
-        <AdminHeader title="Districts" backHref="/admin" />
-
-        <h2 className="mb-2 mt-2 text-label text-white/50">Districts ({districtRows.length})</h2>
-        {districtRows.length === 0 ? (
-          <p className="mb-6 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
-            No districts yet. Create the first one below.
-          </p>
-        ) : (
-          <AdminDistrictList districts={districtRows} locationCounts={locationCounts} />
-        )}
-
-        <AdminCreateModal triggerLabel="Add District" title="New District">
-          <AdminDistrictForm />
-        </AdminCreateModal>
-      </div>
-    </main>
-  );
+/**
+ * Districts now live under a knowledge level (`/admin/levels/<level>`), so the
+ * flat district list is gone. Kept as a redirect because it was the entry point
+ * bookmarked from the Content Manager landing and the sidebar.
+ */
+export default function AdminDistrictsPage() {
+  redirect("/admin/levels");
 }

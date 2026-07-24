@@ -6,6 +6,7 @@ type Tables = Database["public"]["Tables"];
 type Enums = Database["public"]["Enums"];
 
 export type UserRole = Enums["user_role"];
+export type KnowledgeLevel = Enums["knowledge_level"];
 export type MissionTaskType = Enums["mission_task_type"];
 export type AiContentDraftStatus = Enums["ai_content_draft_status"];
 

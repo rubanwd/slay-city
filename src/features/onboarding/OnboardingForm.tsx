@@ -1,10 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 import { signOut } from "@/features/auth/actions";
+import LevelPicker from "@/features/levels/LevelPicker";
+import LockedLevelsNote from "@/features/levels/LockedLevelsNote";
+import { resolveSelectableLevel } from "@/features/levels/levels";
+import type { KnowledgeLevel } from "@/types";
 
 import { createProfile, type OnboardingState } from "./actions";
 
@@ -41,8 +45,18 @@ function SignOutLink() {
   );
 }
 
-export default function OnboardingForm() {
+export interface OnboardingFormProps {
+  /** Levels that already have content — the only ones a child may start on. */
+  levels: readonly KnowledgeLevel[];
+}
+
+export default function OnboardingForm({ levels }: OnboardingFormProps) {
   const [state, formAction] = useActionState<OnboardingState, FormData>(createProfile, {});
+  // Pre-selects the first available level (Elementary today) so the child can
+  // submit without thinking about it, while still being able to change it.
+  const [level, setLevel] = useState<KnowledgeLevel | null>(() =>
+    resolveSelectableLevel(levels, null)
+  );
 
   return (
     <div className="w-full flex flex-col items-center gap-6">
@@ -79,6 +93,21 @@ export default function OnboardingForm() {
             className={INPUT_CLASS}
           />
         </label>
+
+        <div className="flex flex-col gap-2">
+          <span className="text-label text-white/50 uppercase tracking-widest">Level</span>
+          {levels.length === 0 ? (
+            <p className="rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-small text-white/50">
+              No levels are open yet — you&apos;ll be able to pick one as soon as the city has
+              content.
+            </p>
+          ) : (
+            <>
+              <LevelPicker levels={levels} value={level} onChange={setLevel} name="level" />
+              <LockedLevelsNote available={levels} />
+            </>
+          )}
+        </div>
 
         {state.error && (
           <p role="alert" className="text-sm font-semibold text-neon-pink text-center">

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import NavLink from "@/components/ui/NavLink";
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminDistrictHeader from "@/features/admin/AdminDistrictHeader";
 import type { AdminDistrictItemData } from "@/features/admin/AdminDistrictList";
@@ -8,6 +9,7 @@ import AdminLocationForm from "@/features/admin/AdminLocationForm";
 import AdminDistrictMapPreview from "@/features/admin/AdminDistrictMapPreview";
 import AdminLocationItem, { type AdminLocationItemData } from "@/features/admin/AdminLocationItem";
 import { requireAdminPage } from "@/features/admin/guard";
+import { KNOWLEDGE_LEVEL_LABELS } from "@/features/levels/levels";
 
 interface DistrictDetailPageProps {
   params: Promise<{ districtId: string }>;
@@ -20,12 +22,12 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
 
   const { data: district } = await supabase
     .from("districts")
-    .select("id, name, description, order_index, is_published, background_image_url")
+    .select("id, name, description, order_index, is_published, background_image_url, level")
     .eq("id", districtId)
     .maybeSingle();
 
   if (!district) {
-    redirect("/admin/districts");
+    redirect("/admin/levels");
   }
 
   const [{ data: locations }, { data: missions }] = await Promise.all([
@@ -48,7 +50,19 @@ export default async function DistrictDetailPage({ params }: DistrictDetailPageP
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
-        <AdminHeader title={district.name} backHref="/admin/districts" />
+        <AdminHeader title={district.name} backHref={`/admin/levels/${district.level}`} />
+
+        <nav className="mb-3 flex items-center gap-1.5 text-xs text-white/40">
+          <NavLink href="/admin/levels" className="hover:text-white/70">
+            Levels
+          </NavLink>
+          <span>›</span>
+          <NavLink href={`/admin/levels/${district.level}`} className="hover:text-white/70">
+            {KNOWLEDGE_LEVEL_LABELS[district.level]}
+          </NavLink>
+          <span>›</span>
+          <span className="truncate text-white/60">{district.name}</span>
+        </nav>
 
         <AdminDistrictHeader
           district={districtData}

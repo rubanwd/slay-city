@@ -6,6 +6,9 @@ import { BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import SlayCharacter from "@/components/ui/SlayCharacter";
 import { signOut } from "@/features/auth/actions";
 import { resetMissionProgress } from "@/features/mission/actions";
+import type { KnowledgeLevel } from "@/types";
+
+import ProfileLevelCard from "./ProfileLevelCard";
 
 function LogoutButton() {
   const { pending } = useFormStatus();
@@ -61,9 +64,19 @@ export interface ProfileScreenProps {
   email: string | null;
   /** The player's snake wearing their currently equipped wardrobe item. */
   mascotImageUrl: string;
+  /** The knowledge level whose districts the player's map is showing. */
+  level: KnowledgeLevel;
+  /** Levels with content — what the player can switch to. */
+  availableLevels: readonly KnowledgeLevel[];
 }
 
-export default function ProfileScreen({ username, email, mascotImageUrl }: ProfileScreenProps) {
+export default function ProfileScreen({
+  username,
+  email,
+  mascotImageUrl,
+  level,
+  availableLevels,
+}: ProfileScreenProps) {
   return (
     <main className="min-h-screen bg-black flex flex-col mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-center px-6 py-4 border-b border-white/10">
@@ -82,6 +95,8 @@ export default function ProfileScreen({ username, email, mascotImageUrl }: Profi
             <p className="text-sm text-white/50 break-all text-center">{email ?? "Signed in"}</p>
           </div>
         </div>
+
+        <ProfileLevelCard current={level} available={availableLevels} />
 
         <div className="mt-auto flex flex-col gap-3">
           {/* TEMPORARY: dev-only progress reset. Remove or gate to admins before launch. */}

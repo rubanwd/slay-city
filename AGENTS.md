@@ -256,8 +256,8 @@ Implement all of the following tables. Do not rename them:
 
 | Table | Purpose |
 |---|---|
-| `profiles` | Child profile data |
-| `districts` | City districts |
+| `profiles` | Child profile data (incl. `level`, the knowledge level being studied) |
+| `districts` | City districts, each belonging to one knowledge `level` |
 | `locations` | Map locations inside districts |
 | `missions` | Learning missions connected to locations |
 | `vocabulary_items` | English words, translations, images, audio, examples |
@@ -272,6 +272,15 @@ Implement all of the following tables. Do not rename them:
 | `admin_emails` | Allowlist of emails permitted to self-claim the admin role (`claim_admin` RPC) |
 | `parent_child_links` | Links a parent account to child profile(s) (`link_child_by_email` RPC) |
 | `task_type_templates` | Default config per task type, used by the admin Task Types configurator/tester |
+
+### Content hierarchy
+Content is nested `Level → District → Location → Mission → Task`. The level is
+the `knowledge_level` enum (`beginner`, `elementary`, `pre_intermediate`,
+`intermediate`, `upper_intermediate`) on `districts`; a child's map shows only
+the published districts matching their own `profiles.level`. A level is offered
+to children only once it has a published district with a published location —
+`available_knowledge_levels()` is the single source of truth for that, and
+`set_my_knowledge_level()` is the only way a child changes level.
 
 ### Rules
 - All user-related tables must have RLS enabled and appropriate policies defined.
