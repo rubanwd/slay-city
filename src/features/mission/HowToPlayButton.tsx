@@ -42,13 +42,13 @@ export default function HowToPlayButton({ text }: HowToPlayButtonProps) {
         aria-label="How to play"
         aria-expanded={open}
         className={[
-          "flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
+          "flex h-9 w-9 items-center justify-center rounded-full border transition-colors",
           open
             ? "border-cyan bg-cyan/15 text-cyan"
             : "border-white/15 text-white/70 hover:bg-white/5 hover:text-white",
         ].join(" ")}
       >
-        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
           <circle cx="8" cy="4.6" r="0.95" fill="currentColor" />
           <path d="M8 7v4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -58,10 +58,10 @@ export default function HowToPlayButton({ text }: HowToPlayButtonProps) {
       {open && (
         <div
           role="tooltip"
-          className="absolute right-0 top-12 z-30 w-72 rounded-2xl border border-white/15 bg-[#1a1a1a] p-4 shadow-xl shadow-black/50"
+          className="absolute right-0 top-11 z-30 w-64 rounded-2xl border border-white/15 bg-[#1a1a1a] p-4 shadow-xl shadow-black/50"
         >
-          <p className="mb-1.5 text-sm font-bold uppercase tracking-widest text-cyan">How to play</p>
-          <p className="text-base leading-relaxed text-white/80">{text}</p>
+          <p className="mb-1.5 text-label uppercase tracking-widest text-cyan">How to play</p>
+          <p className="text-small leading-relaxed text-white/80">{text}</p>
         </div>
       )}
     </div>

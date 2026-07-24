@@ -28,15 +28,9 @@ export type MissionCompletionResult =
  * Authenticated users have no UPDATE grant on user_stats, so XP/coins can only
  * ever be changed server-side through that function, which also guards (via a
  * unique index) against granting rewards twice.
- *
- * `score` (0–1) scales the granted xp/coins — 1 for a mission completed in
- * full, less when a task (like the Snake game) was moved on from early. The
- * mission still counts as completed either way; the function itself re-clamps
- * the value, so this is just the requested amount, not a trusted one.
  */
 export async function submitMissionCompletion(
-  missionId: string,
-  score = 1
+  missionId: string
 ): Promise<MissionCompletionResult> {
   const supabase = await createClient();
 
@@ -49,7 +43,6 @@ export async function submitMissionCompletion(
 
   const { data, error } = await supabase.rpc("complete_mission", {
     p_mission_id: missionId,
-    p_score: Number.isFinite(score) ? Math.max(0, Math.min(1, score)) : 1,
   });
 
   if (error) {
