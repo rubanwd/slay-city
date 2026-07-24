@@ -15,6 +15,7 @@ import {
   type AdminFormState,
 } from "./actions";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
+import { taskImageStatus } from "./taskImageMeta";
 import { TASK_TYPES, taskTypeLabel, type MissionTaskType } from "./taskTypes";
 
 export interface AdminTaskItemProps {
@@ -129,6 +130,7 @@ export default function AdminTaskItem({
         >
           {task.is_published ? "Published" : "Draft"}
         </span>
+        <TaskImageBadge taskType={task.task_type} content={task.content} />
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-2">
@@ -177,5 +179,40 @@ export default function AdminTaskItem({
         {JSON.stringify(task.content)}
       </pre>
     </li>
+  );
+}
+
+/**
+ * Flags whether a task's artwork is set. Image-capable types with a missing
+ * image show a badge — pink "Needs image" when the picture is required for the
+ * task to play (picture reveal, word-to-image matching), amber "Add image" when
+ * it's an optional enhancement. Types that use no image render nothing.
+ */
+function TaskImageBadge({ taskType, content }: { taskType: MissionTaskType; content: Json }) {
+  const status = taskImageStatus(taskType, content);
+  if (!status.imageType) return null;
+
+  if (status.missing === 0) {
+    return (
+      <span
+        title="Artwork set"
+        className="shrink-0 rounded-md bg-white/10 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-white/50"
+      >
+        🖼 Image
+      </span>
+    );
+  }
+
+  const count = status.total > 1 ? ` ${status.missing}/${status.total}` : "";
+  return (
+    <span
+      className={[
+        "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide",
+        status.required ? "bg-neon-pink/20 text-neon-pink" : "bg-neon-orange/20 text-neon-orange",
+      ].join(" ")}
+    >
+      🖼 {status.required ? "Needs image" : "Add image"}
+      {count}
+    </span>
   );
 }

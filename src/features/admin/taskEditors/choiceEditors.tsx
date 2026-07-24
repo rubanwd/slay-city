@@ -9,6 +9,8 @@ import {
   parseTrueFalseContent,
 } from "@/features/mission/types";
 
+import TaskImageField from "../TaskImageField";
+
 import {
   OptionsField,
   SelectField,
@@ -105,7 +107,12 @@ export function TrueFalseEditor({ initialContent, onChange }: TaskEditorProps) {
           { value: "false", label: "False" },
         ]}
       />
-      <TextField label="Image URL (optional)" value={imageUrl} onChange={setImageUrl} />
+      <TaskImageField
+        label="Image (optional)"
+        value={imageUrl}
+        onChange={setImageUrl}
+        subject={statement}
+      />
     </div>
   );
 }

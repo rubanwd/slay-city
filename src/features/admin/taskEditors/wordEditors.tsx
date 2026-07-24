@@ -10,6 +10,8 @@ import {
   parseWordScrambleContent,
 } from "@/features/mission/types";
 
+import TaskImageField from "../TaskImageField";
+
 import { StringListField, TextAreaField, TextField, useEmitContent, type TaskEditorProps } from "./fields";
 
 export function WordScrambleEditor({ initialContent, onChange }: TaskEditorProps) {
@@ -38,7 +40,13 @@ export function WordScrambleEditor({ initialContent, onChange }: TaskEditorProps
       />
       <TextField label="Translation (optional)" value={translation} onChange={setTranslation} />
       <TextField label="Hint (optional)" value={hint} onChange={setHint} />
-      <TextField label="Image URL (optional)" value={imageUrl} onChange={setImageUrl} />
+      <TaskImageField
+        label="Image (optional)"
+        value={imageUrl}
+        onChange={setImageUrl}
+        subject={word}
+        context={translation}
+      />
     </div>
   );
 }

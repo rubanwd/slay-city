@@ -12,6 +12,8 @@ import {
   parseSimonSequenceContent,
 } from "@/features/mission/types";
 
+import TaskImageField from "../TaskImageField";
+
 import {
   NumberField,
   OptionsField,
@@ -145,10 +147,19 @@ export function PictureRevealEditor({ initialContent, onChange }: TaskEditorProp
 
   useEmitContent(onChange, { prompt, imageUrl, options: options.filter((o) => o.trim()), correctIndex });
 
+  const subject = options[correctIndex]?.trim() || "";
+
   return (
     <div className="flex flex-col gap-3">
       <TextField label="Prompt" value={prompt} onChange={setPrompt} />
-      <TextField label="Image URL" value={imageUrl} onChange={setImageUrl} hint="Starts blurred and sharpens as the child taps Reveal." />
+      <TaskImageField
+        label="Image"
+        value={imageUrl}
+        onChange={setImageUrl}
+        subject={subject}
+        required
+        hint="Starts blurred and sharpens as the child taps Reveal."
+      />
       <OptionsField
         label="Options (select the correct one)"
         options={options}
