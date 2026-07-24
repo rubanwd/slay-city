@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
+    "backfill:task-images": "node scripts/backfill-task-images.mjs",
     "test": "vitest run --project unit",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { SlayButton } from "@/components/ui";
 
 import ImageUploadField from "./ImageUploadField";
-import { generateTaskImage } from "./generateTaskImage";
+import { generateTaskImage, recordTaskImage } from "./generateTaskImage";
 import { uploadContentImage } from "./uploadContentImage";
 import { INPUT_CLASS, LABEL_CLASS } from "./formStyles";
 
@@ -68,6 +68,7 @@ export default function TaskImageField({
   const [generating, setGenerating] = useState(false);
   const [applying, setApplying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reused, setReused] = useState(false);
 
   const current = candidates[index];
   const isApplied = Boolean(current?.uploadedUrl && current.uploadedUrl === value);
@@ -81,13 +82,20 @@ export default function TaskImageField({
     }
     setGenerating(true);
     setError(null);
+    setReused(false);
+    // First "Generate" reuses the shared library; "Regenerate" forces a fresh one.
+    const forceRegenerate = candidates.length > 0;
     const nextIndex = candidates.length;
-    const result = await generateTaskImage({ subject, context, extraInstructions });
-    if (result.ok) {
+    const result = await generateTaskImage({ subject, context, extraInstructions, forceRegenerate });
+    if (!result.ok) {
+      setError(result.error);
+    } else if (result.cached) {
+      // A ready public URL from the library — apply it straight away, no upload.
+      onChange(result.imageUrl);
+      setReused(true);
+    } else {
       setCandidates((prev) => [...prev, { dataUrl: result.dataUrl }]);
       setIndex(nextIndex);
-    } else {
-      setError(result.error);
     }
     setGenerating(false);
   }
@@ -105,6 +113,8 @@ export default function TaskImageField({
       const publicUrl = await uploadContentImage(blob, "tasks", ext);
       setCandidates((prev) => prev.map((c, i) => (i === index ? { ...c, uploadedUrl: publicUrl } : c)));
       onChange(publicUrl);
+      // Record in the shared library so the same subject is free next time.
+      void recordTaskImage(subject, publicUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save that image.");
     } finally {
@@ -265,6 +275,13 @@ export default function TaskImageField({
           {hasUnpickedAttempt && !busy && (
             <p className="text-xs text-neon-pink">
               This attempt only exists in your browser. Press “Use this one” to keep it.
+            </p>
+          )}
+
+          {reused && !busy && (
+            <p className="text-xs text-lime-green">
+              Reused an existing image for “{subject}” from the shared library. Press “Regenerate”
+              for a fresh one.
             </p>
           )}
         </div>
