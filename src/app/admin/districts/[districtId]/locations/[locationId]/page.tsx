@@ -9,6 +9,9 @@ import AdminMissionForm from "@/features/admin/AdminMissionForm";
 import AdminMissionItem, { type AdminMissionItemData } from "@/features/admin/AdminMissionItem";
 import { requireAdminPage } from "@/features/admin/guard";
 import { toLocationOptions } from "@/features/admin/locationOptions";
+import { countImageSlots } from "@/features/admin/taskImageSlots";
+import type { MissionTaskType } from "@/features/admin/taskTypes";
+import type { Json } from "@/types/database";
 
 interface LocationDetailPageProps {
   params: Promise<{ districtId: string; locationId: string }>;
@@ -48,6 +51,28 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
   const locationData: AdminLocationItemData = locationCols;
   const missionRows: AdminMissionItemData[] = missions ?? [];
   const locationOptions = toLocationOptions(allLocations);
+
+  // Per-mission image-slot counts, so each mission box can show its artwork
+  // progress and offer bulk generation. One query for the whole location.
+  const imageCountsByMission = new Map<string, { total: number; missing: number }>();
+  if (missionRows.length > 0) {
+    const { data: tasks } = await supabase
+      .from("mission_tasks")
+      .select("mission_id, task_type, content")
+      .in(
+        "mission_id",
+        missionRows.map((m) => m.id)
+      );
+    const tasksByMission = new Map<string, { task_type: MissionTaskType; content: Json }[]>();
+    for (const task of tasks ?? []) {
+      const list = tasksByMission.get(task.mission_id) ?? [];
+      list.push({ task_type: task.task_type as MissionTaskType, content: task.content });
+      tasksByMission.set(task.mission_id, list);
+    }
+    for (const [missionId, list] of tasksByMission) {
+      imageCountsByMission.set(missionId, countImageSlots(list));
+    }
+  }
   const districtName = districts?.name ?? "District";
   const districtBackgroundUrl = districts?.background_image_url ?? null;
 
@@ -81,9 +106,18 @@ export default async function LocationDetailPage({ params }: LocationDetailPageP
           </p>
         ) : (
           <ul className="mb-6 flex flex-col gap-2">
-            {missionRows.map((m) => (
-              <AdminMissionItem key={m.id} mission={m} locations={locationOptions} />
-            ))}
+            {missionRows.map((m) => {
+              const counts = imageCountsByMission.get(m.id);
+              return (
+                <AdminMissionItem
+                  key={m.id}
+                  mission={m}
+                  locations={locationOptions}
+                  imageTotal={counts?.total ?? 0}
+                  imageMissing={counts?.missing ?? 0}
+                />
+              );
+            })}
           </ul>
         )}
 
