@@ -1,6 +1,6 @@
 -- SLAY CITY — finishing a level moves the player up to the next one.
 --
--- Levels arrived in 20260724000004 as a filter on the map. This closes the
+-- Levels arrived in 20260724000010 as a filter on the map. This closes the
 -- loop: once a child has completed every published mission of every published
 -- location of every published district in their level, they are moved to the
 -- next level that has content — automatically, server-side, inside the same

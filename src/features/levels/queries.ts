@@ -10,7 +10,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
  * published district that has at least one published location. Backed by the
  * `available_knowledge_levels()` SECURITY DEFINER RPC, so the answer is the
  * same for a child and an admin (see
- * `supabase/migrations/20260724000004_knowledge_levels.sql`).
+ * `supabase/migrations/20260724000010_knowledge_levels.sql`).
  *
  * Returns an empty list if the RPC fails — callers must handle "no level to
  * pick" anyway, since a fresh database has no published content at all.

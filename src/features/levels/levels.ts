@@ -3,7 +3,7 @@ import type { KnowledgeLevel } from "@/types";
 /**
  * Every knowledge level the city can hold, in learning order — the same order
  * the `knowledge_level` Postgres enum declares (see
- * `supabase/migrations/20260724000004_knowledge_levels.sql`).
+ * `supabase/migrations/20260724000010_knowledge_levels.sql`).
  *
  * Having content is a separate question from existing: only levels returned by
  * `available_knowledge_levels()` are offered to children. See
