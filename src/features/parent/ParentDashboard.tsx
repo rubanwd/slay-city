@@ -1,3 +1,4 @@
+import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import { signOut } from "@/features/auth/actions";
 
 import type { ParentProgressSummary } from "./queries";
@@ -86,8 +87,8 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
     : `${childName ?? "Your child"}'s progress`;
 
   const header = (
-    // No "back" affordance: parents live only in this dashboard, so there is
-    // nowhere in-app to go back to. A Log Out control is the one exit.
+    // No "back" affordance: the bottom nav is how parents move between this
+    // dashboard, the map and their profile. A Log Out control is the way out.
     <header className="flex items-center justify-between gap-3 py-5">
       <div className="min-w-0">
         <h1 className="text-h2 font-black text-white">Parent Dashboard</h1>
@@ -123,7 +124,7 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
   if (!summary) {
     return (
       <main className="min-h-screen bg-black text-white">
-        <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
+        <div className={`mx-auto flex w-full max-w-md flex-col px-5 ${BOTTOM_NAV_CLEARANCE}`}>
           {header}
           <section className="mt-2 flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-5 py-10 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-neon-pink/10 text-neon-pink">
@@ -148,6 +149,7 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
             </p>
           </section>
         </div>
+        <BottomNav role="parent" />
       </main>
     );
   }
@@ -167,7 +169,7 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="mx-auto flex w-full max-w-md flex-col px-5 pb-16">
+      <div className={`mx-auto flex w-full max-w-md flex-col px-5 ${BOTTOM_NAV_CLEARANCE}`}>
         {header}
 
         {/* ── Vocabulary highlight ───────────────────────────────────────── */}
@@ -266,6 +268,7 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
           )}
         </section>
       </div>
+      <BottomNav role="parent" />
     </main>
   );
 }

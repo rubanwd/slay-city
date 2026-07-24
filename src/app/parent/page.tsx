@@ -1,15 +1,13 @@
-import { redirect } from "next/navigation";
-
 import AuthGuard from "@/components/auth/AuthGuard";
 import ParentDashboard from "@/features/parent/ParentDashboard";
+import { requireParentPage } from "@/features/parent/guard";
 import { getParentProgressSummary } from "@/features/parent/queries";
-import { createClient } from "@/lib/supabase/server";
 
 /**
  * Read-only parent dashboard at `/parent`.
  *
- * Auth is enforced by middleware; here we additionally gate on role — only
- * `parent` and `admin` may view it. The dashboard shows the progress of the
+ * Auth is enforced by middleware; `requireParentPage` additionally gates on
+ * role — only `parent` and `admin` may view it. The dashboard shows the progress of the
  * *child* account whose email the parent supplied at registration (stored in
  * the parent's auth metadata as `child_email`).
  *
@@ -20,34 +18,13 @@ import { createClient } from "@/lib/supabase/server";
  * dashboard shows a "not linked yet" state instead of misleading zeros.
  */
 export default async function ParentPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/auth/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  // Child role (or a missing profile) cannot access the dashboard.
-  if (!profile || profile.role === "child") {
-    redirect("/map");
-  }
-
-  const childEmail =
-    typeof user.user_metadata?.child_email === "string" ? user.user_metadata.child_email : null;
+  const { supabase, profileId, childEmail } = await requireParentPage();
 
   // Already linked from a previous visit?
   const { data: existingLink } = await supabase
     .from("parent_child_links")
     .select("child_id")
-    .eq("parent_id", profile.id)
+    .eq("parent_id", profileId)
     .order("created_at")
     .limit(1);
 

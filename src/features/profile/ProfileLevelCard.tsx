@@ -13,6 +13,11 @@ export interface ProfileLevelCardProps {
   current: KnowledgeLevel;
   /** Levels with content — the only ones that can be switched to. */
   available: readonly KnowledgeLevel[];
+  /**
+   * What this level controls for the viewer. Children see their own map change;
+   * parents and teachers change which level their read-only map previews.
+   */
+  hint?: string;
 }
 
 /**
@@ -24,7 +29,7 @@ export interface ProfileLevelCardProps {
  * The picker is collapsed by default — the card shows the current level and a
  * Change button, so the profile screen keeps a single obvious primary action.
  */
-export default function ProfileLevelCard({ current, available }: ProfileLevelCardProps) {
+export default function ProfileLevelCard({ current, available, hint }: ProfileLevelCardProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -72,6 +77,8 @@ export default function ProfileLevelCard({ current, available }: ProfileLevelCar
           </button>
         )}
       </div>
+
+      {hint && <p className="text-small text-white/40">{hint}</p>}
 
       {open && (
         <LevelPicker

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { activeNavIndex, navItemsForRole, type NavIconName, type NavRole } from "./navigation";
+
 /* ── Tab icons — small, single-purpose SVGs; not worth a shared icon lib. ──── */
 
 function MapIcon() {
@@ -43,20 +45,24 @@ function HomeworkIcon() {
   );
 }
 
-type NavItem = {
-  label: string;
-  href: string;
-  icon: () => React.ReactElement;
+function DashboardIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="9" rx="1.5" />
+      <rect x="14" y="3" width="7" height="5" rx="1.5" />
+      <rect x="3" y="16" width="7" height="5" rx="1.5" />
+      <rect x="14" y="12" width="7" height="9" rx="1.5" />
+    </svg>
+  );
+}
+
+const NAV_ICONS: Record<NavIconName, () => React.ReactElement> = {
+  map: MapIcon,
+  wardrobe: WardrobeIcon,
+  homework: HomeworkIcon,
+  profile: ProfileIcon,
+  dashboard: DashboardIcon,
 };
-
-const BASE_NAV_ITEMS: NavItem[] = [
-  { label: "Map", href: "/map", icon: MapIcon },
-  { label: "Wardrobe", href: "/wardrobe", icon: WardrobeIcon },
-];
-
-const HOMEWORK_NAV_ITEM: NavItem = { label: "Homework", href: "/homework", icon: HomeworkIcon };
-
-const PROFILE_NAV_ITEM: NavItem = { label: "Profile", href: "/profile", icon: ProfileIcon };
 
 /**
  * Bottom padding a page's scrollable content needs so the fixed nav — tab row
@@ -124,32 +130,33 @@ function BrandWatermark() {
 }
 
 export interface BottomNavProps {
+  /**
+   * Whose tabs to show. Children get the game screens; parents and teachers
+   * get their console's dashboard plus the map and profile (see `navigation.ts`).
+   */
+  role?: NavRole;
   /** Shows the Homework tab — only true for a child who belongs to a teacher group. */
   showHomework?: boolean;
 }
 
 /**
- * Fixed bottom navigation shown on the main in-app (child) screens: map,
- * wardrobe, homework (conditional), profile. Includes the Slay School
- * watermark strip beneath the tabs, so pages need `BOTTOM_NAV_CLEARANCE`
- * worth of bottom padding on their scrollable content to stay clear of the
- * whole bar. Active tab is the first item whose href matches the current path.
+ * Fixed bottom navigation shown on the main in-app screens — for a child: map,
+ * wardrobe, homework (conditional), profile; for a parent or teacher: their
+ * dashboard, map and profile. Includes the Slay School watermark strip beneath
+ * the tabs, so pages need `BOTTOM_NAV_CLEARANCE` worth of bottom padding on
+ * their scrollable content to stay clear of the whole bar.
  */
-export default function BottomNav({ showHomework = false }: BottomNavProps) {
+export default function BottomNav({ role = "child", showHomework = false }: BottomNavProps) {
   const pathname = usePathname();
-  const navItems: NavItem[] = showHomework
-    ? [...BASE_NAV_ITEMS, HOMEWORK_NAV_ITEM, PROFILE_NAV_ITEM]
-    : [...BASE_NAV_ITEMS, PROFILE_NAV_ITEM];
-  const activeIndex = navItems.findIndex(
-    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
-  );
+  const navItems = navItemsForRole(role, { showHomework });
+  const activeIndex = activeNavIndex(pathname, navItems);
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md border-t border-white/10 bg-black/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:border-x">
       <nav aria-label="Primary">
         <ul className="flex items-stretch justify-around px-2 py-2">
         {navItems.map((item, index) => {
-          const Icon = item.icon;
+          const Icon = NAV_ICONS[item.icon];
           const active = index === activeIndex;
           return (
             <li key={item.label} className="flex-1">

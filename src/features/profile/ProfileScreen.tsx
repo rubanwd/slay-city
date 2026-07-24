@@ -68,6 +68,15 @@ export interface ProfileScreenProps {
   level: KnowledgeLevel;
   /** Levels with content — what the player can switch to. */
   availableLevels: readonly KnowledgeLevel[];
+  /** Shown as a badge under the name on the adult consoles ("Parent", "Teacher"). */
+  roleLabel?: string;
+  /** Explains what the level controls here — the child map vs. the adult preview. */
+  levelHint?: string;
+  /**
+   * The dev-only progress reset. Children only: parents and teachers have no
+   * mission progress of their own to wipe.
+   */
+  showProgressReset?: boolean;
 }
 
 export default function ProfileScreen({
@@ -76,6 +85,9 @@ export default function ProfileScreen({
   mascotImageUrl,
   level,
   availableLevels,
+  roleLabel,
+  levelHint,
+  showProgressReset = true,
 }: ProfileScreenProps) {
   return (
     <main className="min-h-screen bg-black flex flex-col mx-auto w-full max-w-md md:border-x md:border-white/10">
@@ -93,32 +105,39 @@ export default function ProfileScreen({
               <p className="text-xl font-black text-white break-words text-center">{username}</p>
             )}
             <p className="text-sm text-white/50 break-all text-center">{email ?? "Signed in"}</p>
+            {roleLabel && (
+              <span className="mt-1 rounded-full border border-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white/60">
+                {roleLabel}
+              </span>
+            )}
           </div>
         </div>
 
-        <ProfileLevelCard current={level} available={availableLevels} />
+        <ProfileLevelCard current={level} available={availableLevels} hint={levelHint} />
 
         <div className="mt-auto flex flex-col gap-3">
           {/* TEMPORARY: dev-only progress reset. Remove or gate to admins before launch. */}
-          <form
-            action={async () => {
-              const result = await resetMissionProgress();
-              if (!result.ok) {
-                window.alert(result.error);
-              }
-            }}
-            onSubmit={(event) => {
-              if (
-                !window.confirm(
-                  "Wipe all your mission progress, XP, coins, and streaks? This can't be undone."
-                )
-              ) {
-                event.preventDefault();
-              }
-            }}
-          >
-            <ResetProgressButton />
-          </form>
+          {showProgressReset && (
+            <form
+              action={async () => {
+                const result = await resetMissionProgress();
+                if (!result.ok) {
+                  window.alert(result.error);
+                }
+              }}
+              onSubmit={(event) => {
+                if (
+                  !window.confirm(
+                    "Wipe all your mission progress, XP, coins, and streaks? This can't be undone."
+                  )
+                ) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <ResetProgressButton />
+            </form>
+          )}
 
           <form action={signOut}>
             <LogoutButton />
