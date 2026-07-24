@@ -1,3 +1,4 @@
+import HissableMascot from "@/components/ui/HissableMascot";
 import { DEFAULT_MASCOT_IMAGE } from "@/features/wardrobe/mascot";
 
 export interface FullScreenLoaderProps {
@@ -36,17 +37,13 @@ export default function FullScreenLoader({
         mascot ? "gap-6" : "gap-4",
       ].join(" ")}
     >
+      {/* Tappable while the route loads — waiting is more fun with a hiss. */}
       {mascot && (
-        <div className="flex flex-col items-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={DEFAULT_MASCOT_IMAGE}
-            alt=""
-            aria-hidden="true"
-            className="h-24 w-24 object-contain drop-shadow-[0_0_20px_rgba(157,255,0,0.45)] animate-loader-bob"
-          />
-          <span className="mt-1 h-2 w-16 rounded-full bg-lime-green/40 blur-[3px] animate-loader-shadow" />
-        </div>
+        <HissableMascot
+          src={DEFAULT_MASCOT_IMAGE}
+          imageClassName="h-24 w-24 object-contain drop-shadow-[0_0_20px_rgba(157,255,0,0.45)] animate-loader-bob"
+          shadowClassName="mt-1 h-2 w-16 rounded-full bg-lime-green/40 blur-[3px] animate-loader-shadow"
+        />
       )}
 
       <div className="flex items-center gap-2" aria-hidden="true">

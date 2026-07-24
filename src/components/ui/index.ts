@@ -18,6 +18,9 @@ export type { RewardModalProps } from "./RewardModal";
 export { default as SlayCharacter } from "./SlayCharacter";
 export type { SlayCharacterProps, SlayCharacterSize } from "./SlayCharacter";
 
+export { default as HissableMascot } from "./HissableMascot";
+export type { HissableMascotProps } from "./HissableMascot";
+
 export { default as CoinIcon } from "./CoinIcon";
 export type { CoinIconProps } from "./CoinIcon";
 
