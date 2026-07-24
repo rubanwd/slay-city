@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { SlayButton } from "@/components/ui";
 
@@ -185,24 +186,28 @@ export default function SnakeGameTask({
   const letterCells = new Map(game.letters.map((cell) => [key(cell), cell]));
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="shrink-0 flex flex-col items-center gap-1 text-center">
-        <p className="font-semibold text-white">{prompt}</p>
-        {translation && <p className="text-small text-white/60">{translation}</p>}
+    <div className="flex h-full min-h-0 flex-col gap-2.5">
+      <div className="shrink-0 flex flex-col items-center gap-0.5 text-center">
+        <p className="text-lg leading-tight font-bold text-white">{prompt}</p>
+        {translation && <p className="text-base leading-tight text-cyan">{translation}</p>}
       </div>
 
-      {/* Word progress: every letter starts visible, and each one clears as it's collected. */}
+      {/* Word progress: every letter starts visible, and each one clears as it's collected.
+          The next letter to grab gets a glowing highlight so it reads at a glance. */}
       <div className="shrink-0 flex flex-wrap justify-center gap-1.5">
         {word.split("").map((char, index) => {
           const done = index < game.collected;
+          const next = index === game.collected;
           return (
             <span
               key={index}
               className={[
-                "flex h-9 w-8 items-center justify-center rounded-lg border text-body-strong font-black transition-colors",
+                "flex h-10 w-9 items-center justify-center rounded-lg border text-lg font-black transition-colors",
                 done
                   ? "border-white/10 bg-white/[0.03]"
-                  : "border-white/15 bg-white/5 text-white",
+                  : next
+                    ? "border-lime-green bg-lime-green/15 text-white shadow-[0_0_12px_2px_rgba(157,255,0,0.3)]"
+                    : "border-white/15 bg-white/5 text-white",
               ].join(" ")}
             >
               {done ? "" : char}
@@ -216,12 +221,14 @@ export default function SnakeGameTask({
       <div className="min-h-0 flex-1 flex items-center justify-center">
         <div
           className={[
-            "relative aspect-square h-full max-w-full overflow-hidden rounded-2xl border bg-black/40 transition-colors",
-            game.flashTicks > 0 ? "border-neon-pink" : "border-white/15",
+            "relative aspect-square h-full max-w-full overflow-hidden rounded-2xl border-2 bg-black/50 shadow-[0_0_24px_rgba(0,0,0,0.45)] transition-colors",
+            game.flashTicks > 0
+              ? "border-neon-pink shadow-[0_0_20px_4px_rgba(255,45,142,0.35)]"
+              : "border-white/20",
           ].join(" ")}
         >
           <div
-            className="grid h-full w-full gap-px p-px"
+            className="grid h-full w-full gap-[2px] p-[3px]"
             style={{ gridTemplateColumns: `repeat(${GRID}, minmax(0, 1fr))` }}
           >
             {Array.from({ length: GRID * GRID }, (_, index) => {
@@ -235,7 +242,9 @@ export default function SnakeGameTask({
                     key={index}
                     className={[
                       "rounded-[3px]",
-                      snakeIndex === 0 ? "bg-lime-green" : "bg-lime-green/50",
+                      snakeIndex === 0
+                        ? "bg-lime-green shadow-[0_0_6px_1px_rgba(157,255,0,0.7)]"
+                        : "bg-lime-green/60",
                     ].join(" ")}
                   />
                 );
@@ -245,67 +254,82 @@ export default function SnakeGameTask({
                 return (
                   <div
                     key={index}
-                    className="flex items-center justify-center rounded-[3px] bg-white/15 text-[10px] leading-none font-black text-white"
+                    className="flex items-center justify-center rounded-[3px] border border-cyan/40 bg-cyan/20 text-[11px] leading-none font-black text-white"
                   >
                     {letter.char}
                   </div>
                 );
               }
 
-              return <div key={index} className="rounded-[3px] bg-white/[0.03]" />;
+              return <div key={index} className="rounded-[3px] bg-white/[0.04]" />;
             })}
           </div>
-
-          {game.status !== "playing" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/75 p-4 text-center">
-              {game.status === "idle" && (
-                <>
-                  <p className="text-body-strong font-black text-white">Ready?</p>
-                  <p className="text-small text-white/60">
-                    All the letters are on the board. Eat them in the word&apos;s order, avoid
-                    your own tail, and you can pass through the edges.
-                  </p>
-                  <SlayButton variant="green" size="md" onClick={() => reset("playing")}>
-                    Start
-                  </SlayButton>
-                </>
-              )}
-              {game.status === "dead" && (
-                <>
-                  <p className="text-body-strong font-black text-neon-pink">Oops! Game over.</p>
-                  <SlayButton variant="pink" size="md" onClick={() => reset("playing")}>
-                    Try Again
-                  </SlayButton>
-                </>
-              )}
-              {game.status === "won" && (
-                <>
-                  <p className="text-h3 font-black text-lime-green">{word}</p>
-                  <p className="text-small text-white/70">You collected every letter!</p>
-                </>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
       {/* D-pad */}
-      <div className="shrink-0 mx-auto grid w-44 grid-cols-3 grid-rows-3 gap-2">
+      <div className="shrink-0 mx-auto grid w-48 grid-cols-3 grid-rows-3 gap-2">
         <DPadButton direction="up" label="▲" className="col-start-2 row-start-1" onPress={turn} />
         <DPadButton direction="left" label="◀" className="col-start-1 row-start-2" onPress={turn} />
         <DPadButton direction="right" label="▶" className="col-start-3 row-start-2" onPress={turn} />
         <DPadButton direction="down" label="▼" className="col-start-2 row-start-3" onPress={turn} />
       </div>
 
-      <SlayButton
-        variant="green"
-        size="lg"
-        className="w-full shrink-0"
-        onClick={onComplete}
-        disabled={game.status !== "won"}
-      >
-        {actionLabel}
-      </SlayButton>
+      {/* Ready / Game Over / Won states take over the whole screen behind a
+          heavy blur, instead of a small box confined to the board, so the
+          child's focus goes straight to the one thing they can do next. */}
+      {game.status !== "playing" && typeof document !== "undefined" &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-6 backdrop-blur-xl"
+          >
+            <div
+              className={[
+                "flex w-full max-w-sm flex-col items-center gap-4 rounded-3xl border-2 bg-[#161616] px-6 py-8 text-center shadow-2xl",
+                game.status === "dead" &&
+                  "border-neon-pink/60 shadow-[0_0_50px_10px_rgba(255,45,142,0.3)]",
+                game.status === "won" &&
+                  "border-lime-green/60 shadow-[0_0_50px_10px_rgba(157,255,0,0.3)]",
+                game.status === "idle" && "border-cyan/50 shadow-[0_0_50px_10px_rgba(0,229,255,0.2)]",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {game.status === "idle" && (
+                <>
+                  <p className="text-3xl font-black text-white">Ready?</p>
+                  <p className="text-base leading-relaxed text-white/75">
+                    All the letters are on the board. Eat them in the word&apos;s order, avoid
+                    your own tail, and you can pass through the edges.
+                  </p>
+                  <SlayButton variant="green" size="lg" className="w-full" onClick={() => reset("playing")}>
+                    Start
+                  </SlayButton>
+                </>
+              )}
+              {game.status === "dead" && (
+                <>
+                  <p className="text-2xl font-black text-neon-pink">Oops! Game over.</p>
+                  <SlayButton variant="pink" size="lg" className="w-full" onClick={() => reset("playing")}>
+                    Try Again
+                  </SlayButton>
+                </>
+              )}
+              {game.status === "won" && (
+                <>
+                  <p className="text-3xl font-black text-lime-green">{word}</p>
+                  <p className="text-base text-white/75">You collected every letter!</p>
+                  <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete}>
+                    {actionLabel}
+                  </SlayButton>
+                </>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
@@ -331,7 +355,7 @@ function DPadButton({
         event.preventDefault();
         onPress(direction);
       }}
-      className={`flex h-12 w-12 touch-none items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/80 transition-colors select-none hover:border-white/40 active:bg-cyan/20 focus-visible:ring-2 focus-visible:ring-cyan focus-visible:outline-none ${className}`}
+      className={`flex h-14 w-14 touch-none items-center justify-center rounded-xl border border-white/20 bg-white/[0.07] text-lg text-white/90 transition-colors select-none hover:border-cyan/60 hover:bg-cyan/10 active:bg-cyan/20 focus-visible:ring-2 focus-visible:ring-cyan focus-visible:outline-none ${className}`}
     >
       {label}
     </button>
