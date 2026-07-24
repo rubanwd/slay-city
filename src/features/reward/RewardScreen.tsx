@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { AppContainer, Section } from "@/components/layout";
 import { CoinIcon, SlayButton, SlayCharacter, XpIcon } from "@/components/ui";
-import { playRewardFanfareSfx } from "@/lib/sfx";
+import { playRewardApplauseSfx } from "@/lib/sfx";
 
 export interface RewardScreenProps {
   /** Coins granted for completing the mission */
@@ -81,10 +81,10 @@ export default function RewardScreen({
     setDrops(buildRainDrops(48));
   }, []);
 
-  // Celebratory "ta-da" the moment this screen lands — the one payoff sound
+  // A round of applause the moment this screen lands — the one payoff sound
   // in the whole loop, so it plays once and never re-fires on re-render.
   useEffect(() => {
-    void playRewardFanfareSfx();
+    void playRewardApplauseSfx();
   }, []);
 
   return (

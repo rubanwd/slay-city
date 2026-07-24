@@ -1,50 +1,87 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  applauseSwell,
+  APPLAUSE_CLAP_COUNT,
+  APPLAUSE_DURATION_S,
+  buildApplauseClaps,
+  DRUM_ROLL_ACCENT_GAP_S,
+  DRUM_ROLL_TAP_COUNT,
+  drumRollTapOffsets,
   MAP_TRAVEL_DURATION_S,
-  MISSION_START_NOTES,
-  MISSION_START_NOTE_DURATION_S,
   playMapTravelSfx,
   playMissionStartSfx,
-  playRewardFanfareSfx,
-  REWARD_CHORD_DURATION_S,
-  REWARD_CHORD_NOTES,
-  REWARD_SPARKLE_NOTE_GAP_S,
-  REWARD_SPARKLE_NOTES,
-  REWARD_SWOOP_DURATION_S,
+  playRewardApplauseSfx,
 } from "./sfx";
 
 describe("sound effect shapes", () => {
-  it("mission start rises from one note to a higher one", () => {
-    expect(MISSION_START_NOTES.length).toBeGreaterThanOrEqual(2);
-    for (let i = 1; i < MISSION_START_NOTES.length; i += 1) {
-      expect(MISSION_START_NOTES[i]).toBeGreaterThan(MISSION_START_NOTES[i - 1]);
-    }
-    expect(MISSION_START_NOTE_DURATION_S).toBeGreaterThan(0);
-  });
-
   it("map travel whoosh has a positive, short duration", () => {
     expect(MAP_TRAVEL_DURATION_S).toBeGreaterThan(0);
     expect(MAP_TRAVEL_DURATION_S).toBeLessThan(1);
   });
 
-  it("reward swoop builds for a short, positive duration", () => {
-    expect(REWARD_SWOOP_DURATION_S).toBeGreaterThan(0);
-    expect(REWARD_SWOOP_DURATION_S).toBeLessThan(1);
+  describe("mission start drum roll", () => {
+    it("produces one offset per tap, starting at zero", () => {
+      const offsets = drumRollTapOffsets();
+      expect(offsets).toHaveLength(DRUM_ROLL_TAP_COUNT);
+      expect(offsets[0]).toBe(0);
+    });
+
+    it("accelerates — each gap between taps is shorter than the last", () => {
+      const offsets = drumRollTapOffsets();
+      const gaps = offsets.slice(1).map((t, i) => t - offsets[i]);
+      for (let i = 1; i < gaps.length; i += 1) {
+        expect(gaps[i]).toBeLessThan(gaps[i - 1]);
+      }
+    });
+
+    it("honours custom count/interval/accel arguments", () => {
+      const offsets = drumRollTapOffsets(4, 0.1, 0.5);
+      expect(offsets).toHaveLength(4);
+      [0, 0.1, 0.15, 0.175].forEach((expected, i) => {
+        expect(offsets[i]).toBeCloseTo(expected);
+      });
+    });
+
+    it("closes with a positive gap before the accent hit", () => {
+      expect(DRUM_ROLL_ACCENT_GAP_S).toBeGreaterThan(0);
+    });
   });
 
-  it("reward chord hit has at least three notes and a positive duration", () => {
-    expect(REWARD_CHORD_NOTES.length).toBeGreaterThanOrEqual(3);
-    expect(REWARD_CHORD_DURATION_S).toBeGreaterThan(0);
-  });
+  describe("reward applause", () => {
+    it("swell ramps up, holds, then ramps back down", () => {
+      expect(applauseSwell(0)).toBe(0);
+      expect(applauseSwell(0.18)).toBeCloseTo(1);
+      expect(applauseSwell(0.4)).toBe(1);
+      expect(applauseSwell(1)).toBe(0);
+    });
 
-  it("reward sparkle climbs through at least three notes above the chord", () => {
-    expect(REWARD_SPARKLE_NOTES.length).toBeGreaterThanOrEqual(3);
-    for (let i = 1; i < REWARD_SPARKLE_NOTES.length; i += 1) {
-      expect(REWARD_SPARKLE_NOTES[i]).toBeGreaterThan(REWARD_SPARKLE_NOTES[i - 1]);
-    }
-    expect(Math.min(...REWARD_SPARKLE_NOTES)).toBeGreaterThan(Math.max(...REWARD_CHORD_NOTES));
-    expect(REWARD_SPARKLE_NOTE_GAP_S).toBeGreaterThan(0);
+    it("never lets the swell go negative or above 1", () => {
+      for (let f = 0; f <= 1; f += 0.05) {
+        expect(applauseSwell(f)).toBeGreaterThanOrEqual(0);
+        expect(applauseSwell(f)).toBeLessThanOrEqual(1);
+      }
+    });
+
+    it("builds the expected number of claps, all within the total duration", () => {
+      const claps = buildApplauseClaps(APPLAUSE_CLAP_COUNT, APPLAUSE_DURATION_S, () => 0.5);
+      expect(claps).toHaveLength(APPLAUSE_CLAP_COUNT);
+      for (const clap of claps) {
+        expect(clap.startOffset).toBeGreaterThanOrEqual(0);
+        expect(clap.startOffset).toBeLessThanOrEqual(APPLAUSE_DURATION_S);
+        expect(clap.duration).toBeGreaterThan(0);
+        expect(clap.gain).toBeGreaterThanOrEqual(0);
+        expect(clap.frequency).toBeGreaterThan(0);
+      }
+    });
+
+    it("is deterministic given a fixed random source", () => {
+      const values = [0.1, 0.2, 0.3, 0.4, 0.9, 0.5, 0.6, 0.7];
+      let i = 0;
+      const random = () => values[i++];
+      const claps = buildApplauseClaps(2, 1, random);
+      expect(claps.map((c) => c.startOffset)).toEqual([0.1, 0.9]);
+    });
   });
 });
 
@@ -59,7 +96,7 @@ describe("playback without a browser audio context", () => {
     await expect(playMapTravelSfx()).resolves.toBeUndefined();
   });
 
-  it("playRewardFanfareSfx resolves", async () => {
-    await expect(playRewardFanfareSfx()).resolves.toBeUndefined();
+  it("playRewardApplauseSfx resolves", async () => {
+    await expect(playRewardApplauseSfx()).resolves.toBeUndefined();
   });
 });
