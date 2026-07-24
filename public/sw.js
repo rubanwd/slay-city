@@ -1,9 +1,30 @@
-const CACHE_NAME = "slay-city-v3";
+const CACHE_NAME = "slay-city-v4";
 // Images (map backgrounds, location icons, wardrobe art) live in their own
 // cache that survives app-shell version bumps, so a released update never
 // re-downloads the heavy artwork.
 const IMAGE_CACHE = "slay-city-images-v1";
 const PRECACHE_URLS = ["/", "/manifest.json", "/wardrobe/slay-base.webp"];
+
+// A flaky connection (e.g. 3G) can leave the network fetch below pending far
+// longer than anyone will wait — falling back to the cached shell after this
+// keeps an installed PWA from sitting on the loading screen forever.
+const NETWORK_TIMEOUT_MS = 6000;
+
+function withTimeout(promise, ms) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("network timeout")), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -61,7 +82,7 @@ self.addEventListener("fetch", (event) => {
   if (!request.url.startsWith(self.location.origin)) return;
 
   event.respondWith(
-    fetch(request)
+    withTimeout(fetch(request), NETWORK_TIMEOUT_MS)
       .then((response) => {
         if (response.ok) {
           const clone = response.clone();

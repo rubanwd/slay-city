@@ -6,6 +6,8 @@
  * blocked by a slow Storage response the first time a child taps Slay.
  */
 
+import { resumeSharedAudioContext } from "./audioContext";
+
 /** Length of one hiss, in seconds. */
 export const HISS_DURATION_S = 0.85;
 
@@ -55,27 +57,7 @@ export function hissEnvelope(points = ENVELOPE_POINTS, peak = HISS_PEAK_GAIN): F
   return curve;
 }
 
-type AudioContextConstructor = new () => AudioContext;
-
-/**
- * One shared context for the whole session: browsers cap how many can exist,
- * and creating one per tap leaks them. Created lazily inside a user gesture so
- * autoplay policies let it start.
- */
-let sharedContext: AudioContext | null = null;
 let activeSource: AudioBufferSourceNode | null = null;
-
-function getAudioContext(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-
-  const Ctor =
-    window.AudioContext ??
-    (window as unknown as { webkitAudioContext?: AudioContextConstructor }).webkitAudioContext;
-  if (!Ctor) return null;
-
-  sharedContext ??= new Ctor();
-  return sharedContext;
-}
 
 /**
  * Plays the hiss. Safe to call on every tap: a hiss already in flight is cut
@@ -83,17 +65,8 @@ function getAudioContext(): AudioContext | null {
  * Resolves silently (and does nothing) where Web Audio is unavailable.
  */
 export async function playSnakeHiss(): Promise<void> {
-  const ctx = getAudioContext();
+  const ctx = await resumeSharedAudioContext();
   if (!ctx) return;
-
-  // A context created before the first gesture starts suspended.
-  if (ctx.state === "suspended") {
-    try {
-      await ctx.resume();
-    } catch {
-      return;
-    }
-  }
 
   activeSource?.stop();
 

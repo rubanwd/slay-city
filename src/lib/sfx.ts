@@ -5,35 +5,8 @@
  * it's heard.
  */
 
+import { resumeSharedAudioContext } from "./audioContext";
 import { fillWithNoise } from "./hiss";
-
-type AudioContextConstructor = new () => AudioContext;
-
-/** One shared context for the whole session — see hiss.ts for why. */
-let sharedContext: AudioContext | null = null;
-
-function getAudioContext(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-
-  const Ctor =
-    window.AudioContext ??
-    (window as unknown as { webkitAudioContext?: AudioContextConstructor }).webkitAudioContext;
-  if (!Ctor) return null;
-
-  sharedContext ??= new Ctor();
-  return sharedContext;
-}
-
-/** A context created before the first gesture starts suspended. */
-async function resumeIfSuspended(ctx: AudioContext): Promise<boolean> {
-  if (ctx.state !== "suspended") return true;
-  try {
-    await ctx.resume();
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 interface ToneOptions {
   type?: OscillatorType;
@@ -85,9 +58,8 @@ export const MISSION_START_NOTE_STAGGER_S = MISSION_START_NOTE_DURATION_S * 0.8;
 
 /** Plays when the player taps Start on a location's mission. */
 export async function playMissionStartSfx(): Promise<void> {
-  const ctx = getAudioContext();
+  const ctx = await resumeSharedAudioContext();
   if (!ctx) return;
-  if (!(await resumeIfSuspended(ctx))) return;
 
   const now = ctx.currentTime;
   MISSION_START_NOTES.forEach((freq, i) => {
@@ -109,9 +81,8 @@ const MAP_TRAVEL_PEAK_GAIN = 0.22;
 
 /** Plays when the mascot is sent walking to a different map location. */
 export async function playMapTravelSfx(): Promise<void> {
-  const ctx = getAudioContext();
+  const ctx = await resumeSharedAudioContext();
   if (!ctx) return;
-  if (!(await resumeIfSuspended(ctx))) return;
 
   const now = ctx.currentTime;
   const duration = MAP_TRAVEL_DURATION_S;
@@ -176,9 +147,8 @@ const REWARD_SPARKLE_PEAK_GAIN = 0.09;
 
 /** Plays once when the Rewards screen for a completed mission appears. */
 export async function playRewardFanfareSfx(): Promise<void> {
-  const ctx = getAudioContext();
+  const ctx = await resumeSharedAudioContext();
   if (!ctx) return;
-  if (!(await resumeIfSuspended(ctx))) return;
 
   // Several layers stack right at the hit, so route everything through a
   // limiter instead of the raw destination to keep that moment from clipping.
