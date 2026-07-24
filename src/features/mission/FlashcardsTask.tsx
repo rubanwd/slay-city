@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { SlayButton } from "@/components/ui";
 
@@ -14,10 +14,20 @@ export interface FlashcardsTaskProps {
   actionLabel?: string;
 }
 
+const TURN_MS = 260;
+
+type Phase = "idle" | "out" | "jump" | "in";
+
 /**
  * A self-paced review deck. The child taps a card to flip between its front and
  * back, then steps through every card. The advance button only finishes the task
  * once the last card has been reached.
+ *
+ * The flip never rotates past 90deg in either direction: it turns to 90deg,
+ * swaps the face content while the card is edge-on (and so invisible), then
+ * turns from -90deg back to 0. This sidesteps `backface-visibility`, which
+ * some mobile WebViews flatten to a plain 2D mirror instead of hiding —
+ * leaving both faces visible and overlapping at once.
  */
 export default function FlashcardsTask({
   content,
@@ -27,10 +37,51 @@ export default function FlashcardsTask({
   const { prompt, cards } = content;
 
   const [index, setIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
+  const [side, setSide] = useState<"front" | "back">("front");
+  const [phase, setPhase] = useState<Phase>("idle");
+  const reducedMotion = useRef(false);
+  const timers = useRef<number[]>([]);
+  const frames = useRef<number[]>([]);
+
+  useEffect(() => {
+    reducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timerIds = timers.current;
+    const frameIds = frames.current;
+    return () => {
+      timerIds.forEach((id) => window.clearTimeout(id));
+      frameIds.forEach((id) => window.cancelAnimationFrame(id));
+    };
+  }, []);
 
   const card = cards[index];
   const isLast = index === cards.length - 1;
+
+  const flip = () => {
+    if (phase !== "idle") return;
+
+    if (reducedMotion.current) {
+      setSide((s) => (s === "front" ? "back" : "front"));
+      return;
+    }
+
+    setPhase("out");
+    timers.current.push(
+      window.setTimeout(() => {
+        setSide((s) => (s === "front" ? "back" : "front"));
+        setPhase("jump");
+        frames.current.push(
+          window.requestAnimationFrame(() => {
+            frames.current.push(
+              window.requestAnimationFrame(() => {
+                setPhase("in");
+                timers.current.push(window.setTimeout(() => setPhase("idle"), TURN_MS));
+              }),
+            );
+          }),
+        );
+      }, TURN_MS),
+    );
+  };
 
   const advance = () => {
     if (isLast) {
@@ -38,8 +89,11 @@ export default function FlashcardsTask({
       return;
     }
     setIndex((i) => i + 1);
-    setFlipped(false);
+    setSide("front");
+    setPhase("idle");
   };
+
+  const angle = phase === "out" ? 90 : phase === "jump" ? -90 : 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,28 +106,19 @@ export default function FlashcardsTask({
 
       <button
         type="button"
-        onClick={() => setFlipped((f) => !f)}
-        aria-label={flipped ? "Show the front of the card" : "Show the answer"}
+        onClick={flip}
+        aria-label={side === "front" ? "Show the answer" : "Show the front of the card"}
         className="flip-card-scene relative min-h-[16rem] w-full"
       >
         <div
-          className={[
-            "flip-card-inner relative h-full min-h-[16rem] w-full",
-            flipped ? "is-flipped" : "",
-          ].join(" ")}
+          className="relative h-full min-h-[16rem] w-full"
+          style={{
+            transform: `rotateY(${angle}deg)`,
+            transition: phase === "jump" ? "none" : `transform ${TURN_MS}ms ease`,
+          }}
         >
-          {/* Front face
-              `overflow-hidden` lives on the inner wrapper, not this element — WebKit
-              (iOS Safari) fails to hide the backface when overflow-hidden sits on
-              the same element as backface-visibility: hidden, which made both
-              faces render on top of each other. */}
-          <div
-            className={[
-              "flip-card-face absolute inset-0 rounded-3xl border-2 border-cyan",
-              "shadow-[0_0_40px_-10px_rgba(0,240,255,0.5)]",
-            ].join(" ")}
-          >
-            <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-cyan/25 via-black to-purple/25 p-6 text-center">
+          {side === "front" ? (
+            <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl border-2 border-cyan bg-gradient-to-br from-cyan/25 via-black to-purple/25 p-6 text-center shadow-[0_0_40px_-10px_rgba(0,240,255,0.5)]">
               <div className="pointer-events-none absolute -left-10 -top-10 h-40 w-40 rounded-full bg-cyan/30 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-12 -right-12 h-44 w-44 rounded-full bg-purple/30 blur-3xl" />
               {card.imageUrl && (
@@ -86,16 +131,8 @@ export default function FlashcardsTask({
                 Tap to flip
               </span>
             </div>
-          </div>
-
-          {/* Back face — same inner-wrapper split as the front face above. */}
-          <div
-            className={[
-              "flip-card-face flip-card-face--back absolute inset-0 rounded-3xl border-2 border-lime-green",
-              "shadow-[0_0_40px_-10px_rgba(157,255,0,0.5)]",
-            ].join(" ")}
-          >
-            <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-lime-green/25 via-black to-neon-pink/25 p-6 text-center">
+          ) : (
+            <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 overflow-hidden rounded-3xl border-2 border-lime-green bg-gradient-to-br from-lime-green/25 via-black to-neon-pink/25 p-6 text-center shadow-[0_0_40px_-10px_rgba(157,255,0,0.5)]">
               <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-lime-green/30 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-neon-pink/30 blur-3xl" />
               <span className="relative z-10 text-h1 font-black text-white">{card.back}</span>
@@ -103,7 +140,7 @@ export default function FlashcardsTask({
                 Answer
               </span>
             </div>
-          </div>
+          )}
         </div>
       </button>
 
