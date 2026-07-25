@@ -18,6 +18,28 @@ export type Locale = (typeof LOCALES)[number];
 /** Used when nothing else matches — the language the content is authored in. */
 export const DEFAULT_LOCALE: Locale = "en";
 
+/**
+ * What the game speaks to a student who has never picked a language.
+ *
+ * Deliberately a fixed language rather than the browser's: our students are
+ * Ukrainian-speaking children, and a phone handed down in English (or set that
+ * way in a shop) shouldn't decide that a seven-year-old reads their own
+ * interface in a language they're only starting to learn. The parent console
+ * still follows the browser — an adult's `Accept-Language` is a real signal.
+ */
+export const STUDENT_DEFAULT_LOCALE: Locale = "uk";
+
+/**
+ * The language a student's screens render in: their own saved choice if they
+ * made one, Ukrainian otherwise.
+ *
+ * Split from the cookie plumbing in {@link file://./server.ts} so the rule
+ * itself can be unit tested.
+ */
+export function studentLocaleFrom(chosen: unknown): Locale {
+  return isLocale(chosen) ? chosen : STUDENT_DEFAULT_LOCALE;
+}
+
 /** Each language named in itself, the way language pickers should read. */
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: "English",

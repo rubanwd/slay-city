@@ -104,6 +104,37 @@ export const en: Messages = {
     studentNone: "No student linked yet.",
   },
 
+  student: {
+    nav: {
+      map: "Map",
+      wardrobe: "Wardrobe",
+      homework: "Homework",
+      profile: "Profile",
+    },
+
+    profile: {
+      title: "Profile",
+      characterLabel: "Your character",
+      signedIn: "Signed in",
+
+      languageTitle: "Language",
+      languageHint: "Changes the buttons and menus. Missions stay in English — that's the lesson.",
+
+      levelTitle: "Level",
+      levelChange: "Change",
+      levelClose: "Close",
+      levelSwitching: "Switching level…",
+      levelOnlyOne: "More levels unlock as new districts are added to the city.",
+      levelComingSoon: (levels) => `Coming soon: ${levels}.`,
+
+      logOut: "Log Out",
+      loggingOut: "Logging out…",
+      resetProgress: "Reset Progress (dev)",
+      resetting: "Resetting…",
+      resetConfirm: "Wipe all your mission progress, XP, coins, and streaks? This can't be undone.",
+    },
+  },
+
   map: {
     title: "City Map",
     subtitle: "What your student explores",

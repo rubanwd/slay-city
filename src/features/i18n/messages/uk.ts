@@ -104,6 +104,38 @@ export const uk: Messages = {
     studentNone: "Дитину ще не підключено.",
   },
 
+  student: {
+    nav: {
+      map: "Карта",
+      wardrobe: "Гардероб",
+      homework: "Домашка",
+      profile: "Профіль",
+    },
+
+    profile: {
+      title: "Профіль",
+      characterLabel: "Твій персонаж",
+      signedIn: "Ти увійшов",
+
+      languageTitle: "Мова",
+      languageHint: "Змінює кнопки й меню. Місії лишаються англійською — це і є урок.",
+
+      levelTitle: "Рівень",
+      levelChange: "Змінити",
+      levelClose: "Закрити",
+      levelSwitching: "Змінюємо рівень…",
+      levelOnlyOne: "Нові рівні відкриються, коли в місті з’являться нові райони.",
+      levelComingSoon: (levels) => `Скоро: ${levels}.`,
+
+      logOut: "Вийти",
+      loggingOut: "Виходимо…",
+      resetProgress: "Скинути прогрес (dev)",
+      resetting: "Скидаємо…",
+      resetConfirm:
+        "Стерти весь твій прогрес у місіях, XP, монети та серії? Це не можна скасувати.",
+    },
+  },
+
   map: {
     title: "Карта міста",
     subtitle: "Що досліджує ваша дитина",

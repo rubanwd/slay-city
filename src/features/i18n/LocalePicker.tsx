@@ -3,29 +3,41 @@
 import { useTransition } from "react";
 
 import { setLocalePreference } from "./actions";
-import { getMessages } from "./index";
 import { LOCALE_LABELS, LOCALES, type Locale } from "./locales";
 
 export interface LocalePickerProps {
   /** The language currently being rendered. */
   locale: Locale;
-  /** True when {@link locale} came from a manual choice rather than the browser. */
-  manual: boolean;
-  /** The language the browser asks for — what "Automatic" resolves to. */
-  detected: Locale;
+  /** Section heading — "Language" in the reader's own language. */
+  title: string;
+  /** One line under the heading saying what changes. */
+  hint: string;
+  /**
+   * The parent console's "Automatic" option, which clears the stored choice so
+   * the browser's `Accept-Language` decides again.
+   *
+   * Students have no such option: their default is Ukrainian outright, not
+   * whatever language the phone happens to be set to (see
+   * {@link file://./locales.ts}), so for them the three languages are the whole
+   * choice.
+   */
+  auto?: {
+    label: string;
+    /** True when no manual choice is stored, i.e. Automatic is in effect. */
+    selected: boolean;
+    /** Names the language Automatic currently resolves to. */
+    hint: string;
+  };
 }
 
 /**
- * Language switcher for the parent profile.
+ * Language switcher, shared by the parent console and the student profile.
  *
- * "Automatic" is the default and the first option: it clears the stored choice
- * so the browser's `Accept-Language` decides again. Picking a language pins it
- * instead. Selecting either writes the preference server-side and revalidates,
- * so the whole console re-renders in the new language without a full reload.
+ * Selecting an option writes the preference server-side and revalidates, so the
+ * screen re-renders in the new language without a full reload.
  */
-export default function LocalePicker({ locale, manual, detected }: LocalePickerProps) {
+export default function LocalePicker({ locale, title, hint, auto }: LocalePickerProps) {
   const [pending, startTransition] = useTransition();
-  const messages = getMessages(locale);
 
   function choose(value: Locale | "auto") {
     startTransition(async () => {
@@ -34,25 +46,27 @@ export default function LocalePicker({ locale, manual, detected }: LocalePickerP
   }
 
   const options: { value: Locale | "auto"; label: string; selected: boolean }[] = [
-    { value: "auto", label: messages.profile.languageAuto, selected: !manual },
+    ...(auto ? [{ value: "auto" as const, label: auto.label, selected: auto.selected }] : []),
     ...LOCALES.map((option) => ({
       value: option,
       label: LOCALE_LABELS[option],
-      selected: manual && option === locale,
+      // With Automatic in effect no specific language is the choice, even
+      // though one of them is what ends up on screen.
+      selected: option === locale && !auto?.selected,
     })),
   ];
 
   return (
     <section
-      aria-label={messages.profile.languageTitle}
+      aria-label={title}
       className={[
         "flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] p-4",
         pending ? "opacity-60" : "",
       ].join(" ")}
     >
       <div className="flex flex-col gap-1">
-        <h2 className="text-label text-white/50">{messages.profile.languageTitle}</h2>
-        <p className="text-small text-white/50">{messages.profile.languageHint}</p>
+        <h2 className="text-label text-white/50">{title}</h2>
+        <p className="text-small text-white/50">{hint}</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -76,11 +90,7 @@ export default function LocalePicker({ locale, manual, detected }: LocalePickerP
         ))}
       </div>
 
-      {!manual && (
-        <p className="text-small text-white/40">
-          {messages.profile.languageAutoHint(LOCALE_LABELS[detected])}
-        </p>
-      )}
+      {auto?.selected && <p className="text-small text-white/40">{auto.hint}</p>}
     </section>
   );
 }

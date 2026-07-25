@@ -6,12 +6,14 @@ import { BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import SlayCharacter from "@/components/ui/SlayCharacter";
 import { signOut } from "@/features/auth/actions";
 import FeedbackButton from "@/features/feedback/FeedbackButton";
+import { DEFAULT_LOCALE, getMessages, type Locale } from "@/features/i18n";
+import LocalePicker from "@/features/i18n/LocalePicker";
 import { resetMissionProgress } from "@/features/mission/actions";
 import type { KnowledgeLevel } from "@/types";
 
 import ProfileLevelCard from "./ProfileLevelCard";
 
-function LogoutButton() {
+function LogoutButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -38,7 +40,7 @@ function LogoutButton() {
         <polyline points="16 17 21 12 16 7" />
         <line x1="21" y1="12" x2="9" y2="12" />
       </svg>
-      {pending ? "Logging out…" : "Log Out"}
+      {pending ? pendingLabel : label}
     </button>
   );
 }
@@ -48,7 +50,7 @@ function LogoutButton() {
  * stats so content can be replayed. Exposed to everyone for now; before launch
  * this should be gated to admins only (or removed). See {@link resetMissionProgress}.
  */
-function ResetProgressButton() {
+function ResetProgressButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -74,7 +76,7 @@ function ResetProgressButton() {
         <polyline points="3 6 5 6 21 6" />
         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
       </svg>
-      {pending ? "Resetting…" : "Reset Progress (dev)"}
+      {pending ? pendingLabel : label}
     </button>
   );
 }
@@ -98,6 +100,17 @@ export interface ProfileScreenProps {
    * progress of their own to wipe.
    */
   showProgressReset?: boolean;
+  /**
+   * Language for this screen's own chrome. Defaults to English, which is what
+   * the teacher console — the other user of this screen — speaks; the student
+   * page passes their chosen language (Ukrainian until they change it).
+   */
+  locale?: Locale;
+  /**
+   * Offers the language switcher. Students only: the teacher console is
+   * English throughout, so a picker there would promise more than it delivers.
+   */
+  showLanguagePicker?: boolean;
 }
 
 export default function ProfileScreen({
@@ -109,23 +122,29 @@ export default function ProfileScreen({
   roleLabel,
   levelHint,
   showProgressReset = true,
+  locale = DEFAULT_LOCALE,
+  showLanguagePicker = false,
 }: ProfileScreenProps) {
+  const messages = getMessages(locale).student.profile;
+
   return (
     <main className="min-h-screen bg-black flex flex-col mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-center px-6 py-4 border-b border-white/10">
-        <h1 className="text-xl font-bold text-white">Profile</h1>
+        <h1 className="text-xl font-bold text-white">{messages.title}</h1>
       </header>
 
       <section className={`flex flex-1 flex-col gap-8 px-6 py-8 ${BOTTOM_NAV_CLEARANCE}`}>
         <div className="flex flex-col items-center gap-3">
           <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-white/5 p-2 ring-2 ring-lime-green">
-            <SlayCharacter size="full" src={mascotImageUrl} aria-label="Your character" />
+            <SlayCharacter size="full" src={mascotImageUrl} aria-label={messages.characterLabel} />
           </div>
           <div className="flex flex-col items-center gap-1">
             {username && (
               <p className="text-xl font-black text-white break-words text-center">{username}</p>
             )}
-            <p className="text-sm text-white/50 break-all text-center">{email ?? "Signed in"}</p>
+            <p className="text-sm text-white/50 break-all text-center">
+              {email ?? messages.signedIn}
+            </p>
             {roleLabel && (
               <span className="mt-1 rounded-full border border-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white/60">
                 {roleLabel}
@@ -134,7 +153,20 @@ export default function ProfileScreen({
           </div>
         </div>
 
-        <ProfileLevelCard current={level} available={availableLevels} hint={levelHint} />
+        <ProfileLevelCard
+          current={level}
+          available={availableLevels}
+          hint={levelHint}
+          locale={locale}
+        />
+
+        {showLanguagePicker && (
+          <LocalePicker
+            locale={locale}
+            title={messages.languageTitle}
+            hint={messages.languageHint}
+          />
+        )}
 
         <div className="mt-auto flex flex-col gap-3">
           {/* Reporting a bug or sending an idea — reaches the admin console's inbox. */}
@@ -150,21 +182,20 @@ export default function ProfileScreen({
                 }
               }}
               onSubmit={(event) => {
-                if (
-                  !window.confirm(
-                    "Wipe all your mission progress, XP, coins, and streaks? This can't be undone."
-                  )
-                ) {
+                if (!window.confirm(messages.resetConfirm)) {
                   event.preventDefault();
                 }
               }}
             >
-              <ResetProgressButton />
+              <ResetProgressButton
+                label={messages.resetProgress}
+                pendingLabel={messages.resetting}
+              />
             </form>
           )}
 
           <form action={signOut}>
-            <LogoutButton />
+            <LogoutButton label={messages.logOut} pendingLabel={messages.loggingOut} />
           </form>
         </div>
       </section>

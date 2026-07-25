@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
-import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
+import { BottomNav, BOTTOM_NAV_CLEARANCE, type NavIconName } from "@/components/layout";
 import { CoinAmount, CoinIcon, SlayCharacter } from "@/components/ui";
 import {
   equipWardrobeItem,
@@ -37,6 +37,8 @@ type WardrobeGridProps = {
   mascotImageUrl: string;
   /** Shows the bottom nav's Homework tab — true when the student is in a teacher group. */
   showHomework?: boolean;
+  /** Tab labels in the student's chosen language — see `studentNavLabels`. */
+  navLabels?: Partial<Record<NavIconName, string>>;
 };
 
 /** Slot order shown in the grid — the shared category set (no more "color"). */
@@ -48,6 +50,7 @@ export default function WardrobeGrid({
   level,
   mascotImageUrl,
   showHomework,
+  navLabels,
 }: WardrobeGridProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -141,7 +144,7 @@ export default function WardrobeGrid({
         )}
       </section>
 
-      <BottomNav showHomework={showHomework} />
+      <BottomNav showHomework={showHomework} labels={navLabels} />
     </main>
   );
 }

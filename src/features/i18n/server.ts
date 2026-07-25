@@ -5,6 +5,7 @@ import {
   isLocale,
   LOCALE_COOKIE,
   matchLocale,
+  studentLocaleFrom,
   type Locale,
 } from "./locales";
 
@@ -38,4 +39,17 @@ export async function resolveLocale(): Promise<ResolvedLocale> {
     return { locale: chosen, detected, manual: true };
   }
   return { locale: detected, detected, manual: false };
+}
+
+/**
+ * Which language to render a student's screens in.
+ *
+ * Same stored choice as the parent console — one preference per device, written
+ * by the same picker — but a different default: Ukrainian rather than whatever
+ * the browser asks for (see {@link studentLocaleFrom}). There is no "Automatic"
+ * state to report, so this returns the language and nothing else.
+ */
+export async function resolveStudentLocale(): Promise<Locale> {
+  const cookieStore = await cookies();
+  return studentLocaleFrom(cookieStore.get(LOCALE_COOKIE)?.value);
 }

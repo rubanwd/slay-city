@@ -1,14 +1,17 @@
 import type { TaskFamily } from "@/features/parent/taskFamilies";
 
 /**
- * Every string the parent console shows, in one shape.
+ * Every string the parent console shows — plus the student's own profile and
+ * tab bar — in one shape.
  *
  * Counts and names arrive as function messages rather than templates with
  * placeholders, so each language can put the number where its grammar wants it
  * and pick its own plural form (see {@link file://./plural.ts}).
  *
  * Nothing authored by a teacher or an admin belongs here: district, location,
- * mission and homework titles stay in the language they were written in.
+ * mission and homework titles stay in the language they were written in. Nor do
+ * the knowledge-level names (`Beginner`, `Elementary`…), which are the ladder's
+ * own terminology and read the same everywhere.
  */
 export interface Messages {
   nav: {
@@ -99,6 +102,44 @@ export interface Messages {
     studentTitle: string;
     studentLevelHint: string;
     studentNone: string;
+  };
+
+  /**
+   * The student game's own chrome. Only the tab bar and the profile screen are
+   * translated: everything a mission puts on screen is the English being
+   * learned, and stays English on purpose.
+   */
+  student: {
+    nav: {
+      map: string;
+      wardrobe: string;
+      homework: string;
+      profile: string;
+    };
+
+    profile: {
+      title: string;
+      /** Alt text for the player's snake at the top of the screen. */
+      characterLabel: string;
+      signedIn: string;
+
+      languageTitle: string;
+      languageHint: string;
+
+      levelTitle: string;
+      levelChange: string;
+      levelClose: string;
+      levelSwitching: string;
+      /** Shown when there is no other level with content to switch to. */
+      levelOnlyOne: string;
+      levelComingSoon: (levels: string) => string;
+
+      logOut: string;
+      loggingOut: string;
+      resetProgress: string;
+      resetting: string;
+      resetConfirm: string;
+    };
   };
 
   map: {

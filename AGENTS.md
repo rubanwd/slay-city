@@ -332,10 +332,18 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
 - Leaderboards
 - In-app purchases or payment processing
 - Push notifications
-- Multiple language support beyond English — **except the parent console**, which
-  is translated (English / Ukrainian / Russian, see `src/features/i18n/`) on the
-  product owner's request: a parent is an adult who never signed up to learn
-  English. The student game, and all authored content, stay English-only.
+- Multiple language support beyond English — **except the parent console and two
+  parts of the student game**, translated (English / Ukrainian / Russian, see
+  `src/features/i18n/`) on the product owner's request:
+  - The whole parent console: a parent is an adult who never signed up to learn
+    English. It follows the browser's `Accept-Language` by default.
+  - The student's **profile screen and tab bar** only, defaulting to Ukrainian
+    (`STUDENT_DEFAULT_LOCALE`) and switchable on their profile. Both consoles
+    share one stored preference (the `slay_locale` cookie).
+
+  Everything a mission puts on screen stays English — the English *is* the
+  lesson — as does all authored content (district, location, mission and
+  homework titles, vocabulary) and the knowledge-level names.
 - Additional district content beyond the MVP test set
 - Advanced analytics dashboards
 - Any feature that does not directly serve the loop: `Map → Mission → Reward → Unlock → Return Tomorrow`

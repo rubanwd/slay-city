@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 
+import { DEFAULT_LOCALE, getMessages, type Locale } from "@/features/i18n";
 import LevelPicker from "@/features/levels/LevelPicker";
 import LockedLevelsNote from "@/features/levels/LockedLevelsNote";
 import { changeMyLevel } from "@/features/levels/actions";
@@ -18,6 +19,11 @@ export interface ProfileLevelCardProps {
    * parents and teachers change which level their read-only map previews.
    */
   hint?: string;
+  /**
+   * Language for the card's own words. The level names themselves are the
+   * ladder's terminology and are never translated.
+   */
+  locale?: Locale;
 }
 
 /**
@@ -29,7 +35,13 @@ export interface ProfileLevelCardProps {
  * The picker is collapsed by default — the card shows the current level and a
  * Change button, so the profile screen keeps a single obvious primary action.
  */
-export default function ProfileLevelCard({ current, available, hint }: ProfileLevelCardProps) {
+export default function ProfileLevelCard({
+  current,
+  available,
+  hint,
+  locale = DEFAULT_LOCALE,
+}: ProfileLevelCardProps) {
+  const messages = getMessages(locale).student.profile;
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -60,7 +72,9 @@ export default function ProfileLevelCard({ current, available, hint }: ProfileLe
     <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
       <div className="flex items-center justify-between gap-3">
         <span className="flex flex-col">
-          <span className="text-label uppercase tracking-widest text-white/50">Level</span>
+          <span className="text-label uppercase tracking-widest text-white/50">
+            {messages.levelTitle}
+          </span>
           <span className="text-body-strong font-bold text-lime-green">
             {KNOWLEDGE_LEVEL_LABELS[optimistic]}
           </span>
@@ -73,7 +87,7 @@ export default function ProfileLevelCard({ current, available, hint }: ProfileLe
             disabled={pending}
             className="shrink-0 rounded-full border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white/60 transition-colors hover:bg-white/10 disabled:opacity-50"
           >
-            {open ? "Close" : "Change"}
+            {open ? messages.levelClose : messages.levelChange}
           </button>
         )}
       </div>
@@ -90,15 +104,13 @@ export default function ProfileLevelCard({ current, available, hint }: ProfileLe
       )}
 
       {!canChange && (
-        <p className="text-small text-white/40">
-          More levels unlock as new districts are added to the city.
-        </p>
+        <p className="text-small text-white/40">{messages.levelOnlyOne}</p>
       )}
-      {open && <LockedLevelsNote available={available} />}
+      {open && <LockedLevelsNote available={available} locale={locale} />}
 
       {pending && (
         <p className="text-small text-white/50" aria-live="polite">
-          Switching level…
+          {messages.levelSwitching}
         </p>
       )}
       {error && (
