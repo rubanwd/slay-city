@@ -104,6 +104,37 @@ export const ru: Messages = {
     studentNone: "Ребёнок ещё не подключён.",
   },
 
+  student: {
+    nav: {
+      map: "Карта",
+      wardrobe: "Гардероб",
+      homework: "Домашка",
+      profile: "Профиль",
+    },
+
+    profile: {
+      title: "Профиль",
+      characterLabel: "Твой персонаж",
+      signedIn: "Ты вошёл",
+
+      languageTitle: "Язык",
+      languageHint: "Меняет кнопки и меню. Миссии остаются на английском — это и есть урок.",
+
+      levelTitle: "Уровень",
+      levelChange: "Изменить",
+      levelClose: "Закрыть",
+      levelSwitching: "Меняем уровень…",
+      levelOnlyOne: "Новые уровни откроются, когда в городе появятся новые районы.",
+      levelComingSoon: (levels) => `Скоро: ${levels}.`,
+
+      logOut: "Выйти",
+      loggingOut: "Выходим…",
+      resetProgress: "Сбросить прогресс (dev)",
+      resetting: "Сбрасываем…",
+      resetConfirm: "Стереть весь твой прогресс в миссиях, XP, монеты и серии? Это нельзя отменить.",
+    },
+  },
+
   map: {
     title: "Карта города",
     subtitle: "Что исследует ваш ребёнок",

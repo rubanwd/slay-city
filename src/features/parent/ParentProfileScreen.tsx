@@ -4,7 +4,7 @@ import { useFormStatus } from "react-dom";
 
 import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import { signOut } from "@/features/auth/actions";
-import { getMessages, type Locale } from "@/features/i18n";
+import { getMessages, LOCALE_LABELS, type Locale } from "@/features/i18n";
 import LocalePicker from "@/features/i18n/LocalePicker";
 import { KNOWLEDGE_LEVEL_LABELS } from "@/features/levels/levels";
 import type { KnowledgeLevel } from "@/types";
@@ -79,7 +79,16 @@ export default function ParentProfileScreen({
           </span>
         </div>
 
-        <LocalePicker locale={locale} manual={manualLocale} detected={detectedLocale} />
+        <LocalePicker
+          locale={locale}
+          title={messages.profile.languageTitle}
+          hint={messages.profile.languageHint}
+          auto={{
+            label: messages.profile.languageAuto,
+            selected: !manualLocale,
+            hint: messages.profile.languageAutoHint(LOCALE_LABELS[detectedLocale]),
+          }}
+        />
 
         <section
           aria-label={messages.profile.studentTitle}

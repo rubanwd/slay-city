@@ -1,5 +1,11 @@
 import NavLink from "@/components/ui/NavLink";
-import { AppContainer, BottomNav, Section, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
+import {
+  AppContainer,
+  BottomNav,
+  Section,
+  BOTTOM_NAV_CLEARANCE,
+  type NavIconName,
+} from "@/components/layout";
 
 import UnreadBadge from "./qa/UnreadBadge";
 
@@ -21,6 +27,8 @@ export interface HomeworkScreenProps {
   /** Names of every group the student belongs to — almost always just one, shown once up top. */
   groupNames: string[];
   topics: HomeworkTopicSummary[];
+  /** Tab labels in the student's chosen language — see `studentNavLabels`. */
+  navLabels?: Partial<Record<NavIconName, string>>;
 }
 
 function TopicCard({ topic }: { topic: HomeworkTopicSummary }) {
@@ -65,7 +73,11 @@ function TopicCard({ topic }: { topic: HomeworkTopicSummary }) {
 }
 
 /** Homework list: every lesson topic across every group the student belongs to. */
-export default function HomeworkScreen({ groupNames, topics }: HomeworkScreenProps) {
+export default function HomeworkScreen({
+  groupNames,
+  topics,
+  navLabels,
+}: HomeworkScreenProps) {
   return (
     <AppContainer>
       <Section pt="lg" pb="sm">
@@ -94,7 +106,7 @@ export default function HomeworkScreen({ groupNames, topics }: HomeworkScreenPro
         )}
       </Section>
 
-      <BottomNav showHomework />
+      <BottomNav showHomework labels={navLabels} />
     </AppContainer>
   );
 }

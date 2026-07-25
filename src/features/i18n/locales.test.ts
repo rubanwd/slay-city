@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isLocale, matchLocale } from "./locales";
+import { isLocale, matchLocale, STUDENT_DEFAULT_LOCALE, studentLocaleFrom } from "./locales";
 
 describe("isLocale", () => {
   it("accepts the three supported languages", () => {
@@ -47,5 +47,26 @@ describe("matchLocale", () => {
 
   it("treats a malformed q-value as refused", () => {
     expect(matchLocale("ru;q=abc,en;q=0.3")).toBe("en");
+  });
+});
+
+describe("studentLocaleFrom", () => {
+  it("starts a student off in English, whatever the browser asks for", () => {
+    expect(STUDENT_DEFAULT_LOCALE).toBe("en");
+    expect(studentLocaleFrom(undefined)).toBe("en");
+    expect(studentLocaleFrom(null)).toBe("en");
+    expect(studentLocaleFrom("")).toBe("en");
+  });
+
+  it("honours a language the student picked", () => {
+    expect(studentLocaleFrom("en")).toBe("en");
+    expect(studentLocaleFrom("ru")).toBe("ru");
+    expect(studentLocaleFrom("uk")).toBe("uk");
+  });
+
+  it("falls back rather than trusting an unsupported cookie value", () => {
+    expect(studentLocaleFrom("de")).toBe(STUDENT_DEFAULT_LOCALE);
+    expect(studentLocaleFrom("uk-UA")).toBe(STUDENT_DEFAULT_LOCALE);
+    expect(studentLocaleFrom(42)).toBe(STUDENT_DEFAULT_LOCALE);
   });
 });

@@ -1,11 +1,13 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import { getMyGroups } from "@/features/homework/queries";
+import { studentNavLabels } from "@/features/i18n/navLabels";
+import { resolveStudentLocale } from "@/features/i18n/server";
 import { getUnreadCounts } from "@/features/homework/qa/queries";
 import HomeworkScreen, { type HomeworkTopicSummary } from "@/features/homework/HomeworkScreen";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HomeworkPage() {
-  const supabase = await createClient();
+  const [supabase, locale] = await Promise.all([createClient(), resolveStudentLocale()]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,7 +25,7 @@ export default async function HomeworkPage() {
   if (groups.length === 0) {
     return (
       <AuthGuard>
-        <HomeworkScreen groupNames={[]} topics={[]} />
+        <HomeworkScreen groupNames={[]} topics={[]} navLabels={studentNavLabels(locale)} />
       </AuthGuard>
     );
   }
@@ -79,7 +81,11 @@ export default async function HomeworkPage() {
 
   return (
     <AuthGuard>
-      <HomeworkScreen groupNames={groupNames} topics={topicSummaries} />
+      <HomeworkScreen
+        groupNames={groupNames}
+        topics={topicSummaries}
+        navLabels={studentNavLabels(locale)}
+      />
     </AuthGuard>
   );
 }

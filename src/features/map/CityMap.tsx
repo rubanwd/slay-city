@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
+import { BottomNav, BOTTOM_NAV_CLEARANCE, type NavIconName } from "@/components/layout";
 import { CoinAmount, XpAmount } from "@/components/ui";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
 import { useImageLoaded } from "@/hooks/useImageLoaded";
@@ -93,6 +93,8 @@ export interface CityMapProps {
   mascotImageUrl: string;
   /** Shows the bottom nav's Homework tab — true when the student is in a teacher group. */
   showHomework?: boolean;
+  /** Tab labels in the student's chosen language — see `studentNavLabels`. */
+  navLabels?: Partial<Record<NavIconName, string>>;
   /**
    * Set when the player has cleared their whole level. Reaching the map in
    * this state means no next level had content — the server moves them up
@@ -106,6 +108,7 @@ export default function CityMap({
   hud,
   mascotImageUrl,
   showHomework,
+  navLabels,
   levelStatus,
 }: CityMapProps) {
   const locations = selectVisibleLocations(district?.locations ?? [], MAX_VISIBLE_LOCATIONS);
@@ -418,7 +421,7 @@ export default function CityMap({
         </div>
       )}
 
-      <BottomNav showHomework={showHomework} />
+      <BottomNav showHomework={showHomework} labels={navLabels} />
     </main>
   );
 }

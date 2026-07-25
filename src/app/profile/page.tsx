@@ -1,5 +1,7 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import { BottomNav } from "@/components/layout";
+import { studentNavLabels } from "@/features/i18n/navLabels";
+import { resolveStudentLocale } from "@/features/i18n/server";
 import { hasAnyGroup } from "@/features/homework/queries";
 import { DEFAULT_KNOWLEDGE_LEVEL, isKnowledgeLevel } from "@/features/levels/levels";
 import { getAvailableLevels } from "@/features/levels/queries";
@@ -9,7 +11,7 @@ import { DEFAULT_MASCOT_IMAGE } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
+  const [supabase, locale] = await Promise.all([createClient(), resolveStudentLocale()]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -37,8 +39,10 @@ export default async function ProfilePage() {
         mascotImageUrl={mascotImageUrl}
         level={level}
         availableLevels={availableLevels}
+        locale={locale}
+        showLanguagePicker
       />
-      <BottomNav showHomework={showHomework} />
+      <BottomNav showHomework={showHomework} labels={studentNavLabels(locale)} />
     </AuthGuard>
   );
 }

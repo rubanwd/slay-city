@@ -1,11 +1,13 @@
 import AuthGuard from "@/components/auth/AuthGuard";
 import WardrobeGrid, { type WardrobeItemVM } from "@/components/wardrobe/WardrobeGrid";
 import { hasAnyGroup } from "@/features/homework/queries";
+import { studentNavLabels } from "@/features/i18n/navLabels";
+import { resolveStudentLocale } from "@/features/i18n/server";
 import { resolveMascotImage } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function WardrobePage() {
-  const supabase = await createClient();
+  const [supabase, locale] = await Promise.all([createClient(), resolveStudentLocale()]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -73,6 +75,7 @@ export default async function WardrobePage() {
         level={statsRes.data?.level ?? 1}
         mascotImageUrl={mascotImageUrl}
         showHomework={showHomework}
+        navLabels={studentNavLabels(locale)}
       />
     </AuthGuard>
   );

@@ -8,13 +8,15 @@ import {
   sumLocationRewards,
 } from "@/features/map/mapState";
 import { hasAnyGroup } from "@/features/homework/queries";
+import { studentNavLabels } from "@/features/i18n/navLabels";
+import { resolveStudentLocale } from "@/features/i18n/server";
 import { KNOWLEDGE_LEVEL_LABELS, nextKnowledgeLevel } from "@/features/levels/levels";
 import { getMyLevel } from "@/features/levels/queries";
 import { resolveMascotImage } from "@/features/wardrobe/mascot";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function MapPage() {
-  const supabase = await createClient();
+  const [supabase, locale] = await Promise.all([createClient(), resolveStudentLocale()]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -129,6 +131,7 @@ export default async function MapPage() {
         }}
         mascotImageUrl={mascotImageUrl}
         showHomework={showHomework}
+        navLabels={studentNavLabels(locale)}
         levelStatus={levelStatus}
       />
     </AuthGuard>
