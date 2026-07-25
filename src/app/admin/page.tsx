@@ -3,6 +3,8 @@ import NavLink from "@/components/ui/NavLink";
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminSnakePlayground from "@/features/admin/AdminSnakePlayground";
 import { requireAdminPage } from "@/features/admin/guard";
+import { getUnreadFeedbackCount } from "@/features/feedback/queries";
+import UnreadFeedbackBadge from "@/features/feedback/UnreadFeedbackBadge";
 import { KNOWLEDGE_LEVELS } from "@/features/levels/levels";
 
 /**
@@ -12,19 +14,34 @@ import { KNOWLEDGE_LEVELS } from "@/features/levels/levels";
 export default async function AdminPage() {
   const { supabase } = await requireAdminPage();
 
-  const [missionsRes, districtsRes, locationsRes, wardrobeRes, publishedTaskTypesRes] =
-    await Promise.all([
-      supabase.from("missions").select("id", { count: "exact", head: true }),
-      supabase.from("districts").select("id", { count: "exact", head: true }),
-      supabase.from("locations").select("id", { count: "exact", head: true }),
-      supabase.from("wardrobe_items").select("id", { count: "exact", head: true }),
-      supabase
-        .from("task_type_templates")
-        .select("task_type", { count: "exact", head: true })
-        .eq("is_published", true),
-    ]);
+  const [
+    missionsRes,
+    districtsRes,
+    locationsRes,
+    wardrobeRes,
+    publishedTaskTypesRes,
+    unreadFeedback,
+  ] = await Promise.all([
+    supabase.from("missions").select("id", { count: "exact", head: true }),
+    supabase.from("districts").select("id", { count: "exact", head: true }),
+    supabase.from("locations").select("id", { count: "exact", head: true }),
+    supabase.from("wardrobe_items").select("id", { count: "exact", head: true }),
+    supabase
+      .from("task_type_templates")
+      .select("task_type", { count: "exact", head: true })
+      .eq("is_published", true),
+    getUnreadFeedbackCount(supabase),
+  ]);
 
-  const cards = [
+  const cards: {
+    href: string;
+    title: string;
+    count: number | null;
+    description: string;
+    accent: string;
+    /** Unread marker shown beside the title — only the feedback card uses it. */
+    unread?: number;
+  }[] = [
     {
       href: "/admin/levels",
       title: "Levels, Districts, Missions",
@@ -60,6 +77,14 @@ export default async function AdminPage() {
       description: "Add teacher accounts and assign student groups.",
       accent: "text-neon-orange",
     },
+    {
+      href: "/admin/feedback",
+      title: "Feedback & Bugs",
+      count: null,
+      description: "Bug reports and ideas sent by students and teachers.",
+      accent: "text-cyan",
+      unread: unreadFeedback,
+    },
   ];
 
   return (
@@ -81,7 +106,10 @@ export default async function AdminPage() {
               className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] p-5 transition-colors hover:border-white/30 hover:bg-white/5"
             >
               <span className="flex flex-col">
-                <span className={`text-h3 font-bold ${card.accent}`}>{card.title}</span>
+                <span className="flex items-center gap-2">
+                  <span className={`text-h3 font-bold ${card.accent}`}>{card.title}</span>
+                  <UnreadFeedbackBadge count={card.unread ?? 0} />
+                </span>
                 <span className="text-small text-white/50">{card.description}</span>
               </span>
               <span className="flex items-center gap-2 text-white/40">

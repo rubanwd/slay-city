@@ -5,6 +5,7 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 
 import NavLink from "@/components/ui/NavLink";
+import UnreadFeedbackBadge from "@/features/feedback/UnreadFeedbackBadge";
 
 type SidebarItem = {
   href: string;
@@ -23,7 +24,13 @@ const ITEMS: SidebarItem[] = [
   { href: "/admin/wardrobe", title: "Wardrobe", accent: "text-neon-pink" },
   { href: "/admin/admins", title: "Manage Admins", accent: "text-purple" },
   { href: "/admin/teachers", title: "Manage Teachers", accent: "text-neon-orange" },
+  { href: "/admin/feedback", title: "Feedback & Bugs", accent: "text-cyan" },
 ];
+
+export interface AdminSidebarProps {
+  /** Reports this admin hasn't opened — badges the Feedback & Bugs entry (and the hamburger). */
+  unreadFeedback?: number;
+}
 
 /**
  * Hamburger button + slide-out left drawer for jumping between the main admin
@@ -31,7 +38,7 @@ const ITEMS: SidebarItem[] = [
  * every admin screen, not just the Content Manager landing. Closes on backdrop
  * click, Escape, or after navigating.
  */
-export default function AdminSidebar() {
+export default function AdminSidebar({ unreadFeedback = 0 }: AdminSidebarProps) {
   const [open, setOpen] = useState(false);
   // Separate flag drives the slide/fade transition: we mount off-screen, then
   // flip `shown` on the next frame so the browser animates the entrance.
@@ -79,11 +86,19 @@ export default function AdminSidebar() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Open menu"
+        aria-label={unreadFeedback > 0 ? "Open menu — new feedback reports" : "Open menu"}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+        className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 transition-colors hover:bg-white/5 hover:text-white"
       >
+        {/* Unread feedback is only nameable inside the drawer, so the closed
+            menu carries a dot to say there's something new behind it. */}
+        {unreadFeedback > 0 && (
+          <span
+            aria-hidden="true"
+            className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-cyan ring-2 ring-black"
+          />
+        )}
         <svg
           width="18"
           height="18"
@@ -139,19 +154,21 @@ export default function AdminSidebar() {
 
               <nav className="flex flex-col gap-1">
                 {ITEMS.map((item) => {
-                  const active =
-                    pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   return (
                     <NavLink
                       key={item.href}
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       onClick={close}
-                      className={`rounded-xl px-4 py-3 text-body-strong font-bold transition-colors ${
+                      className={`flex items-center justify-between gap-2 rounded-xl px-4 py-3 text-body-strong font-bold transition-colors ${
                         item.accent
                       } ${active ? "bg-white/10" : "hover:bg-white/5"}`}
                     >
-                      {item.title}
+                      <span>{item.title}</span>
+                      {item.href === "/admin/feedback" && (
+                        <UnreadFeedbackBadge count={unreadFeedback} />
+                      )}
                     </NavLink>
                   );
                 })}

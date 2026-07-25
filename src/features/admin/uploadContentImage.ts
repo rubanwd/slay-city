@@ -3,15 +3,17 @@ import { createClient } from "@/lib/supabase/client";
 /** Storage bucket for admin-managed content imagery (see the content_images migration). */
 const BUCKET = "content";
 
-export type ContentImageFolder = "districts" | "locations" | "wardrobe" | "homework" | "tasks";
+export type ContentImageFolder =
+  "districts" | "locations" | "wardrobe" | "homework" | "tasks" | "feedback";
 
 /**
  * Uploads an image blob to the public `content` bucket and returns its public
  * URL. Public read serves the map. Storage RLS restricts writes to admins for
  * every folder except `homework/`, which any teacher may also write to (for
- * topic note images — see `20260720000012_homework_topic_notes.sql`). Each
- * upload gets a unique name, so old images are simply orphaned rather than
- * overwritten.
+ * topic note images — see `20260720000012_homework_topic_notes.sql`), and
+ * `feedback/`, which any signed-in user may add bug screenshots to (see
+ * `20260725000006_feedback_reports.sql`). Each upload gets a unique name, so
+ * old images are simply orphaned rather than overwritten.
  */
 export async function uploadContentImage(
   file: Blob,

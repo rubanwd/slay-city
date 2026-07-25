@@ -2,6 +2,8 @@ import NavLink from "@/components/ui/NavLink";
 
 import AdminSidebar from "@/features/admin/AdminSidebar";
 import { signOut } from "@/features/auth/actions";
+import { getUnreadFeedbackCount } from "@/features/feedback/queries";
+import { createClient } from "@/lib/supabase/server";
 
 export interface AdminHeaderProps {
   title: string;
@@ -9,10 +11,18 @@ export interface AdminHeaderProps {
   backHref?: string;
 }
 
-export default function AdminHeader({ title, backHref }: AdminHeaderProps) {
+/**
+ * Header shown on every admin screen. Reads the unread feedback count here
+ * rather than in each page, so the marker on the menu's Feedback & Bugs entry
+ * is visible from wherever the admin happens to be.
+ */
+export default async function AdminHeader({ title, backHref }: AdminHeaderProps) {
+  const supabase = await createClient();
+  const unreadFeedback = await getUnreadFeedbackCount(supabase);
+
   return (
     <header className="flex items-center gap-3 py-5">
-      <AdminSidebar />
+      <AdminSidebar unreadFeedback={unreadFeedback} />
       {backHref && (
         <NavLink
           href={backHref}

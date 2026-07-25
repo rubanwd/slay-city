@@ -58,6 +58,9 @@ export type UserAchievement = Tables["user_achievements"]["Row"];
 export type UserAchievementInsert = Tables["user_achievements"]["Insert"];
 export type UserAchievementUpdate = Tables["user_achievements"]["Update"];
 
+export type FeedbackReport = Tables["feedback_reports"]["Row"];
+export type FeedbackReportInsert = Tables["feedback_reports"]["Insert"];
+
 export type AiContentDraft = Tables["ai_content_drafts"]["Row"];
 export type AiContentDraftInsert = Tables["ai_content_drafts"]["Insert"];
 export type AiContentDraftUpdate = Tables["ai_content_drafts"]["Update"];
