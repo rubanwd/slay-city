@@ -103,7 +103,7 @@ export interface ProfileScreenProps {
   /**
    * Language for this screen's own chrome. Defaults to English, which is what
    * the teacher console — the other user of this screen — speaks; the student
-   * page passes their chosen language (Ukrainian until they change it).
+   * page passes whatever that student has chosen.
    */
   locale?: Locale;
   /**

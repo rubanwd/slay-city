@@ -51,11 +51,11 @@ describe("matchLocale", () => {
 });
 
 describe("studentLocaleFrom", () => {
-  it("starts a student off in Ukrainian, not the browser's language", () => {
-    expect(STUDENT_DEFAULT_LOCALE).toBe("uk");
-    expect(studentLocaleFrom(undefined)).toBe("uk");
-    expect(studentLocaleFrom(null)).toBe("uk");
-    expect(studentLocaleFrom("")).toBe("uk");
+  it("starts a student off in English, whatever the browser asks for", () => {
+    expect(STUDENT_DEFAULT_LOCALE).toBe("en");
+    expect(studentLocaleFrom(undefined)).toBe("en");
+    expect(studentLocaleFrom(null)).toBe("en");
+    expect(studentLocaleFrom("")).toBe("en");
   });
 
   it("honours a language the student picked", () => {
@@ -65,8 +65,8 @@ describe("studentLocaleFrom", () => {
   });
 
   it("falls back rather than trusting an unsupported cookie value", () => {
-    expect(studentLocaleFrom("de")).toBe("uk");
-    expect(studentLocaleFrom("uk-UA")).toBe("uk");
-    expect(studentLocaleFrom(42)).toBe("uk");
+    expect(studentLocaleFrom("de")).toBe(STUDENT_DEFAULT_LOCALE);
+    expect(studentLocaleFrom("uk-UA")).toBe(STUDENT_DEFAULT_LOCALE);
+    expect(studentLocaleFrom(42)).toBe(STUDENT_DEFAULT_LOCALE);
   });
 });

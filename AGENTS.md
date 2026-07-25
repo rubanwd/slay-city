@@ -337,9 +337,10 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
   `src/features/i18n/`) on the product owner's request:
   - The whole parent console: a parent is an adult who never signed up to learn
     English. It follows the browser's `Accept-Language` by default.
-  - The student's **profile screen and tab bar** only, defaulting to Ukrainian
-    (`STUDENT_DEFAULT_LOCALE`) and switchable on their profile. Both consoles
-    share one stored preference (the `slay_locale` cookie).
+  - The student's **profile screen and tab bar** only, switchable on their
+    profile. The default is a fixed language (`STUDENT_DEFAULT_LOCALE`,
+    currently English) rather than the browser's. Both consoles share one
+    stored preference (the `slay_locale` cookie).
 
   Everything a mission puts on screen stays English — the English *is* the
   lesson — as does all authored content (district, location, mission and

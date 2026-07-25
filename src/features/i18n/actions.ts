@@ -10,9 +10,9 @@ import { isLocale, LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from "./locales";
  * student's alike, since both read the same preference.
  *
  * `"auto"` deletes the cookie and hands the decision back to the default: the
- * browser's `Accept-Language` for a parent, plain Ukrainian for a student (see
- * {@link file://./locales.ts}). Any unrecognised value is treated the same way
- * rather than trusted into the cookie.
+ * browser's `Accept-Language` for a parent, a fixed language for a student
+ * (see {@link file://./locales.ts}). Any unrecognised value is treated the same
+ * way rather than trusted into the cookie.
  *
  * The cookie carries no identity, just a display preference. Everything below
  * the root layout is revalidated because the language now reaches both consoles

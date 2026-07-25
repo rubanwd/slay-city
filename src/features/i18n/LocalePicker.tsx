@@ -16,10 +16,9 @@ export interface LocalePickerProps {
    * The parent console's "Automatic" option, which clears the stored choice so
    * the browser's `Accept-Language` decides again.
    *
-   * Students have no such option: their default is Ukrainian outright, not
-   * whatever language the phone happens to be set to (see
-   * {@link file://./locales.ts}), so for them the three languages are the whole
-   * choice.
+   * Students have no such option: their default is one fixed language, not
+   * whatever the phone happens to be set to (see {@link file://./locales.ts}),
+   * so for them the three languages are the whole choice.
    */
   auto?: {
     label: string;
