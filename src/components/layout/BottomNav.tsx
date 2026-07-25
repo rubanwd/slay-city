@@ -66,10 +66,14 @@ const NAV_ICONS: Record<NavIconName, () => React.ReactElement> = {
 
 /**
  * Bottom padding a page's scrollable content needs so the fixed nav — tab row
- * (~79px) plus the watermark strip (38px) — never covers it. Kept here so the
- * screens that render the bar stay in sync when its height changes.
+ * (~79px) plus the watermark strip (38px) — never covers it. Also adds the
+ * device's own safe-area inset, since the nav bar grows by that same amount
+ * (see its `pb-[env(safe-area-inset-bottom)]` below) and a flat 150px alone
+ * falls short on phones with a home indicator, clipping the last row of
+ * content. Kept here so the screens that render the bar stay in sync when
+ * its height changes.
  */
-export const BOTTOM_NAV_CLEARANCE = "pb-[150px]";
+export const BOTTOM_NAV_CLEARANCE = "pb-[calc(150px+env(safe-area-inset-bottom))]";
 
 const WATERMARK_TEXT = "Slay School";
 
