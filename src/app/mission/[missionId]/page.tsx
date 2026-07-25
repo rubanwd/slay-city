@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import AuthGuard from "@/components/auth/AuthGuard";
 import MissionScreen from "@/features/mission/MissionScreen";
 import type { MissionTaskViewModel } from "@/features/mission/types";
+import StudyTimeTracker from "@/features/study/StudyTimeTracker";
 import { createClient } from "@/lib/supabase/server";
 
 interface MissionDetailPageProps {
@@ -45,6 +46,8 @@ export default async function MissionDetailPage({ params }: MissionDetailPagePro
 
   return (
     <AuthGuard>
+      {/* Counts the time this mission stays open towards the student's study time. */}
+      <StudyTimeTracker />
       <MissionScreen
         mission={{
           id: mission.id,

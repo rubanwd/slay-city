@@ -137,6 +137,12 @@ export interface BottomNavProps {
   role?: NavRole;
   /** Shows the Homework tab — only true for a student who belongs to a teacher group. */
   showHomework?: boolean;
+  /**
+   * Translated tab labels, keyed by icon. The parent console passes its own
+   * language's words; everywhere else the English defaults from
+   * `navigation.ts` stand.
+   */
+  labels?: Partial<Record<NavIconName, string>>;
 }
 
 /**
@@ -146,7 +152,11 @@ export interface BottomNavProps {
  * the tabs, so pages need `BOTTOM_NAV_CLEARANCE` worth of bottom padding on
  * their scrollable content to stay clear of the whole bar.
  */
-export default function BottomNav({ role = "student", showHomework = false }: BottomNavProps) {
+export default function BottomNav({
+  role = "student",
+  showHomework = false,
+  labels,
+}: BottomNavProps) {
   const pathname = usePathname();
   const navItems = navItemsForRole(role, { showHomework });
   const activeIndex = activeNavIndex(pathname, navItems);
@@ -158,8 +168,9 @@ export default function BottomNav({ role = "student", showHomework = false }: Bo
         {navItems.map((item, index) => {
           const Icon = NAV_ICONS[item.icon];
           const active = index === activeIndex;
+          const label = labels?.[item.icon] ?? item.label;
           return (
-            <li key={item.label} className="flex-1">
+            <li key={item.href} className="flex-1">
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
@@ -182,7 +193,7 @@ export default function BottomNav({ role = "student", showHomework = false }: Bo
                     active ? "text-lime-green" : "text-white/50",
                   ].join(" ")}
                 >
-                  {item.label}
+                  {label}
                 </span>
               </Link>
             </li>

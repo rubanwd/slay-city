@@ -1,7 +1,8 @@
 import AuthGuard from "@/components/auth/AuthGuard";
+import { resolveLocale } from "@/features/i18n/server";
 import ParentDashboard from "@/features/parent/ParentDashboard";
 import { requireParentPage } from "@/features/parent/guard";
-import { getParentProgressSummary } from "@/features/parent/queries";
+import { getParentDashboardData } from "@/features/parent/queries";
 
 /**
  * Read-only parent dashboard at `/parent`.
@@ -16,9 +17,15 @@ import { getParentProgressSummary } from "@/features/parent/queries";
  * email to a student profile and records the link. RLS then lets the parent read
  * that student's stats and progress. Until a matching student account exists, the
  * dashboard shows a "not linked yet" state instead of misleading zeros.
+ *
+ * The page speaks the parent's language: their manual choice if they made one,
+ * otherwise whatever their browser asks for (see `resolveLocale`).
  */
 export default async function ParentPage() {
-  const { supabase, profileId, studentEmail } = await requireParentPage();
+  const [{ supabase, profileId, studentEmail }, { locale }] = await Promise.all([
+    requireParentPage(),
+    resolveLocale(),
+  ]);
 
   // Already linked from a previous visit?
   const { data: existingLink } = await supabase
@@ -49,24 +56,19 @@ export default async function ParentPage() {
   if (!studentId) {
     return (
       <AuthGuard>
-        <ParentDashboard pending={{ studentEmail, reason }} />
+        <ParentDashboard locale={locale} pending={{ studentEmail, reason }} />
       </AuthGuard>
     );
   }
 
-  const { data: studentProfile } = await supabase
-    .from("profiles")
-    .select("username")
-    .eq("id", studentId)
-    .maybeSingle();
-
-  const summary = await getParentProgressSummary(supabase, studentId);
+  const data = await getParentDashboardData(supabase, studentId);
 
   return (
     <AuthGuard>
       <ParentDashboard
-        studentName={studentProfile?.username ?? studentEmail ?? "Your student"}
-        summary={summary}
+        locale={locale}
+        studentName={studentEmail ?? undefined}
+        data={data}
       />
     </AuthGuard>
   );
