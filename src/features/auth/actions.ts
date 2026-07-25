@@ -196,13 +196,19 @@ export async function registerFormAction(
  * Send a password-reset email. The link routes through `/auth/callback`,
  * which exchanges the code for a (recovery) session and forwards on to
  * `/auth/reset-password`.
+ *
+ * Uses the same `resolveSiteUrl()` as signup/OAuth: on a deployment the
+ * request `origin` is not always the public site (proxies, custom domains,
+ * previews), and an origin Supabase doesn't recognise is dropped in favour of
+ * the project's Site URL — which is how reset links end up pointing at
+ * localhost. `NEXT_PUBLIC_SITE_URL` pins them to the real site.
  */
 export async function requestPasswordReset(email: string): Promise<AuthState> {
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  const siteUrl = await resolveSiteUrl();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: origin ? `${origin}/auth/callback?next=/auth/reset-password` : undefined,
+    redirectTo: siteUrl ? `${siteUrl}/auth/callback?next=/auth/reset-password` : undefined,
   });
 
   if (error) {
