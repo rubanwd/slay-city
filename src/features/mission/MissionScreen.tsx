@@ -25,13 +25,32 @@ export interface MissionScreenProps {
   /** The location this mission belongs to — its icon and name head the screen. */
   location?: { name: string; iconUrl: string | null } | null;
   tasks: MissionTaskViewModel[];
+  /**
+   * Review mode: play the mission exactly as a child sees it, but record
+   * nothing — no completion row, no XP or coins, no reward screen. Used by the
+   * teacher console to check the content children are given.
+   */
+  review?: boolean;
+  /** Where exiting (and finishing a review) goes. Defaults to the child map. */
+  exitHref?: string;
+  /** Review mode only: the next mission at this location, offered at the end. */
+  nextMission?: { title: string; href: string } | null;
 }
 
-export default function MissionScreen({ mission, location, tasks }: MissionScreenProps) {
+export default function MissionScreen({
+  mission,
+  location,
+  tasks,
+  review = false,
+  exitHref = "/map",
+  nextMission = null,
+}: MissionScreenProps) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, startSubmit] = useTransition();
+  /** Review mode has no reward screen to move on to — this end card stands in. */
+  const [reviewFinished, setReviewFinished] = useState(false);
 
   // Running share of the mission reward the player has earned. Tasks that can be
   // finished early (the word search) report a fraction in [0, 1]; every fully
@@ -45,6 +64,10 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
 
   const finishMission = (rewardFraction: number) => {
     setError(null);
+    if (review) {
+      setReviewFinished(true);
+      return;
+    }
     startSubmit(async () => {
       const result = await submitMissionCompletion(mission.id, rewardFraction);
       if (!result.ok) {
@@ -66,9 +89,20 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
   };
 
   const handleExit = () => {
-    if (window.confirm("Leave this mission? Your progress on this task will be lost.")) {
-      router.push("/map");
+    // A review records nothing, so there is nothing to warn about losing.
+    if (review) {
+      router.push(exitHref);
+      return;
     }
+    if (window.confirm("Leave this mission? Your progress on this task will be lost.")) {
+      router.push(exitHref);
+    }
+  };
+
+  const restart = () => {
+    rewardFractionRef.current = 1;
+    setCurrentIndex(0);
+    setReviewFinished(false);
   };
 
   if (total === 0) {
@@ -77,15 +111,42 @@ export default function MissionScreen({ mission, location, tasks }: MissionScree
         <Section className="items-center gap-4 text-center">
           <h1 className="text-h2 font-black text-white">{mission.title}</h1>
           <p className="text-white/60">This mission has no tasks yet.</p>
-          <SlayButton variant="ghost" onClick={() => router.push("/map")}>
-            Back to Map
+          <SlayButton variant="ghost" onClick={() => router.push(exitHref)}>
+            {review ? "Back" : "Back to Map"}
           </SlayButton>
         </Section>
       </AppContainer>
     );
   }
 
-  const actionLabel = isLastTask ? "Finish Mission" : "Next";
+  if (reviewFinished) {
+    return (
+      <AppContainer className="justify-center">
+        <Section className="items-center gap-4 text-center">
+          <h1 className="text-h2 font-black text-white">{mission.title}</h1>
+          <p className="text-white/60">
+            That&apos;s every task in this mission. Reviews aren&apos;t recorded — no progress, XP
+            or coins were given.
+          </p>
+          <div className="flex w-full flex-col gap-3 pt-2">
+            {nextMission && (
+              <SlayButton onClick={() => router.push(nextMission.href)}>
+                Next: {nextMission.title}
+              </SlayButton>
+            )}
+            <SlayButton variant="ghost" onClick={restart}>
+              Play Again
+            </SlayButton>
+            <SlayButton variant="ghost" onClick={() => router.push(exitHref)}>
+              Back
+            </SlayButton>
+          </div>
+        </Section>
+      </AppContainer>
+    );
+  }
+
+  const actionLabel = isLastTask ? (review ? "Finish Review" : "Finish Mission") : "Next";
 
   return (
     <AppContainer fixedHeight>

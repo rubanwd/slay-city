@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
@@ -56,23 +57,32 @@ export interface CityMapPreviewProps {
   subtitle: string;
   /**
    * Whose progress the ✓ marks and mission counts reflect — a child's name, or
-   * something like "every student". Null when no progress is tracked (no child
-   * linked, no students yet), and then the map shows content only.
+   * similar. Null when no progress is tracked (no child linked yet, or a
+   * console that deliberately shows none), and then the map is content only.
    */
   progressLabel?: string | null;
+  /**
+   * Turns the selected stop into a link to `${locationHrefBase}/<locationId>`.
+   * Set on the teacher console, where a stop opens its list of missions to run;
+   * left unset for the parent, whose map is purely something to look at.
+   */
+  locationHrefBase?: string | null;
 }
 
 /**
- * Read-only city map for the adult consoles: the same frame, artwork and
- * location labels children see on `/map`, with nothing to play.
+ * City map for the adult consoles: the same frame, artwork and location labels
+ * children see on `/map`, but never a game.
  *
- * Two things make it a preview rather than the game screen. There is nothing to
- * play — no Start button, no mascot, no XP/coin HUD — and the progress shown is
- * not the viewer's but that of whoever they follow: a parent's child, a
- * teacher's students (see `loadMapPreview`). Since it is a child's own progress
- * that walks them from district to district, adults step through the level's
- * districts by hand with the pager below the title; it opens on the first
- * district the followed players have not finished.
+ * What makes it a preview: no mascot, no XP/coin HUD, and no progress of the
+ * viewer's own — a parent instead sees their child's (see `loadMapPreview`),
+ * and a teacher sees none at all. Since it is a child's own progress that walks
+ * them from district to district, adults step through the level's districts by
+ * hand with the pager below the title; it opens on the first district the
+ * followed players have not finished.
+ *
+ * With `locationHrefBase` the selected stop becomes a way in — the teacher
+ * console uses it to open a location's missions and play through them in review
+ * mode. Without it, the panel just describes the stop.
  *
  * Which level is shown comes from the viewer's own profile (Elementary by
  * default, changeable on their profile screen), so this always mirrors a real
@@ -84,6 +94,7 @@ export default function CityMapPreview({
   role,
   subtitle,
   progressLabel = null,
+  locationHrefBase = null,
 }: CityMapPreviewProps) {
   const [districtIndex, setDistrictIndex] = useState(() =>
     defaultPreviewDistrictIndex(districts)
@@ -249,6 +260,22 @@ export default function CityMapPreview({
                     <XpAmount value={`+${selected.totalXp}`} />
                     <span>{selected.state === "completed" ? "earned here" : "to earn here"}</span>
                   </p>
+                )}
+
+                {locationHrefBase && (
+                  <Link
+                    href={`${locationHrefBase}/${selected.id}`}
+                    className={[
+                      "mt-3 flex h-14 items-center justify-center gap-2 rounded-2xl",
+                      "bg-lime-green text-black font-extrabold uppercase tracking-wide text-lg",
+                      "hover:brightness-110 active:brightness-90 transition-all",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+                    ].join(" ")}
+                  >
+                    <span className="truncate">
+                      {selected.totalMissions > 0 ? "▶ Open missions" : "Open location"}
+                    </span>
+                  </Link>
                 )}
               </>
             ) : (

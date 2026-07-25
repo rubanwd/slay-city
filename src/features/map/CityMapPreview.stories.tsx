@@ -100,8 +100,13 @@ export const WithChildProgress: Story = {
   },
 };
 
+/** The teacher's map: no student progress, and every stop opens its missions. */
 export const Teacher: Story = {
-  args: { role: "teacher", subtitle: "What your students explore" },
+  args: {
+    role: "teacher",
+    subtitle: "Every district and mission",
+    locationHrefBase: "/teacher/location",
+  },
 };
 
 /** No published districts for the picked level yet. */

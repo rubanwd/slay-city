@@ -3,15 +3,16 @@ import { getMyLevel } from "@/features/levels/queries";
 import CityMapPreview from "@/features/map/CityMapPreview";
 import { loadMapPreview } from "@/features/map/previewMap";
 import { requireTeacherPage } from "@/features/teacher/guard";
-import { getTeacherStudentIds } from "@/features/teacher/queries";
 
 /**
- * Read-only city map for a teacher at `/teacher/map` — the districts and stops
- * their students work through, with nothing to play.
+ * City map for a teacher at `/teacher/map` — the whole city as a child sees it,
+ * to check what the missions actually ask of them.
  *
- * A stop is marked ✓ once *every* student in the teacher's groups has finished
- * it, so the marks read as "the class is done here" rather than "somebody was
- * here". A teacher with no students yet sees the plain city.
+ * Nothing is gated and nothing is scored: every district and stop is open (a
+ * teacher is inspecting content, not progressing through it), no student's
+ * completions are drawn on the map — the dashboard is where student progress
+ * lives — and opening a stop leads to its missions, which run in review mode
+ * with no rewards and no record (`/teacher/location/[locationId]`).
  *
  * The level is read from the signed-in account's own profile (defaulting to
  * Elementary, the database default and today's only level with content), not
@@ -19,28 +20,18 @@ import { getTeacherStudentIds } from "@/features/teacher/queries";
  * `/teacher/profile` actually changes.
  */
 export default async function TeacherMapPage() {
-  const { supabase, userId, teacherId } = await requireTeacherPage();
+  const { supabase, userId } = await requireTeacherPage();
 
-  const [level, studentIds] = await Promise.all([
-    getMyLevel(supabase, userId),
-    getTeacherStudentIds(supabase, teacherId),
-  ]);
-
-  const districts = await loadMapPreview(supabase, level, studentIds);
+  const level = await getMyLevel(supabase, userId);
+  const districts = await loadMapPreview(supabase, level);
 
   return (
     <CityMapPreview
       districts={districts}
       levelName={KNOWLEDGE_LEVEL_LABELS[level]}
       role="teacher"
-      subtitle="What your students explore"
-      progressLabel={
-        studentIds.length === 0
-          ? null
-          : studentIds.length === 1
-            ? "your student"
-            : "every student"
-      }
+      subtitle="Every district and mission"
+      locationHrefBase="/teacher/location"
     />
   );
 }

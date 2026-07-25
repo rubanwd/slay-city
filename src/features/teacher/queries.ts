@@ -130,27 +130,3 @@ export async function getTeacherGroups(
   );
 }
 
-/**
- * Ids of every child in this teacher's groups, deduplicated (a child can be in
- * more than one group). Used by the teacher's map to mark the stops the whole
- * class has finished, where the full `getTeacherGroups` payload would be waste.
- */
-export async function getTeacherStudentIds(
-  supabase: SupabaseServerClient,
-  teacherId: string
-): Promise<string[]> {
-  const { data: groups } = await supabase
-    .from("teacher_groups")
-    .select("id")
-    .eq("teacher_id", teacherId);
-
-  const groupIds = (groups ?? []).map((group) => group.id);
-  if (groupIds.length === 0) return [];
-
-  const { data: members } = await supabase
-    .from("teacher_group_members")
-    .select("child_id")
-    .in("group_id", groupIds);
-
-  return [...new Set((members ?? []).map((member) => member.child_id))];
-}
