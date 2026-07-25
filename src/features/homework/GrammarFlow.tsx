@@ -26,7 +26,7 @@ export interface GrammarFlowProps {
   points: HomeworkGrammarPoint[];
   /** The test tasks that check the rules. */
   tasks: MissionTaskViewModel[];
-  /** Whether the child has already passed this topic's grammar before. */
+  /** Whether the student has already passed this topic's grammar before. */
   alreadyPassed: boolean;
   /** Return to the topic's intro screen. */
   onExit: () => void;
@@ -35,10 +35,10 @@ export interface GrammarFlowProps {
 type FlowMode = "intro" | "cards" | "test" | "done";
 
 /**
- * The child's grammar learning flow for one topic, the sibling of
+ * The student's grammar learning flow for one topic, the sibling of
  * {@link VocabularyFlow}: step through every rule card (title, explanation,
  * example), then take the AI-built test. Finishing the whole flow records a
- * pass (`completeHomeworkGrammar`) that both the child and the teacher can see,
+ * pass (`completeHomeworkGrammar`) that both the student and the teacher can see,
  * and grants XP for a first-time pass (coins stay mission-driven).
  */
 export default function GrammarFlow({

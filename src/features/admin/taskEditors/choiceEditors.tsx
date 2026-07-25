@@ -41,7 +41,7 @@ export function EmojiDecodeEditor({ initialContent, onChange }: TaskEditorProps)
         value={emojis}
         onChange={setEmojis}
         placeholder="🌧️ + 🏹 = ?"
-        hint="The emoji puzzle the child decodes into a word."
+        hint="The emoji puzzle the student decodes into a word."
       />
       <OptionsField
         label="Options (select the correct word)"
@@ -137,7 +137,7 @@ export function BubblePopEditor({ initialContent, onChange }: TaskEditorProps) {
         label="Prompt"
         value={prompt}
         onChange={setPrompt}
-        hint="Tell the child what to pop, e.g. 'Pop the animals'."
+        hint="Tell the student what to pop, e.g. 'Pop the animals'."
       />
       <StringListField
         label="Correct words (all must be popped)"

@@ -9,13 +9,13 @@ export type HomeworkTaskCompletionResult =
   | { ok: false; error: string };
 
 /**
- * Records that the signed-in child finished a topic's whole vocabulary flow
+ * Records that the signed-in student finished a topic's whole vocabulary flow
  * (all word cards + the test) and grants XP for a first-time pass. The reward
  * is applied inside the `complete_homework_vocab` SECURITY DEFINER function —
  * the browser has no UPDATE grant on user_stats, so XP can only be added
  * server-side, and its unique completion row makes the grant idempotent
  * (replaying a passed topic returns `alreadyPassed` with `xpEarned: 0`). Once
- * recorded, both the child and the assigning teacher can see the pass.
+ * recorded, both the student and the assigning teacher can see the pass.
  */
 export async function completeHomeworkVocab(topicId: string): Promise<HomeworkTaskCompletionResult> {
   const supabase = await createClient();
@@ -40,7 +40,7 @@ export async function completeHomeworkVocab(topicId: string): Promise<HomeworkTa
 }
 
 /**
- * Records that the signed-in child finished a topic's whole grammar flow (all
+ * Records that the signed-in student finished a topic's whole grammar flow (all
  * rule cards + the test) and grants XP for a first-time pass. Mirrors
  * {@link completeHomeworkVocab}: the `complete_homework_grammar` SECURITY
  * DEFINER function performs the idempotent XP grant server-side, and a

@@ -31,7 +31,7 @@ function SaveButton() {
 /**
  * The task-type detail editor: guided (or raw-JSON) fields for the type's example
  * content, a Save action that upserts the template, and a Test button that runs
- * the task with whatever is currently in the form — the same gameplay a child
+ * the task with whatever is currently in the form — the same gameplay a student
  * would see in a real mission.
  */
 export default function AdminTaskTypeConfigurator({

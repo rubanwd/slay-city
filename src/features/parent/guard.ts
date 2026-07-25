@@ -9,13 +9,13 @@ export interface RequireParentPageResult {
   /** The signed-in adult's profile id — the parent (or an admin looking in). */
   profileId: string;
   email: string | null;
-  /** Child account this parent registered with, from their auth metadata. */
-  childEmail: string | null;
+  /** Student account this parent registered with, from their auth metadata. */
+  studentEmail: string | null;
 }
 
 /**
  * Server-side guard for the parent console: the caller must be signed in and
- * hold a non-child profile. Middleware enforces the same rule, but keeping it
+ * hold a non-student profile. Middleware enforces the same rule, but keeping it
  * here means the pages are safe even if the matcher ever changes. Mirrors
  * {@link file://../teacher/guard.ts}.
  */
@@ -33,8 +33,8 @@ export async function requireParentPage(): Promise<RequireParentPageResult> {
     .eq("id", user.id)
     .maybeSingle();
 
-  // A child (or a user who never finished onboarding) has no business here.
-  if (!profile || profile.role === "child") {
+  // A student (or a user who never finished onboarding) has no business here.
+  if (!profile || profile.role === "student") {
     redirect("/map");
   }
 
@@ -42,7 +42,9 @@ export async function requireParentPage(): Promise<RequireParentPageResult> {
     supabase,
     profileId: profile.id,
     email: user.email ?? null,
-    childEmail:
-      typeof user.user_metadata?.child_email === "string" ? user.user_metadata.child_email : null,
+    studentEmail:
+      typeof user.user_metadata?.student_email === "string"
+        ? user.user_metadata.student_email
+        : null,
   };
 }

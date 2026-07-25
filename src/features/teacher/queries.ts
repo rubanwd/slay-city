@@ -3,18 +3,18 @@ import { getParentProgressSummary } from "@/features/parent/queries";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-/** One topic's pass state for a given child. */
+/** One topic's pass state for a given student. */
 export interface TeacherTopicResult {
   topicId: string;
   title: string;
-  /** True when the child has passed every module (vocabulary/grammar) the topic has. */
+  /** True when the student has passed every module (vocabulary/grammar) the topic has. */
   passed: boolean;
 }
 
-export interface TeacherGroupChild {
+export interface TeacherGroupStudent {
   id: string;
   username: string;
-  /** Total missions the child has completed across the map. */
+  /** Total missions the student has completed across the map. */
   missionsCompleted: number;
   /** Per-topic pass results for this group's homework topics (only topics with content). */
   topicResults: TeacherTopicResult[];
@@ -23,14 +23,14 @@ export interface TeacherGroupChild {
 export interface TeacherGroup {
   id: string;
   name: string;
-  children: TeacherGroupChild[];
+  students: TeacherGroupStudent[];
 }
 
 /**
- * Read-only groups + children for the teacher dashboard. Each child shows their
+ * Read-only groups + students for the teacher dashboard. Each student shows their
  * total completed missions plus, per homework topic in the group, whether they
  * have passed it — a topic counts as passed once every learning module it has
- * (vocabulary and/or grammar) is completed by that child. Topics with no
+ * (vocabulary and/or grammar) is completed by that student. Topics with no
  * content yet are omitted, since there is nothing to pass.
  */
 export async function getTeacherGroups(
@@ -50,7 +50,7 @@ export async function getTeacherGroups(
   const [{ data: members }, { data: topics }] = await Promise.all([
     supabase
       .from("teacher_group_members")
-      .select("group_id, child_id, profiles(username)")
+      .select("group_id, student_id, profiles(username)")
       .in("group_id", groupIds),
     supabase
       .from("homework_topics")
@@ -62,7 +62,7 @@ export async function getTeacherGroups(
   const topicRows = topics ?? [];
   const topicIds = topicRows.map((t) => t.id);
 
-  // Which modules each topic has, and every child's passes across all topics.
+  // Which modules each topic has, and every student's passes across all topics.
   const [vocabWordsRes, grammarPointsRes, vocabComplRes, grammarComplRes] =
     topicIds.length > 0
       ? await Promise.all([
@@ -70,19 +70,21 @@ export async function getTeacherGroups(
           supabase.from("homework_grammar_points").select("topic_id").in("topic_id", topicIds),
           supabase
             .from("homework_vocab_completions")
-            .select("topic_id, child_id")
+            .select("topic_id, student_id")
             .in("topic_id", topicIds),
           supabase
             .from("homework_grammar_completions")
-            .select("topic_id, child_id")
+            .select("topic_id, student_id")
             .in("topic_id", topicIds),
         ])
       : [{ data: [] }, { data: [] }, { data: [] }, { data: [] }];
 
   const topicsWithVocab = new Set((vocabWordsRes.data ?? []).map((r) => r.topic_id));
   const topicsWithGrammar = new Set((grammarPointsRes.data ?? []).map((r) => r.topic_id));
-  const vocabPass = new Set((vocabComplRes.data ?? []).map((r) => `${r.topic_id}:${r.child_id}`));
-  const grammarPass = new Set((grammarComplRes.data ?? []).map((r) => `${r.topic_id}:${r.child_id}`));
+  const vocabPass = new Set((vocabComplRes.data ?? []).map((r) => `${r.topic_id}:${r.student_id}`));
+  const grammarPass = new Set(
+    (grammarComplRes.data ?? []).map((r) => `${r.topic_id}:${r.student_id}`)
+  );
 
   // Topics that actually have something to pass, grouped by their group.
   const topicsByGroup = new Map<string, { id: string; title: string }[]>();
@@ -93,16 +95,16 @@ export async function getTeacherGroups(
     topicsByGroup.set(t.group_id, list);
   }
 
-  const membersByGroup = new Map<string, { childId: string; username: string }[]>();
+  const membersByGroup = new Map<string, { studentId: string; username: string }[]>();
   for (const row of members ?? []) {
     const list = membersByGroup.get(row.group_id) ?? [];
-    list.push({ childId: row.child_id, username: row.profiles?.username ?? "Unknown" });
+    list.push({ studentId: row.student_id, username: row.profiles?.username ?? "Unknown" });
     membersByGroup.set(row.group_id, list);
   }
 
-  function topicResultsFor(groupId: string, childId: string): TeacherTopicResult[] {
+  function topicResultsFor(groupId: string, studentId: string): TeacherTopicResult[] {
     return (topicsByGroup.get(groupId) ?? []).map((topic) => {
-      const key = `${topic.id}:${childId}`;
+      const key = `${topic.id}:${studentId}`;
       const needsVocab = topicsWithVocab.has(topic.id);
       const needsGrammar = topicsWithGrammar.has(topic.id);
       const passed =
@@ -114,18 +116,18 @@ export async function getTeacherGroups(
   return Promise.all(
     groups.map(async (group) => {
       const groupMembers = membersByGroup.get(group.id) ?? [];
-      const children = await Promise.all(
+      const students = await Promise.all(
         groupMembers.map(async (member) => {
-          const progress = await getParentProgressSummary(supabase, member.childId);
+          const progress = await getParentProgressSummary(supabase, member.studentId);
           return {
-            id: member.childId,
+            id: member.studentId,
             username: member.username,
             missionsCompleted: progress.missionsCompleted,
-            topicResults: topicResultsFor(group.id, member.childId),
+            topicResults: topicResultsFor(group.id, member.studentId),
           };
         })
       );
-      return { id: group.id, name: group.name, children };
+      return { id: group.id, name: group.name, students };
     })
   );
 }

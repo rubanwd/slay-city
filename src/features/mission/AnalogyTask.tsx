@@ -13,7 +13,7 @@ export interface AnalogyTaskProps {
 }
 
 /**
- * A verbal analogy: "A is to B as C is to ___?". The child taps the option
+ * A verbal analogy: "A is to B as C is to ___?". The student taps the option
  * that completes the relationship.
  */
 export default function AnalogyTask({

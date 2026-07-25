@@ -25,7 +25,7 @@ function shuffle<T>(items: T[]): T[] {
 }
 
 /**
- * Word-to-image or word-to-translation matching. The child taps a word, then
+ * Word-to-image or word-to-translation matching. The student taps a word, then
  * its match; correct pairs lock in green and a wrong pick flashes red. When
  * every pair is matched the Continue button is enabled.
  */

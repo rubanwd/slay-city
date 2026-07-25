@@ -17,7 +17,7 @@ export interface VocabularyTaskProps {
 /**
  * A read-only "learn this word" task: shows the word, its translation, an
  * illustrative image, and an example sentence. There is no wrong answer — the
- * child reviews the card and taps Next.
+ * student reviews the card and taps Next.
  */
 export default function VocabularyTask({
   content,

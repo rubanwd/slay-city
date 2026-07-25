@@ -10,7 +10,7 @@ interface TeacherMissionPageProps {
 
 /**
  * A mission played in review mode by a teacher: the same screen, tasks and
- * order a child gets, with nothing recorded — no completion, no XP or coins, no
+ * order a student gets, with nothing recorded — no completion, no XP or coins, no
  * reward screen (see `MissionScreen`'s `review` prop). Every published mission
  * is reachable regardless of order, since a teacher is checking the content
  * rather than progressing through it.

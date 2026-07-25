@@ -91,7 +91,7 @@ export interface CityMapProps {
   hud: HudStats;
   /** Mascot image for the you-are-here marker (equipped item or default). */
   mascotImageUrl: string;
-  /** Shows the bottom nav's Homework tab — true when the child is in a teacher group. */
+  /** Shows the bottom nav's Homework tab — true when the student is in a teacher group. */
   showHomework?: boolean;
   /**
    * Set when the player has cleared their whole level. Reaching the map in

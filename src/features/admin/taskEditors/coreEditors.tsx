@@ -200,7 +200,7 @@ export function SnakeGameEditor({ initialContent, onChange }: TaskEditorProps) {
         onChange={setWord}
         placeholder="CAT"
         uppercase
-        hint="The child steers the snake over these letters in order. 3–8 letters works best."
+        hint="The student steers the snake over these letters in order. 3–8 letters works best."
       />
       <TextField label="Translation (optional)" value={translation} onChange={setTranslation} />
       <TextField label="Prompt" value={prompt} onChange={setPrompt} />

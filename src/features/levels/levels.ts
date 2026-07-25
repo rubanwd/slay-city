@@ -6,7 +6,7 @@ import type { KnowledgeLevel } from "@/types";
  * `supabase/migrations/20260724000010_knowledge_levels.sql`).
  *
  * Having content is a separate question from existing: only levels returned by
- * `available_knowledge_levels()` are offered to children. See
+ * `available_knowledge_levels()` are offered to students. See
  * {@link file://./queries.ts}.
  */
 export const KNOWLEDGE_LEVELS = [
@@ -73,7 +73,7 @@ export function nextKnowledgeLevel(level: KnowledgeLevel): KnowledgeLevel | null
 }
 
 /**
- * The level a picker should start on: the child's current level when it is
+ * The level a picker should start on: the student's current level when it is
  * still selectable, otherwise the first available one. Null when nothing is
  * available at all (no published content anywhere yet).
  */

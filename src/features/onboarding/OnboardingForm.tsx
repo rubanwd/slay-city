@@ -46,13 +46,13 @@ function SignOutLink() {
 }
 
 export interface OnboardingFormProps {
-  /** Levels that already have content — the only ones a child may start on. */
+  /** Levels that already have content — the only ones a student may start on. */
   levels: readonly KnowledgeLevel[];
 }
 
 export default function OnboardingForm({ levels }: OnboardingFormProps) {
   const [state, formAction] = useActionState<OnboardingState, FormData>(createProfile, {});
-  // Pre-selects the first available level (Elementary today) so the child can
+  // Pre-selects the first available level (Elementary today) so the student can
   // submit without thinking about it, while still being able to change it.
   const [level, setLevel] = useState<KnowledgeLevel | null>(() =>
     resolveSelectableLevel(levels, null)

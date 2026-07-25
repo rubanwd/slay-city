@@ -5,7 +5,7 @@ import AdminWardrobeItem, { type AdminWardrobeItemData } from "@/features/admin/
 import { requireAdminPage } from "@/features/admin/guard";
 import { WARDROBE_CATEGORIES, WARDROBE_CATEGORY_META } from "@/features/wardrobe/categories";
 
-/** Manage the wardrobe catalog: upload item art, set prices, publish for all children. */
+/** Manage the wardrobe catalog: upload item art, set prices, publish for all students. */
 export default async function AdminWardrobePage() {
   const { supabase } = await requireAdminPage();
 
@@ -23,7 +23,7 @@ export default async function AdminWardrobePage() {
         <AdminHeader title="Wardrobe" backHref="/admin" />
 
         <p className="mb-4 mt-2 text-small text-white/50">
-          Upload art and set a price for each item. Published items appear in every child&apos;s
+          Upload art and set a price for each item. Published items appear in every student&apos;s
           wardrobe, and equipping one changes their mascot.
         </p>
 

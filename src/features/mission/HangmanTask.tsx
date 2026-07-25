@@ -18,7 +18,7 @@ const MAX_WRONG = 6;
 const STAGES = ["😀", "😯", "😟", "😧", "😨", "😰", "💀"];
 
 /**
- * Classic hangman. The child reveals the word by guessing letters; six wrong
+ * Classic hangman. The student reveals the word by guessing letters; six wrong
  * guesses ends the round and resets it. Non-letter characters (spaces) are shown
  * for free so multi-word answers still read clearly.
  */

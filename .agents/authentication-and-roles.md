@@ -14,18 +14,18 @@ Future authentication methods:
 ```txt
 Google OAuth
 Apple OAuth
-Parent-managed child login
+Parent-managed student login
 ```
 
 Roles:
 
 ```txt
-child
+student
 parent
 admin
 ```
 
-Child permissions:
+Student permissions:
 
 ```txt
 View city map
@@ -39,7 +39,7 @@ View own progress
 Parent permissions:
 
 ```txt
-View child progress
+View student progress
 View completed missions
 View learned vocabulary
 View streaks
@@ -63,8 +63,8 @@ Manage wardrobe items
 
 Authorization rules:
 
-* Child users can access only their own profile and progress.
-* Parent users can access only linked child profiles.
+* Student users can access only their own profile and progress.
+* Parent users can access only linked student profiles.
 * Admin users can manage content and system data.
 * All sensitive access must be protected by Row Level Security.
 * Role checks must be enforced on both frontend routes and backend functions.

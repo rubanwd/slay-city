@@ -65,7 +65,7 @@ function randomFreeCells(occupied: Cell[], count: number): Cell[] {
 
 /**
  * Scatters every letter of the word across the board at once. Nothing marks
- * which one comes next — the child reads that off the word above the board.
+ * which one comes next — the student reads that off the word above the board.
  */
 function spawnLetters(snake: Cell[], word: string): LetterCell[] {
   const cells = randomFreeCells(snake, word.length);
@@ -85,7 +85,7 @@ function createGame(word: string, status: Status): GameState {
 
 /**
  * A Snake mini-game where every letter of the authored word is scattered on the
- * board at once and the child collects them in order, reading the next one off
+ * board at once and the student collects them in order, reading the next one off
  * the word above. Taking a letter clears it from both the board and the word;
  * taking one out of order only costs a flash. Running into the snake's own body
  * ends the run and restarts the word, while edges wrap, so self-collision is the
@@ -155,7 +155,7 @@ export default function SnakeGameTask({
         const snake = [head, ...prev.snake.slice(0, -1)];
 
         // Out-of-order letter: it stays put and costs only a flash, so a wrong
-        // guess never strands the child mid-word.
+        // guess never strands the student mid-word.
         if (letter) return { ...prev, direction, snake, flashTicks: FLASH_TICKS };
 
         return { ...prev, direction, snake };
@@ -277,7 +277,7 @@ export default function SnakeGameTask({
 
       {/* Ready / Game Over / Won states take over the whole screen behind a
           heavy blur, instead of a small box confined to the board, so the
-          child's focus goes straight to the one thing they can do next. */}
+          student's focus goes straight to the one thing they can do next. */}
       {game.status !== "playing" && typeof document !== "undefined" &&
         createPortal(
           <div

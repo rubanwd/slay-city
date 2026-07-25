@@ -76,7 +76,7 @@ function buildGrid(entries: CrosswordEntry[]): BuiltGrid {
 }
 
 /**
- * A small crossword. The child types letters into the numbered grid using the
+ * A small crossword. The student types letters into the numbered grid using the
  * across/down clues, then checks the solution. Correct cells lock in green;
  * wrong ones flash until edited. The task advances when the whole grid is right.
  */

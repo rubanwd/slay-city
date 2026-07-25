@@ -88,7 +88,7 @@ Table purposes:
 
 ```txt
 profiles
-Stores child profile data.
+Stores student profile data.
 
 districts
 Stores city districts.
@@ -130,7 +130,7 @@ Stores AI-generated content before review and publishing.
 Database rules:
 
 * Learning content must be stored in the database.
-* User progress must be stored per child profile.
+* User progress must be stored per student profile.
 * Reward-related data must be updated only through backend functions.
 * All user-related tables must be protected with Row Level Security.
 * Admin content should support draft and published states.

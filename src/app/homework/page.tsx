@@ -41,7 +41,7 @@ export default async function HomeworkPage() {
   const topicIds = topics.map((t) => t.id);
 
   // A topic offers up to two learning modules (vocabulary, grammar); progress
-  // is how many of the present modules the child has passed.
+  // is how many of the present modules the student has passed.
   const [vocabWordsRes, grammarPointsRes, vocabPassRes, grammarPassRes] = await Promise.all([
     topicIds.length > 0
       ? supabase.from("homework_vocab_words").select("topic_id").in("topic_id", topicIds)
@@ -49,8 +49,8 @@ export default async function HomeworkPage() {
     topicIds.length > 0
       ? supabase.from("homework_grammar_points").select("topic_id").in("topic_id", topicIds)
       : Promise.resolve({ data: [] as { topic_id: string }[] }),
-    supabase.from("homework_vocab_completions").select("topic_id").eq("child_id", user.id),
-    supabase.from("homework_grammar_completions").select("topic_id").eq("child_id", user.id),
+    supabase.from("homework_vocab_completions").select("topic_id").eq("student_id", user.id),
+    supabase.from("homework_grammar_completions").select("topic_id").eq("student_id", user.id),
   ]);
 
   const topicsWithVocab = new Set((vocabWordsRes.data ?? []).map((r) => r.topic_id));

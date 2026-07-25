@@ -13,7 +13,7 @@ export interface AntonymMatchTaskProps {
 }
 
 /**
- * A word is shown; the child taps the option that means the opposite.
+ * A word is shown; the student taps the option that means the opposite.
  */
 export default function AntonymMatchTask({
   content,

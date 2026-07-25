@@ -5,7 +5,7 @@ import { loadMapPreview } from "@/features/map/previewMap";
 import { requireTeacherPage } from "@/features/teacher/guard";
 
 /**
- * City map for a teacher at `/teacher/map` — the whole city as a child sees it,
+ * City map for a teacher at `/teacher/map` — the whole city as a student sees it,
  * to check what the missions actually ask of them.
  *
  * Nothing is gated and nothing is scored: every district and stop is open (a

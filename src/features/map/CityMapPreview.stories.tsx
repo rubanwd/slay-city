@@ -74,7 +74,7 @@ const meta: Meta<typeof CityMapPreview> = {
     districts: DISTRICTS,
     levelName: "Elementary",
     role: "parent",
-    subtitle: "What your child explores",
+    subtitle: "What your student explores",
   },
 };
 
@@ -83,8 +83,8 @@ type Story = StoryObj<typeof CityMapPreview>;
 
 export const Parent: Story = {};
 
-/** The child has finished the first stop — the map marks it and counts missions. */
-export const WithChildProgress: Story = {
+/** The student has finished the first stop — the map marks it and counts missions. */
+export const WithStudentProgress: Story = {
   args: {
     progressLabel: "Piotre",
     districts: [

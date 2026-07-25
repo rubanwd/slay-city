@@ -26,7 +26,7 @@ function blankIndicesFor(word: string): number[] {
 
 /**
  * A word with some letters already filled in and the rest blanked out. The
- * child taps letters from the shuffled bank, in order, to complete the word.
+ * student taps letters from the shuffled bank, in order, to complete the word.
  */
 export default function LetterFillTask({
   content,

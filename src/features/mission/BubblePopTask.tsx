@@ -29,7 +29,7 @@ const HUES = [
 ];
 
 /**
- * A field of gently bobbing bubbles. The child pops every correct word while
+ * A field of gently bobbing bubbles. The student pops every correct word while
  * avoiding the distractors — a wrong tap flashes but doesn't end the round. The
  * task is done once all correct bubbles are popped.
  */

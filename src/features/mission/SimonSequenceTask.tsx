@@ -28,7 +28,7 @@ const LIT_HUES = [
 type Phase = "watching" | "input" | "wrong" | "done";
 
 /**
- * A Simon-says memory game: the tiles light up in sequence, then the child taps
+ * A Simon-says memory game: the tiles light up in sequence, then the student taps
  * them back in the same order. A wrong tap replays the sequence for another try.
  */
 export default function SimonSequenceTask({

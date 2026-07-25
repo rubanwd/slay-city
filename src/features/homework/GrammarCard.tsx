@@ -15,7 +15,7 @@ export interface GrammarCardProps {
 /**
  * One grammar rule card in the learning flow: the rule title, a short
  * explanation, and an example sentence. The sibling of {@link WordCard} —
- * there is no wrong answer; the child reads the rule and taps to continue.
+ * there is no wrong answer; the student reads the rule and taps to continue.
  */
 export default function GrammarCard({ point, onNext, actionLabel = "Next" }: GrammarCardProps) {
   return (

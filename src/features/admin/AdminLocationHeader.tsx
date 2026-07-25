@@ -23,7 +23,7 @@ function SaveButton() {
 
 export interface AdminLocationHeaderProps {
   location: AdminLocationItemData;
-  /** The district's background, shown in the position picker to match the child's map. */
+  /** The district's background, shown in the position picker to match the student's map. */
   districtBackgroundUrl?: string | null;
   /** The district's name, fed to the AI icon prompt for scene context. */
   districtName?: string;

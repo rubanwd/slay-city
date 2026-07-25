@@ -7,7 +7,7 @@ import ProfileScreen from "@/features/profile/ProfileScreen";
 import { DEFAULT_MASCOT_IMAGE } from "@/features/wardrobe/mascot";
 
 /**
- * Parent's own account screen at `/parent/profile`. The same screen the child
+ * Parent's own account screen at `/parent/profile`. The same screen the student
  * gets, minus what only a player has: no equipped wardrobe look (the plain
  * snake stands in as the avatar) and no progress to reset.
  *

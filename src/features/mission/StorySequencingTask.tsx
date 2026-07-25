@@ -16,7 +16,7 @@ export interface StorySequencingTaskProps {
 }
 
 /**
- * The story's steps arrive shuffled and the child reorders them with the up/down
+ * The story's steps arrive shuffled and the student reorders them with the up/down
  * arrows. Checking reveals whether the sequence matches the authored order; the
  * task advances once it's correct.
  */

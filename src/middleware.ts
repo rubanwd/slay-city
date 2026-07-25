@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Authenticated users shouldn't see the login/register pages — send them to
-  // their own home: admins to the console, parents to their dashboard, children
+  // their own home: admins to the console, parents to their dashboard, students
   // to the map. The callback route is exempt so the code exchange can complete,
   // and reset-password is exempt because the recovery link signs the user in
   // (via a temporary session) specifically so they can set a new password.
@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
   // first; users who already have one shouldn't be sent back through it.
   // We also enforce role-based area access here so it can't be bypassed by
   // navigating directly: parents live only in the parent dashboard area, and
-  // children can never reach it.
+  // students can never reach it.
   if (user && !isPublicPath(pathname)) {
     const onOnboarding = pathname.startsWith("/onboarding");
     const inParentArea = pathname === "/parent" || pathname.startsWith("/parent/");
@@ -123,7 +123,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(url);
       }
       // Parents may only use the parent dashboard — bounce them out of the
-      // child game screens (map, missions, wardrobe, profile, …).
+      // student game screens (map, missions, wardrobe, profile, …).
       if (profile.role === "parent" && !inParentArea) {
         const url = request.nextUrl.clone();
         url.pathname = "/parent";
@@ -135,9 +135,9 @@ export async function middleware(request: NextRequest) {
         url.pathname = "/teacher";
         return NextResponse.redirect(url);
       }
-      // Children (and any non-parent/teacher, non-admin role) can't view the
+      // Students (and any non-parent/teacher, non-admin role) can't view the
       // parent or teacher dashboards. Admins are intentionally unrestricted.
-      if (profile.role === "child" && (inParentArea || inTeacherArea)) {
+      if (profile.role === "student" && (inParentArea || inTeacherArea)) {
         const url = request.nextUrl.clone();
         url.pathname = "/map";
         return NextResponse.redirect(url);

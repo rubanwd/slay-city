@@ -35,7 +35,7 @@ type WardrobeGridProps = {
   level: number;
   /** Resolved mascot preview image reflecting the currently equipped items. */
   mascotImageUrl: string;
-  /** Shows the bottom nav's Homework tab — true when the child is in a teacher group. */
+  /** Shows the bottom nav's Homework tab — true when the student is in a teacher group. */
   showHomework?: boolean;
 };
 

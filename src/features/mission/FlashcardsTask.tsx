@@ -19,7 +19,7 @@ const TURN_MS = 260;
 type Phase = "idle" | "out" | "jump" | "in";
 
 /**
- * A self-paced review deck. The child taps a card to flip between its front and
+ * A self-paced review deck. The student taps a card to flip between its front and
  * back, then steps through every card. The advance button only finishes the task
  * once the last card has been reached.
  *

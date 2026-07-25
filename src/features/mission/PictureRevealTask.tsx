@@ -18,7 +18,7 @@ const BLUR_STAGES = [20, 12, 6];
 const MAX_HINT_STAGE = BLUR_STAGES.length - 1;
 
 /**
- * A blurred image sharpens each time the child taps "Reveal more". They can
+ * A blurred image sharpens each time the student taps "Reveal more". They can
  * guess at any point; picking an option locks the answer and fully reveals
  * the picture.
  */

@@ -6,7 +6,7 @@ import { requireTeacherPage } from "@/features/teacher/guard";
 import { DEFAULT_MASCOT_IMAGE } from "@/features/wardrobe/mascot";
 
 /**
- * Teacher's own account screen at `/teacher/profile`. The same screen the child
+ * Teacher's own account screen at `/teacher/profile`. The same screen the student
  * gets, minus what only a player has: no equipped wardrobe look (the plain
  * snake stands in as the avatar) and no progress to reset.
  *

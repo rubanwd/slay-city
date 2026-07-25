@@ -16,7 +16,7 @@ interface TeacherGroupsPageProps {
 
 /**
  * One teacher's groups: create/delete groups, and assign/remove existing
- * `child` accounts. Group CRUD is plain admin-gated table access (no RPC
+ * `student` accounts. Group CRUD is plain admin-gated table access (no RPC
  * needed — unlike the role change itself, these tables don't touch `profiles`).
  */
 export default async function TeacherGroupsPage({ params, searchParams }: TeacherGroupsPageProps) {
@@ -44,31 +44,31 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
 
   const { data: members } = await supabase
     .from("teacher_group_members")
-    .select("group_id, child_id, profiles(username)")
+    .select("group_id, student_id, profiles(username)")
     .in(
       "group_id",
       groupRows.map((group) => group.id)
     );
 
-  const membersByGroup = new Map<string, { childId: string; username: string }[]>();
+  const membersByGroup = new Map<string, { studentId: string; username: string }[]>();
   for (const row of members ?? []) {
     const list = membersByGroup.get(row.group_id) ?? [];
-    list.push({ childId: row.child_id, username: row.profiles?.username ?? "Unknown" });
+    list.push({ studentId: row.student_id, username: row.profiles?.username ?? "Unknown" });
     membersByGroup.set(row.group_id, list);
   }
 
   const query = (q ?? "").trim();
-  let childResults: { id: string; username: string }[] = [];
+  let studentResults: { id: string; username: string }[] = [];
   if (groupRows.length > 0) {
-    let childrenQuery = supabase
+    let studentsQuery = supabase
       .from("profiles")
       .select("id, username")
-      .eq("role", "child")
+      .eq("role", "student")
       .order("username", { ascending: true })
       .limit(20);
-    if (query) childrenQuery = childrenQuery.ilike("username", `%${query}%`);
-    const { data } = await childrenQuery;
-    childResults = data ?? [];
+    if (query) studentsQuery = studentsQuery.ilike("username", `%${query}%`);
+    const { data } = await studentsQuery;
+    studentResults = data ?? [];
   }
 
   return (
@@ -123,7 +123,7 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
                     <ul className="flex flex-col gap-2">
                       {groupMembers.map((member) => (
                         <li
-                          key={member.childId}
+                          key={member.studentId}
                           className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3"
                         >
                           <span className="min-w-0 truncate text-body-strong text-white">
@@ -131,7 +131,7 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
                           </span>
                           <form action={removeGroupMember} className="shrink-0">
                             <input type="hidden" name="group_id" value={group.id} />
-                            <input type="hidden" name="child_id" value={member.childId} />
+                            <input type="hidden" name="student_id" value={member.studentId} />
                             <input type="hidden" name="teacher_id" value={teacherId} />
                             <button
                               type="submit"
@@ -165,22 +165,22 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
                 Search
               </SlayButton>
             </form>
-            {childResults.length === 0 ? (
+            {studentResults.length === 0 ? (
               <p className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
                 No matching students.
               </p>
             ) : (
               <ul className="flex flex-col gap-2">
-                {childResults.map((child) => (
+                {studentResults.map((student) => (
                   <li
-                    key={child.id}
+                    key={student.id}
                     className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3"
                   >
                     <span className="min-w-0 truncate text-body-strong text-white">
-                      {child.username}
+                      {student.username}
                     </span>
                     <form action={addGroupMember} className="flex shrink-0 items-center gap-2">
-                      <input type="hidden" name="child_id" value={child.id} />
+                      <input type="hidden" name="student_id" value={student.id} />
                       <input type="hidden" name="teacher_id" value={teacherId} />
                       <select
                         name="group_id"

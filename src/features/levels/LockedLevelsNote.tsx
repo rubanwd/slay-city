@@ -8,7 +8,7 @@ export interface LockedLevelsNoteProps {
 }
 
 /**
- * Shows the rest of the level ladder as "coming soon" so a child can see where
+ * Shows the rest of the level ladder as "coming soon" so a student can see where
  * they're headed, without offering a level that would open onto an empty map.
  * Renders nothing once every level has content.
  */

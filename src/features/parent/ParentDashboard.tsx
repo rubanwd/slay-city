@@ -3,42 +3,42 @@ import { signOut } from "@/features/auth/actions";
 
 import type { ParentProgressSummary } from "./queries";
 
-/** Why no child progress is shown yet (see `link_child_by_email` reason codes). */
+/** Why no student progress is shown yet (see `link_student_by_email` reason codes). */
 export type PendingReason =
-  | "child_not_registered"
-  | "child_no_profile"
-  | "not_a_child"
+  | "student_not_registered"
+  | "student_no_profile"
+  | "not_a_student"
   | "no_email"
   | string;
 
 export interface PendingLink {
-  /** The child email the parent registered with, if any. */
-  childEmail: string | null;
+  /** The student email the parent registered with, if any. */
+  studentEmail: string | null;
   reason: PendingReason;
 }
 
 export interface ParentDashboardProps {
-  /** Display name for the child whose progress is shown (linked state). */
-  childName?: string;
-  /** Child progress — present once a child account is linked. */
+  /** Display name for the student whose progress is shown (linked state). */
+  studentName?: string;
+  /** Student progress — present once a student account is linked. */
   summary?: ParentProgressSummary;
-  /** Present instead of `summary` when no child is linked yet. */
+  /** Present instead of `summary` when no student is linked yet. */
   pending?: PendingLink;
 }
 
 /** Human-readable explanation for each not-yet-linked reason. */
-function pendingMessage(childEmail: string | null, reason: PendingReason): string {
-  const who = childEmail ? `"${childEmail}"` : "your child";
+function pendingMessage(studentEmail: string | null, reason: PendingReason): string {
+  const who = studentEmail ? `"${studentEmail}"` : "your student";
   switch (reason) {
-    case "child_no_profile":
+    case "student_no_profile":
       return `${who} has registered but hasn't finished setting up their profile yet. Their progress will appear here once they do.`;
-    case "not_a_child":
-      return `The account for ${who} isn't a Child account, so there's no learning progress to show.`;
+    case "not_a_student":
+      return `The account for ${who} isn't a Student account, so there's no learning progress to show.`;
     case "no_email":
-      return "No child account is linked to this parent yet.";
-    case "child_not_registered":
+      return "No student account is linked to this parent yet.";
+    case "student_not_registered":
     default:
-      return `${who} hasn't joined Slay City yet. Once they sign up with this email as a Child, their progress will appear here automatically.`;
+      return `${who} hasn't joined Slay City yet. Once they sign up with this email as a Student, their progress will appear here automatically.`;
   }
 }
 
@@ -75,16 +75,16 @@ function StatCard({
 /* ── Dashboard ─────────────────────────────────────────────────────────────── */
 
 /**
- * Read-only parent dashboard. Adult-facing: calmer than the child game screens
+ * Read-only parent dashboard. Adult-facing: calmer than the student game screens
  * (no glow/animation) but still on-brand — dark surface, neon accents, rounded
  * cards. Rendered as a plain server component; all data arrives via props.
  */
-export default function ParentDashboard({ childName, summary, pending }: ParentDashboardProps) {
+export default function ParentDashboard({ studentName, summary, pending }: ParentDashboardProps) {
   const subtitle = pending
-    ? pending.childEmail
-      ? `Linking ${pending.childEmail}`
-      : "No child linked yet"
-    : `${childName ?? "Your child"}'s progress`;
+    ? pending.studentEmail
+      ? `Linking ${pending.studentEmail}`
+      : "No student linked yet"
+    : `${studentName ?? "Your student"}'s progress`;
 
   const header = (
     // No "back" affordance: the bottom nav is how parents move between this
@@ -120,7 +120,7 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
     </header>
   );
 
-  // ── Not linked to a child account yet ──────────────────────────────────
+  // ── Not linked to a student account yet ────────────────────────────────
   if (!summary) {
     return (
       <ScrollScreen footer={<BottomNav role="parent" />}>
@@ -143,9 +143,12 @@ export default function ParentDashboard({ childName, summary, pending }: ParentD
                 <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" />
               </svg>
             </span>
-            <h2 className="text-h3 font-bold text-white">No child progress yet</h2>
+            <h2 className="text-h3 font-bold text-white">No student progress yet</h2>
             <p className="max-w-xs text-small text-white/60">
-              {pendingMessage(pending?.childEmail ?? null, pending?.reason ?? "child_not_registered")}
+              {pendingMessage(
+                pending?.studentEmail ?? null,
+                pending?.reason ?? "student_not_registered"
+              )}
             </p>
           </section>
         </div>

@@ -231,7 +231,7 @@ export interface PublishVocabularyInput {
  * Replaces the topic's vocabulary words and rebuilds its test in one shot: any
  * existing words/tasks are deleted, the new words inserted, and a deterministic
  * test of `taskCount` tasks generated from them. Existing pass records are left
- * intact — a child who already passed stays passed.
+ * intact — a student who already passed stays passed.
  */
 export async function publishVocabulary(input: PublishVocabularyInput): Promise<VocabActionResult> {
   const supabase = await createClient();

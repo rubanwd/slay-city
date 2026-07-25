@@ -138,27 +138,27 @@ export type Database = {
       }
       homework_grammar_completions: {
         Row: {
-          child_id: string
           completed_at: string
           id: string
+          student_id: string
           topic_id: string
         }
         Insert: {
-          child_id: string
           completed_at?: string
           id?: string
+          student_id: string
           topic_id: string
         }
         Update: {
-          child_id?: string
           completed_at?: string
           id?: string
+          student_id?: string
           topic_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "homework_grammar_completions_child_id_fkey"
-            columns: ["child_id"]
+            foreignKeyName: "homework_grammar_completions_student_id_fkey"
+            columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -325,27 +325,27 @@ export type Database = {
       }
       homework_vocab_completions: {
         Row: {
-          child_id: string
           completed_at: string
           id: string
+          student_id: string
           topic_id: string
         }
         Insert: {
-          child_id: string
           completed_at?: string
           id?: string
+          student_id: string
           topic_id: string
         }
         Update: {
-          child_id?: string
           completed_at?: string
           id?: string
+          student_id?: string
           topic_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "homework_vocab_completions_child_id_fkey"
-            columns: ["child_id"]
+            foreignKeyName: "homework_vocab_completions_student_id_fkey"
+            columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -668,36 +668,36 @@ export type Database = {
           },
         ]
       }
-      parent_child_links: {
+      parent_student_links: {
         Row: {
-          child_id: string
           created_at: string
           id: string
           parent_id: string
+          student_id: string
         }
         Insert: {
-          child_id: string
           created_at?: string
           id?: string
           parent_id: string
+          student_id: string
         }
         Update: {
-          child_id?: string
           created_at?: string
           id?: string
           parent_id?: string
+          student_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "parent_child_links_child_id_fkey"
-            columns: ["child_id"]
+            foreignKeyName: "parent_student_links_parent_id_fkey"
+            columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "parent_child_links_parent_id_fkey"
-            columns: ["parent_id"]
+            foreignKeyName: "parent_student_links_student_id_fkey"
+            columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -760,36 +760,36 @@ export type Database = {
       }
       teacher_group_members: {
         Row: {
-          child_id: string
           created_at: string
           group_id: string
           id: string
+          student_id: string
         }
         Insert: {
-          child_id: string
           created_at?: string
           group_id: string
           id?: string
+          student_id: string
         }
         Update: {
-          child_id?: string
           created_at?: string
           group_id?: string
           id?: string
+          student_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "teacher_group_members_child_id_fkey"
-            columns: ["child_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "teacher_group_members_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "teacher_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_group_members_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1165,14 +1165,14 @@ export type Database = {
         Returns: boolean
       }
       is_group_member: { Args: { p_group_id: string }; Returns: boolean }
-      is_linked_child: { Args: { p_child_id: string }; Returns: boolean }
+      is_linked_student: { Args: { p_student_id: string }; Returns: boolean }
       is_teacher: { Args: never; Returns: boolean }
-      link_child_by_email: {
-        Args: { p_child_email: string }
+      link_student_by_email: {
+        Args: { p_student_email: string }
         Returns: {
-          child_id: string
           linked: boolean
           reason: string
+          student_id: string
         }[]
       }
       my_groups: {
@@ -1211,7 +1211,7 @@ export type Database = {
         Args: { p_level: Database["public"]["Enums"]["knowledge_level"] }
         Returns: undefined
       }
-      teaches_child: { Args: { p_child_id: string }; Returns: boolean }
+      teaches_student: { Args: { p_student_id: string }; Returns: boolean }
       unequip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
     }
     Enums: {
@@ -1255,7 +1255,7 @@ export type Database = {
         | "size_order"
         | "spot_the_difference"
         | "clock_reading"
-      user_role: "child" | "parent" | "admin" | "teacher"
+      user_role: "student" | "parent" | "admin" | "teacher"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1425,7 +1425,7 @@ export const Constants = {
         "spot_the_difference",
         "clock_reading",
       ],
-      user_role: ["child", "parent", "admin", "teacher"],
+      user_role: ["student", "parent", "admin", "teacher"],
     },
   },
 } as const

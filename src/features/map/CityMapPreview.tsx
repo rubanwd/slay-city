@@ -56,8 +56,8 @@ export interface CityMapPreviewProps {
   /** One-line explanation under the title, e.g. whose city this is. */
   subtitle: string;
   /**
-   * Whose progress the ✓ marks and mission counts reflect — a child's name, or
-   * similar. Null when no progress is tracked (no child linked yet, or a
+   * Whose progress the ✓ marks and mission counts reflect — a student's name, or
+   * similar. Null when no progress is tracked (no student linked yet, or a
    * console that deliberately shows none), and then the map is content only.
    */
   progressLabel?: string | null;
@@ -71,11 +71,11 @@ export interface CityMapPreviewProps {
 
 /**
  * City map for the adult consoles: the same frame, artwork and location labels
- * children see on `/map`, but never a game.
+ * students see on `/map`, but never a game.
  *
  * What makes it a preview: no mascot, no XP/coin HUD, and no progress of the
- * viewer's own — a parent instead sees their child's (see `loadMapPreview`),
- * and a teacher sees none at all. Since it is a child's own progress that walks
+ * viewer's own — a parent instead sees their student's (see `loadMapPreview`),
+ * and a teacher sees none at all. Since it is a student's own progress that walks
  * them from district to district, adults step through the level's districts by
  * hand with the pager below the title; it opens on the first district the
  * followed players have not finished.
@@ -86,7 +86,7 @@ export interface CityMapPreviewProps {
  *
  * Which level is shown comes from the viewer's own profile (Elementary by
  * default, changeable on their profile screen), so this always mirrors a real
- * child map for that level.
+ * student map for that level.
  */
 export default function CityMapPreview({
   districts,
@@ -165,9 +165,9 @@ export default function CityMapPreview({
           )}
 
           {/*
-            Same coordinate space as the child map: a MAP_ASPECT-ratio frame
+            Same coordinate space as the student map: a MAP_ASPECT-ratio frame
             with a blurred copy of the background filling the rest, so a pin
-            lands on exactly the spot the child sees.
+            lands on exactly the spot the student sees.
           */}
           <div className="relative flex-1 min-h-0 overflow-hidden">
             {backgroundUrl && (

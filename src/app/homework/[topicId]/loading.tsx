@@ -9,7 +9,7 @@ import { readMascotImageCookie } from "@/features/wardrobe/loadMascot";
  * already committed and would otherwise leave the tap with no feedback.
  *
  * Reads the cached mascot cookie (not a DB query) to keep this instant while
- * still matching the child's equipped Wardrobe look.
+ * still matching the student's equipped Wardrobe look.
  */
 export default async function Loading() {
   const mascotImageUrl = await readMascotImageCookie();

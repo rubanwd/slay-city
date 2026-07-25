@@ -9,19 +9,19 @@ import { KNOWLEDGE_LEVEL_LABELS } from "@/features/levels/levels";
 import type { KnowledgeLevel } from "@/types";
 
 export interface ProfileLevelCardProps {
-  /** The level the child is studying right now. */
+  /** The level the student is studying right now. */
   current: KnowledgeLevel;
   /** Levels with content — the only ones that can be switched to. */
   available: readonly KnowledgeLevel[];
   /**
-   * What this level controls for the viewer. Children see their own map change;
+   * What this level controls for the viewer. Students see their own map change;
    * parents and teachers change which level their read-only map previews.
    */
   hint?: string;
 }
 
 /**
- * Lets a child change their knowledge level from their own profile. Picking a
+ * Lets a student change their knowledge level from their own profile. Picking a
  * level saves immediately and the map re-renders around the new level's
  * districts; mission progress is per-mission, so switching never loses
  * anything.

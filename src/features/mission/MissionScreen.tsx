@@ -26,12 +26,12 @@ export interface MissionScreenProps {
   location?: { name: string; iconUrl: string | null } | null;
   tasks: MissionTaskViewModel[];
   /**
-   * Review mode: play the mission exactly as a child sees it, but record
+   * Review mode: play the mission exactly as a student sees it, but record
    * nothing — no completion row, no XP or coins, no reward screen. Used by the
-   * teacher console to check the content children are given.
+   * teacher console to check the content students are given.
    */
   review?: boolean;
-  /** Where exiting (and finishing a review) goes. Defaults to the child map. */
+  /** Where exiting (and finishing a review) goes. Defaults to the student map. */
   exitHref?: string;
   /** Review mode only: the next mission at this location, offered at the end. */
   nextMission?: { title: string; href: string } | null;

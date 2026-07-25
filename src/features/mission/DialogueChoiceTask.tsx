@@ -13,7 +13,7 @@ export interface DialogueChoiceTaskProps {
 }
 
 /**
- * A chat-style line the child reads, then a set of reply bubbles to pick the
+ * A chat-style line the student reads, then a set of reply bubbles to pick the
  * best response from — practicing conversational language.
  */
 export default function DialogueChoiceTask({

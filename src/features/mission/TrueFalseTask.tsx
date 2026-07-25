@@ -15,7 +15,7 @@ export interface TrueFalseTaskProps {
 }
 
 /**
- * A statement the child judges true or false. The chosen button reveals whether
+ * A statement the student judges true or false. The chosen button reveals whether
  * it was right before they continue.
  */
 export default function TrueFalseTask({

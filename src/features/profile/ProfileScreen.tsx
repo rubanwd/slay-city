@@ -70,10 +70,10 @@ export interface ProfileScreenProps {
   availableLevels: readonly KnowledgeLevel[];
   /** Shown as a badge under the name on the adult consoles ("Parent", "Teacher"). */
   roleLabel?: string;
-  /** Explains what the level controls here — the child map vs. the adult preview. */
+  /** Explains what the level controls here — the student map vs. the adult preview. */
   levelHint?: string;
   /**
-   * The dev-only progress reset. Children only: parents and teachers have no
+   * The dev-only progress reset. Students only: parents and teachers have no
    * mission progress of their own to wipe.
    */
   showProgressReset?: boolean;

@@ -13,7 +13,7 @@ export interface CauseEffectTaskProps {
 }
 
 /**
- * A cause is shown; the child taps the option that describes what happens
+ * A cause is shown; the student taps the option that describes what happens
  * next — a simple reasoning exercise.
  */
 export default function CauseEffectTask({

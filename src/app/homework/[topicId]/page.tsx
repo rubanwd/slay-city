@@ -24,7 +24,7 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
   }
 
   // RLS (`homework_topics_select`) already restricts this to a topic in one of
-  // the child's own groups — a topic from another group simply comes back null.
+  // the student's own groups — a topic from another group simply comes back null.
   const [
     topicRes,
     vocabWordsRes,
@@ -53,7 +53,7 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
       .from("homework_vocab_completions")
       .select("id")
       .eq("topic_id", topicId)
-      .eq("child_id", user.id)
+      .eq("student_id", user.id)
       .maybeSingle(),
     supabase
       .from("homework_grammar_points")
@@ -69,7 +69,7 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
       .from("homework_grammar_completions")
       .select("id")
       .eq("topic_id", topicId)
-      .eq("child_id", user.id)
+      .eq("student_id", user.id)
       .maybeSingle(),
   ]);
 

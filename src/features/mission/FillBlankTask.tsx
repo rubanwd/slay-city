@@ -16,7 +16,7 @@ export interface FillBlankTaskProps {
 const BLANK_PATTERN = /_{2,}/;
 
 /**
- * A sentence with a gap. When options are authored the child taps the right
+ * A sentence with a gap. When options are authored the student taps the right
  * word; otherwise they type it. The answer check is case- and space-insensitive.
  */
 export default function FillBlankTask({

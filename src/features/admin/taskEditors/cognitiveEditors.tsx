@@ -110,7 +110,7 @@ export function SizeOrderEditor({ initialContent, onChange }: TaskEditorProps) {
         placeholder="Ant"
         addLabel="+ Add item"
         min={3}
-        hint="The child sees these shuffled and taps them back into this order."
+        hint="The student sees these shuffled and taps them back into this order."
       />
     </div>
   );

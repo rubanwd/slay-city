@@ -6,10 +6,10 @@ import { isKnowledgeLevel, sortKnowledgeLevels, DEFAULT_KNOWLEDGE_LEVEL } from "
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 /**
- * The levels a child is allowed to pick right now: those with at least one
+ * The levels a student is allowed to pick right now: those with at least one
  * published district that has at least one published location. Backed by the
  * `available_knowledge_levels()` SECURITY DEFINER RPC, so the answer is the
- * same for a child and an admin (see
+ * same for a student and an admin (see
  * `supabase/migrations/20260724000010_knowledge_levels.sql`).
  *
  * Returns an empty list if the RPC fails — callers must handle "no level to
@@ -79,7 +79,7 @@ export async function isLevelCleared(
 }
 
 /**
- * The level the signed-in child is studying. Falls back to the default level
+ * The level the signed-in student is studying. Falls back to the default level
  * for profiles that predate this column or when the profile row is missing.
  */
 export async function getMyLevel(

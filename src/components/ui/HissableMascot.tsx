@@ -16,7 +16,7 @@ export interface HissableMascotProps {
 
 /**
  * Slay, but tappable: playing a hiss on tap is the cheapest bit of "the mascot
- * is alive" we can give a child on screens where there is nothing else to do
+ * is alive" we can give a student on screens where there is nothing else to do
  * (the map, and while a route loads). Purely decorative — nothing about the
  * game state changes — so the button carries no other behaviour.
  */

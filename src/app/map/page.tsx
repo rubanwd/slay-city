@@ -26,7 +26,7 @@ export default async function MapPage() {
     return null;
   }
 
-  // The map only ever shows the districts of the level the child is studying.
+  // The map only ever shows the districts of the level the student is studying.
   // Switching level (profile screen) swaps the whole map; per-mission progress
   // is untouched, so coming back restores exactly what was finished there.
   const level = await getMyLevel(supabase, user.id);

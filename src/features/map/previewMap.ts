@@ -17,9 +17,9 @@ const NO_NEXT_MISSIONS: ReadonlyMap<string, string> = new Map<string, string>();
  * The missions every one of `profileIds` has completed.
  *
  * "Every one" rather than "any one" so a ✓ on the map always means everyone the
- * viewer follows is done there — for a parent that is simply their child; for a
+ * viewer follows is done there — for a parent that is simply their student; for a
  * teacher it is the whole class. RLS decides what is readable at all
- * (`user_progress_select_linked_child` / `user_progress_select_group_child`),
+ * (`user_progress_select_linked_student` / `user_progress_select_group_student`),
  * so a profile the viewer may not read contributes nothing and its stops stay
  * unmarked rather than wrongly ✓.
  */
@@ -57,12 +57,12 @@ async function loadSharedCompletedMissions(
  * and teachers browse (`CityMapPreview`).
  *
  * `followedProfileIds` are the players whose progress the map reflects: the
- * parent's linked child, or a teacher's students. A location comes back
+ * parent's linked student, or a teacher's students. A location comes back
  * "completed" once all of them have finished every mission there. Pass none and
  * the map is pure content — nothing completed, nothing counted.
  *
  * Nothing here ever points at a playable mission, since an adult cannot enter
- * one; the child map (`/map`) stays the only screen that mixes progress with a
+ * one; the student map (`/map`) stays the only screen that mixes progress with a
  * next mission to play.
  */
 export async function loadMapPreview(

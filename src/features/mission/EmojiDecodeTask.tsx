@@ -13,7 +13,7 @@ export interface EmojiDecodeTaskProps {
 }
 
 /**
- * An emoji rebus the child decodes by picking the word it spells out. The right
+ * An emoji rebus the student decodes by picking the word it spells out. The right
  * option turns green and a wrong pick turns red before they continue.
  */
 export default function EmojiDecodeTask({

@@ -10,6 +10,6 @@ The main product loop is:
 Map → Mission → Reward → Unlock → Return Tomorrow
 ```
 
-The MVP focuses on validating whether children are motivated to return daily, complete short English missions, and progress through the city.
+The MVP focuses on validating whether students are motivated to return daily, complete short English missions, and progress through the city.
 
 The first version should include a limited number of districts and missions, enough to test the core engagement mechanic without building a full educational platform.

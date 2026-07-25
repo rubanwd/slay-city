@@ -22,7 +22,7 @@ interface Chip {
 /**
  * A timed round: tap every correct word before the clock runs out while
  * avoiding the distractors. Ends in either a win (all correct tapped) or a
- * timeout — either way the child can move on.
+ * timeout — either way the student can move on.
  */
 export default function ReactionTapTask({
   content,

@@ -16,7 +16,7 @@ export interface QuizTaskProps {
 
 /**
  * A multiple-choice question. Selecting an option reveals feedback — the correct
- * answer turns green, an incorrect pick turns red — before the child continues.
+ * answer turns green, an incorrect pick turns red — before the student continues.
  */
 export default function QuizTask({
   content,

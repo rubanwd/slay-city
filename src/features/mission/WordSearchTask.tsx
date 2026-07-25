@@ -171,7 +171,7 @@ function HintButton() {
 }
 
 /**
- * A word-search puzzle. The child taps the first and last letter of a word; if
+ * A word-search puzzle. The student taps the first and last letter of a word; if
  * the straight line between them spells one of the hidden words (in either
  * direction) it locks in green. The task is done when every word is found.
  */

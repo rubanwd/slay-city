@@ -7,18 +7,18 @@ export interface HomeworkTopicSummary {
   id: string;
   title: string;
   description: string | null;
-  /** Who assigned this topic — shown per card since a child can be in more than one group. */
+  /** Who assigned this topic — shown per card since a student can be in more than one group. */
   teacherUsername: string;
   /** How many learning modules (vocabulary, grammar) the topic has. */
   totalModules: number;
-  /** How many of those modules the child has passed. */
+  /** How many of those modules the student has passed. */
   passedModules: number;
   /** Unread Q&A messages in this topic's thread — shows a badge when > 0. */
   unreadCount: number;
 }
 
 export interface HomeworkScreenProps {
-  /** Names of every group the child belongs to — almost always just one, shown once up top. */
+  /** Names of every group the student belongs to — almost always just one, shown once up top. */
   groupNames: string[];
   topics: HomeworkTopicSummary[];
 }
@@ -64,7 +64,7 @@ function TopicCard({ topic }: { topic: HomeworkTopicSummary }) {
   );
 }
 
-/** Homework list: every lesson topic across every group the child belongs to. */
+/** Homework list: every lesson topic across every group the student belongs to. */
 export default function HomeworkScreen({ groupNames, topics }: HomeworkScreenProps) {
   return (
     <AppContainer>

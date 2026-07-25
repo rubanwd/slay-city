@@ -11,7 +11,7 @@ import type { KnowledgeLevel } from "@/types";
 /**
  * Top of the content hierarchy: Level → District → Location → Mission → Task.
  * Every level is always listed, even empty ones, because this is where an admin
- * goes to start filling one in. A level only becomes selectable for children
+ * goes to start filling one in. A level only becomes selectable for students
  * once it has a published district with a published location — the "Live for
  * kids" flag below mirrors that rule.
  */

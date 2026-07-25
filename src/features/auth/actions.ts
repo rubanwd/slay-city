@@ -18,7 +18,7 @@ export type AuthState = {
 };
 
 /** Roles a user may self-select at registration. Admin is never self-assigned. */
-export type SignupRole = "child" | "parent";
+export type SignupRole = "student" | "parent";
 
 /**
  * Base URL used to build the email-confirmation redirect. Prefer an explicit
@@ -35,16 +35,16 @@ async function resolveSiteUrl(): Promise<string | undefined> {
 
 /**
  * Register a new account. `role` is chosen at signup; parents additionally
- * supply the (future-linked) child's email, stashed in user metadata. On
+ * supply the (future-linked) student's email, stashed in user metadata. On
  * success with an active session the user is routed by role — parents to the
- * parent dashboard, children to the map. If the project requires email
+ * parent dashboard, students to the map. If the project requires email
  * confirmation, a message is returned instead (there is no session yet).
  */
 export async function signUp(
   email: string,
   password: string,
-  role: SignupRole = "child",
-  childEmail?: string
+  role: SignupRole = "student",
+  studentEmail?: string
 ): Promise<AuthState> {
   const supabase = await createClient();
   const siteUrl = await resolveSiteUrl();
@@ -56,7 +56,7 @@ export async function signUp(
       emailRedirectTo: siteUrl ? `${siteUrl}/auth/callback` : undefined,
       data: {
         role,
-        ...(role === "parent" && childEmail ? { child_email: childEmail } : {}),
+        ...(role === "parent" && studentEmail ? { student_email: studentEmail } : {}),
       },
     },
   });
@@ -99,7 +99,7 @@ export async function signIn(email: string, password: string): Promise<AuthState
  * which we redirect the browser to; Google then sends the user back to
  * `/auth/callback`, where the code is exchanged for a session and the user is
  * routed by role. Google users carry no role flag, so they land on `/map` and
- * middleware forwards first-timers into onboarding — the same as a child signup.
+ * middleware forwards first-timers into onboarding — the same as a student signup.
  *
  * Requires the Google provider to be enabled in the Supabase project, and
  * `${siteUrl}/auth/callback` to be in its redirect allow-list.
@@ -164,8 +164,8 @@ export async function registerFormAction(
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
-  const role: SignupRole = formData.get("role") === "parent" ? "parent" : "child";
-  const childEmail = String(formData.get("childEmail") ?? "").trim();
+  const role: SignupRole = formData.get("role") === "parent" ? "parent" : "student";
+  const studentEmail = String(formData.get("studentEmail") ?? "").trim();
 
   if (!email || !password) {
     return { error: "Enter your email and password." };
@@ -178,18 +178,18 @@ export async function registerFormAction(
   }
 
   if (role === "parent") {
-    if (!childEmail) {
-      return { error: "Enter your child's email to link their account." };
+    if (!studentEmail) {
+      return { error: "Enter your student's email to link their account." };
     }
-    if (!EMAIL_PATTERN.test(childEmail)) {
-      return { error: "Enter a valid child email address." };
+    if (!EMAIL_PATTERN.test(studentEmail)) {
+      return { error: "Enter a valid student email address." };
     }
-    if (childEmail.toLowerCase() === email.toLowerCase()) {
-      return { error: "The child email must be different from your own." };
+    if (studentEmail.toLowerCase() === email.toLowerCase()) {
+      return { error: "The student email must be different from your own." };
     }
   }
 
-  return signUp(email, password, role, role === "parent" ? childEmail : undefined);
+  return signUp(email, password, role, role === "parent" ? studentEmail : undefined);
 }
 
 /**

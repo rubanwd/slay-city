@@ -4,11 +4,11 @@ import { getMyLevel } from "@/features/levels/queries";
 import CityMapPreview from "@/features/map/CityMapPreview";
 import { loadMapPreview } from "@/features/map/previewMap";
 import { requireParentPage } from "@/features/parent/guard";
-import { getLinkedChild } from "@/features/parent/queries";
+import { getLinkedStudent } from "@/features/parent/queries";
 
 /**
  * Read-only city map for a parent at `/parent/map` — the districts and stops
- * their child works through, with everything the child has already finished
+ * their student works through, with everything the student has already finished
  * marked ✓, and nothing to play.
  *
  * The level comes from the parent's own profile, which defaults to Elementary
@@ -18,14 +18,14 @@ import { getLinkedChild } from "@/features/parent/queries";
 export default async function ParentMapPage() {
   const { supabase, profileId } = await requireParentPage();
 
-  const [level, child] = await Promise.all([
+  const [level, student] = await Promise.all([
     getMyLevel(supabase, profileId),
-    getLinkedChild(supabase, profileId),
+    getLinkedStudent(supabase, profileId),
   ]);
 
-  // No linked child yet — the dashboard explains why; here the map simply
+  // No linked student yet — the dashboard explains why; here the map simply
   // shows the city with no progress on it.
-  const districts = await loadMapPreview(supabase, level, child ? [child.id] : []);
+  const districts = await loadMapPreview(supabase, level, student ? [student.id] : []);
 
   return (
     <AuthGuard>
@@ -33,8 +33,8 @@ export default async function ParentMapPage() {
         districts={districts}
         levelName={KNOWLEDGE_LEVEL_LABELS[level]}
         role="parent"
-        subtitle="What your child explores"
-        progressLabel={child ? (child.username ?? "your child") : null}
+        subtitle="What your student explores"
+        progressLabel={student ? (student.username ?? "your student") : null}
       />
     </AuthGuard>
   );

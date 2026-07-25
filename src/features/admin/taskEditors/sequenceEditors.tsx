@@ -104,7 +104,7 @@ export function StorySequencingEditor({ initialContent, onChange }: TaskEditorPr
       <div className="flex flex-col gap-2">
         <span className={LABEL_CLASS}>Steps (in the correct order)</span>
         <span className="text-xs text-white/40">
-          The child sees these shuffled and drags them back into this order.
+          The student sees these shuffled and drags them back into this order.
         </span>
         {steps.map((step, i) => (
           <div key={i} className="flex flex-col gap-2 rounded-xl border border-white/10 p-3">

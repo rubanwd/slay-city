@@ -21,7 +21,7 @@ interface Tile {
 }
 
 /**
- * The word's letters are shuffled into tiles. The child taps tiles to spell the
+ * The word's letters are shuffled into tiles. The student taps tiles to spell the
  * word into the answer row (tapping a placed tile sends it back), and the row
  * turns green once the spelling matches.
  */

@@ -31,7 +31,7 @@ export interface AdminLocationFormProps {
   districts?: DistrictOption[];
   /** When set, the district is fixed (drill-down from a district) — no dropdown is shown. */
   fixedDistrictId?: string;
-  /** The district's background, shown in the position picker to match the child's map. */
+  /** The district's background, shown in the position picker to match the student's map. */
   districtBackgroundUrl?: string | null;
   /** The district's name, fed to the AI icon prompt for scene context. */
   districtName?: string;

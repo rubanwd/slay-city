@@ -36,7 +36,7 @@ function parseOptionalUrl(raw: FormDataEntryValue | null): string | null | undef
 
 function revalidateGroup(groupId: string): void {
   revalidatePath(`/teacher/groups/${groupId}`);
-  // Homework pages are per-child server components — bust them too so a child
+  // Homework pages are per-student server components — bust them too so a student
   // sees a topic/task change without waiting for their own next navigation.
   revalidatePath("/homework", "layout");
 }

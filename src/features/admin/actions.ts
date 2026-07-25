@@ -547,42 +547,42 @@ export async function deleteTeacherGroup(formData: FormData): Promise<void> {
   if (!error && teacherId) revalidatePath(`/admin/teachers/${teacherId}`);
 }
 
-/** Adds an existing `child` account to one of a teacher's groups. */
+/** Adds an existing `student` account to one of a teacher's groups. */
 export async function addGroupMember(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const admin = await requireAdmin(supabase);
   if (!admin.ok) return;
 
   const groupId = String(formData.get("group_id") ?? "").trim();
-  const childId = String(formData.get("child_id") ?? "").trim();
+  const studentId = String(formData.get("student_id") ?? "").trim();
   const teacherId = String(formData.get("teacher_id") ?? "").trim();
-  if (!groupId || !childId) return;
+  if (!groupId || !studentId) return;
 
   const { error } = await supabase
     .from("teacher_group_members")
-    .insert({ group_id: groupId, child_id: childId });
+    .insert({ group_id: groupId, student_id: studentId });
   // 23505 = unique_violation — already a member, treat as success.
   if ((!error || error.code === "23505") && teacherId) {
     revalidatePath(`/admin/teachers/${teacherId}`);
   }
 }
 
-/** Removes a child from one of a teacher's groups. */
+/** Removes a student from one of a teacher's groups. */
 export async function removeGroupMember(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const admin = await requireAdmin(supabase);
   if (!admin.ok) return;
 
   const groupId = String(formData.get("group_id") ?? "").trim();
-  const childId = String(formData.get("child_id") ?? "").trim();
+  const studentId = String(formData.get("student_id") ?? "").trim();
   const teacherId = String(formData.get("teacher_id") ?? "").trim();
-  if (!groupId || !childId) return;
+  if (!groupId || !studentId) return;
 
   const { error } = await supabase
     .from("teacher_group_members")
     .delete()
     .eq("group_id", groupId)
-    .eq("child_id", childId);
+    .eq("student_id", studentId);
   if (!error && teacherId) revalidatePath(`/admin/teachers/${teacherId}`);
 }
 
@@ -590,7 +590,7 @@ export async function removeGroupMember(formData: FormData): Promise<void> {
 
 /**
  * Districts are reachable from three trees — the level pages, the district
- * detail pages, and the child-facing map — and every district write can move a
+ * detail pages, and the student-facing map — and every district write can move a
  * row between them, so all three are revalidated together.
  */
 function revalidateDistricts(): void {

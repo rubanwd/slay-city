@@ -41,7 +41,7 @@ const COPY = {
 } as const;
 
 const ROLE_OPTIONS: { value: SignupRole; label: string }[] = [
-  { value: "child", label: "Child" },
+  { value: "student", label: "Student" },
   { value: "parent", label: "Parent" },
 ];
 
@@ -114,7 +114,7 @@ export default function AuthForm({
     message: initialMessage,
     error: initialError,
   });
-  const [role, setRole] = useState<SignupRole>("child");
+  const [role, setRole] = useState<SignupRole>("student");
   const isRegister = mode === "register";
   const copy = COPY[mode];
 
@@ -213,18 +213,18 @@ export default function AuthForm({
         {isRegister && role === "parent" && (
           <label className="flex flex-col gap-1.5">
             <span className="text-label text-white/50 uppercase tracking-widest">
-              Child&apos;s Email
+              Student&apos;s Email
             </span>
             <input
-              name="childEmail"
+              name="studentEmail"
               type="email"
               required
               autoComplete="off"
-              placeholder="child@example.com"
+              placeholder="student@example.com"
               className={INPUT_CLASS}
             />
             <span className="text-xs text-white/40">
-              We&apos;ll link your child&apos;s account so you can follow their progress.
+              We&apos;ll link your student&apos;s account so you can follow their progress.
             </span>
           </label>
         )}

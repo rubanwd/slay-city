@@ -25,7 +25,7 @@ export interface HomeworkTopicNote {
 export interface HomeworkTopicVocab {
   words: HomeworkWord[];
   tasks: MissionTaskViewModel[];
-  /** Whether the child has already passed the vocabulary flow for this topic. */
+  /** Whether the student has already passed the vocabulary flow for this topic. */
   passed: boolean;
 }
 
@@ -33,7 +33,7 @@ export interface HomeworkTopicVocab {
 export interface HomeworkTopicGrammar {
   points: HomeworkGrammarPoint[];
   tasks: MissionTaskViewModel[];
-  /** Whether the child has already passed the grammar flow for this topic. */
+  /** Whether the student has already passed the grammar flow for this topic. */
   passed: boolean;
 }
 
@@ -41,7 +41,7 @@ export interface HomeworkTopicScreenProps {
   topic: { id: string; title: string; description: string | null };
   /** Extra context the teacher attached — text, a link, and/or an image, all optional. */
   note: HomeworkTopicNote;
-  /** The signed-in child's id — for the shared Q&A thread. */
+  /** The signed-in student's id — for the shared Q&A thread. */
   currentUserId: string;
   /** Server-rendered Q&A thread, kept live via Realtime inside `TopicChat`. */
   initialMessages: TopicMessage[];
@@ -111,7 +111,7 @@ function ModuleCard({
 }
 
 /**
- * The child's screen for one homework topic. A topic offers up to two learning
+ * The student's screen for one homework topic. A topic offers up to two learning
  * modules — Vocabulary ("Learn the Words") and Grammar ("Learn the Grammar") —
  * each launched from the intro screen into its own full-screen flow, plus a
  * shared Q&A thread with the group and teacher. Homework grants no XP/coins; it

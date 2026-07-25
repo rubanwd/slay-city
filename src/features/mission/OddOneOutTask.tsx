@@ -13,7 +13,7 @@ export interface OddOneOutTaskProps {
 }
 
 /**
- * The child taps the word that doesn't belong with the rest. The odd word turns
+ * The student taps the word that doesn't belong with the rest. The odd word turns
  * green and a wrong pick turns red before they continue.
  */
 export default function OddOneOutTask({

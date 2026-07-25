@@ -3,13 +3,13 @@ import { describe, expect, it } from "vitest";
 import { activeNavIndex, navItemsForRole } from "./navigation";
 
 describe("navItemsForRole", () => {
-  it("gives a child the game tabs, with Homework only when they have a group", () => {
-    expect(navItemsForRole("child").map((item) => item.href)).toEqual([
+  it("gives a student the game tabs, with Homework only when they have a group", () => {
+    expect(navItemsForRole("student").map((item) => item.href)).toEqual([
       "/map",
       "/wardrobe",
       "/profile",
     ]);
-    expect(navItemsForRole("child", { showHomework: true }).map((item) => item.href)).toEqual([
+    expect(navItemsForRole("student", { showHomework: true }).map((item) => item.href)).toEqual([
       "/map",
       "/wardrobe",
       "/homework",
@@ -40,14 +40,14 @@ describe("navItemsForRole", () => {
 });
 
 describe("activeNavIndex", () => {
-  const childItems = navItemsForRole("child", { showHomework: true });
+  const studentItems = navItemsForRole("student", { showHomework: true });
   const parentItems = navItemsForRole("parent");
 
   it("marks the tab whose route the path belongs to", () => {
-    expect(activeNavIndex("/map", childItems)).toBe(0);
-    expect(activeNavIndex("/homework", childItems)).toBe(2);
+    expect(activeNavIndex("/map", studentItems)).toBe(0);
+    expect(activeNavIndex("/homework", studentItems)).toBe(2);
     // A topic inside Homework still highlights the Homework tab.
-    expect(activeNavIndex("/homework/topic-1", childItems)).toBe(2);
+    expect(activeNavIndex("/homework/topic-1", studentItems)).toBe(2);
   });
 
   it("prefers the most specific tab when one route nests inside another", () => {
@@ -57,11 +57,11 @@ describe("activeNavIndex", () => {
   });
 
   it("highlights nothing on a screen no tab owns", () => {
-    expect(activeNavIndex("/mission/abc", childItems)).toBe(-1);
+    expect(activeNavIndex("/mission/abc", studentItems)).toBe(-1);
   });
 
   it("does not treat a shared prefix as a match", () => {
     // `/mapmaker` is not inside the Map tab, despite starting with "/map".
-    expect(activeNavIndex("/mapmaker", childItems)).toBe(-1);
+    expect(activeNavIndex("/mapmaker", studentItems)).toBe(-1);
   });
 });

@@ -3,13 +3,13 @@ import type { MissionTaskType } from "@/features/mission/types";
 
 /**
  * Shared, framework-free domain logic for the homework vocabulary flow —
- * imported by both the teacher (authoring/AI) and child (learning) sides, and
+ * imported by both the teacher (authoring/AI) and student (learning) sides, and
  * by the server actions. Keep it free of any `"use client"`/`"use server"`
  * directive and of Supabase/React imports so it stays unit-testable and usable
  * on either side of the network boundary.
  */
 
-/** One vocabulary word the child learns as a flashcard. */
+/** One vocabulary word the student learns as a flashcard. */
 export interface HomeworkWord {
   id: string;
   word: string;

@@ -67,7 +67,7 @@ const NAV_ICONS: Record<NavIconName, () => React.ReactElement> = {
 /**
  * Bottom padding a page's scrollable content needs so the fixed nav — tab row
  * (~79px) plus the watermark strip (38px) — never covers it. Kept here so the
- * child screens stay in sync when the bar's height changes.
+ * screens that render the bar stay in sync when its height changes.
  */
 export const BOTTOM_NAV_CLEARANCE = "pb-[150px]";
 
@@ -131,22 +131,22 @@ function BrandWatermark() {
 
 export interface BottomNavProps {
   /**
-   * Whose tabs to show. Children get the game screens; parents and teachers
+   * Whose tabs to show. Students get the game screens; parents and teachers
    * get their console's dashboard plus the map and profile (see `navigation.ts`).
    */
   role?: NavRole;
-  /** Shows the Homework tab — only true for a child who belongs to a teacher group. */
+  /** Shows the Homework tab — only true for a student who belongs to a teacher group. */
   showHomework?: boolean;
 }
 
 /**
- * Fixed bottom navigation shown on the main in-app screens — for a child: map,
+ * Fixed bottom navigation shown on the main in-app screens — for a student: map,
  * wardrobe, homework (conditional), profile; for a parent or teacher: their
  * dashboard, map and profile. Includes the Slay School watermark strip beneath
  * the tabs, so pages need `BOTTOM_NAV_CLEARANCE` worth of bottom padding on
  * their scrollable content to stay clear of the whole bar.
  */
-export default function BottomNav({ role = "child", showHomework = false }: BottomNavProps) {
+export default function BottomNav({ role = "student", showHomework = false }: BottomNavProps) {
   const pathname = usePathname();
   const navItems = navItemsForRole(role, { showHomework });
   const activeIndex = activeNavIndex(pathname, navItems);

@@ -4,18 +4,18 @@ import type { MissionTaskType } from "@/features/mission/types";
 /**
  * Shared, framework-free domain logic for the homework grammar flow — the
  * sibling of `vocabulary.ts`. Imported by both the teacher (authoring/AI) and
- * child (learning) sides, and by the server actions. Keep it free of any
+ * student (learning) sides, and by the server actions. Keep it free of any
  * `"use client"`/`"use server"` directive and of Supabase/React imports so it
  * stays unit-testable and usable on either side of the network boundary.
  *
  * A grammar module for a topic is a set of rule "points" (a title, a short
- * explanation, an example sentence) the child studies as cards, plus a short
+ * explanation, an example sentence) the student studies as cards, plus a short
  * test whose questions are authored by the AI — grammar can't be built
  * deterministically from a word list the way the vocabulary test is, so the
  * generator returns the questions directly.
  */
 
-/** One grammar rule the child studies as a card. */
+/** One grammar rule the student studies as a card. */
 export interface HomeworkGrammarPoint {
   id: string;
   title: string;

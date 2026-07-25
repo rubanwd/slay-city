@@ -23,7 +23,7 @@ interface Card {
 }
 
 /**
- * A concentration game: the child flips two cards at a time to find the word and
+ * A concentration game: the student flips two cards at a time to find the word and
  * its match (translation or picture). Matched pairs stay face-up; a mismatch
  * flips back after a beat. The task is done when every pair is found.
  */

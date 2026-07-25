@@ -13,7 +13,7 @@ export interface RhymeMatchTaskProps {
 }
 
 /**
- * A target word is shown; the child taps the option from the list that rhymes
+ * A target word is shown; the student taps the option from the list that rhymes
  * with it.
  */
 export default function RhymeMatchTask({

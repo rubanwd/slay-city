@@ -35,13 +35,13 @@ export async function restartMyLevel(): Promise<ChangeLevelResult> {
 }
 
 /**
- * Switches the signed-in child to another knowledge level, changing which
+ * Switches the signed-in student to another knowledge level, changing which
  * districts their map shows. Progress is per-mission, so nothing is lost:
  * switching back restores exactly what they had finished there.
  *
  * The "is this level actually available?" rule lives in
  * `set_my_knowledge_level` (SECURITY DEFINER), so a hand-crafted request can't
- * park a child on an empty level.
+ * park a student on an empty level.
  */
 export async function changeMyLevel(level: string): Promise<ChangeLevelResult> {
   if (!isKnowledgeLevel(level)) {

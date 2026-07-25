@@ -92,7 +92,7 @@ export function SimonSequenceEditor({ initialContent, onChange }: TaskEditorProp
         value={sequenceText}
         onChange={setSequenceText}
         placeholder="1, 2, 1, 3"
-        hint="Comma-separated tile numbers (1-based) the child must repeat, in order."
+        hint="Comma-separated tile numbers (1-based) the student must repeat, in order."
       />
     </div>
   );
@@ -158,7 +158,7 @@ export function PictureRevealEditor({ initialContent, onChange }: TaskEditorProp
         onChange={setImageUrl}
         subject={subject}
         required
-        hint="Starts blurred and sharpens as the child taps Reveal."
+        hint="Starts blurred and sharpens as the student taps Reveal."
       />
       <OptionsField
         label="Options (select the correct one)"
@@ -221,7 +221,7 @@ export function LetterFillEditor({ initialContent, onChange }: TaskEditorProps) 
         onChange={setWord}
         placeholder="BANANA"
         uppercase
-        hint="Every other letter is blanked out for the child to fill in. 3+ letters."
+        hint="Every other letter is blanked out for the student to fill in. 3+ letters."
       />
       <TextField label="Hint (optional)" value={hint} onChange={setHint} />
       <TextField label="Translation (optional)" value={translation} onChange={setTranslation} />

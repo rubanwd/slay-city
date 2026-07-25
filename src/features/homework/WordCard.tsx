@@ -28,7 +28,7 @@ function pronounce(word: string): void {
  * One vocabulary flashcard in the learning flow: the word's illustration, the
  * English word, its transcription and translation, plus a button that speaks
  * the word aloud (browser TTS — no stored audio). There is no wrong answer; the
- * child studies the card and taps to continue.
+ * student studies the card and taps to continue.
  */
 export default function WordCard({ word, onNext, actionLabel = "Next" }: WordCardProps) {
   return (

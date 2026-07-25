@@ -13,9 +13,9 @@ export interface TeacherDashboardProps {
 }
 
 /**
- * Read-only teacher dashboard: one section per group, each child shown as a
- * compact row with a few key stats. No per-child recent-activity list — a
- * class-sized group needs to stay scannable, unlike the single-child parent
+ * Read-only teacher dashboard: one section per group, each student shown as a
+ * compact row with a few key stats. No per-student recent-activity list — a
+ * class-sized group needs to stay scannable, unlike the single-student parent
  * dashboard this mirrors (`ParentDashboard.tsx`).
  */
 export default function TeacherDashboard({ groups, username, email }: TeacherDashboardProps) {
@@ -102,7 +102,7 @@ export default function TeacherDashboard({ groups, username, email }: TeacherDas
                 <h2 className="min-w-0 truncate text-label text-white/50">{group.name}</h2>
                 <div className="flex shrink-0 items-center gap-2">
                   <span className="text-small font-bold text-white/40">
-                    {group.children.length} {group.children.length === 1 ? "student" : "students"}
+                    {group.students.length} {group.students.length === 1 ? "student" : "students"}
                   </span>
                   <NavLink
                     href={`/teacher/groups/${group.id}`}
@@ -112,14 +112,14 @@ export default function TeacherDashboard({ groups, username, email }: TeacherDas
                   </NavLink>
                 </div>
               </div>
-              {group.children.length === 0 ? (
+              {group.students.length === 0 ? (
                 <p className="rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-6 text-center text-small text-white/50">
                   No students in this group yet.
                 </p>
               ) : (
                 <ul className="flex flex-col gap-2">
-                  {group.children.map((child) => (
-                    <StudentCard key={child.id} child={child} />
+                  {group.students.map((student) => (
+                    <StudentCard key={student.id} student={student} />
                   ))}
                 </ul>
               )}

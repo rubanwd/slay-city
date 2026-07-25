@@ -1,5 +1,5 @@
 export interface VocabularyCompletionRow {
-  childId: string;
+  studentId: string;
   username: string;
   passed: boolean;
 }
@@ -9,7 +9,7 @@ export interface VocabularyCompletionsProps {
 }
 
 /**
- * Read-only roster showing which children in the group have passed this topic's
+ * Read-only roster showing which students in the group have passed this topic's
  * vocabulary (finished every word card and the test). Rendered on the teacher's
  * topic page so they can see progress at a glance. Presentational only — the
  * page supplies the joined data.
@@ -27,7 +27,7 @@ export default function VocabularyCompletions({ rows }: VocabularyCompletionsPro
       <ul className="flex flex-col gap-1.5">
         {rows.map((row) => (
           <li
-            key={row.childId}
+            key={row.studentId}
             className="flex items-center justify-between rounded-xl border border-white/10 bg-[#1a1a1a] px-3 py-2"
           >
             <span className="truncate text-small text-white">{row.username}</span>

@@ -36,7 +36,7 @@ export function WordScrambleEditor({ initialContent, onChange }: TaskEditorProps
         onChange={setWord}
         placeholder="RAINBOW"
         uppercase
-        hint="Its letters are shuffled for the child to unscramble. 3–8 letters works best."
+        hint="Its letters are shuffled for the student to unscramble. 3–8 letters works best."
       />
       <TextField label="Translation (optional)" value={translation} onChange={setTranslation} />
       <TextField label="Hint (optional)" value={hint} onChange={setHint} />
@@ -67,7 +67,7 @@ export function HangmanEditor({ initialContent, onChange }: TaskEditorProps) {
         onChange={setWord}
         placeholder="ELEPHANT"
         uppercase
-        hint="The child guesses it letter by letter. Spaces are shown for multi-word answers."
+        hint="The student guesses it letter by letter. Spaces are shown for multi-word answers."
       />
       <TextField label="Hint / category (optional)" value={hint} onChange={setHint} />
       <TextField label="Translation (optional)" value={translation} onChange={setTranslation} />
@@ -126,7 +126,7 @@ export function SentenceBuilderEditor({ initialContent, onChange }: TaskEditorPr
         placeholder="word"
         addLabel="+ Add word"
         min={2}
-        hint="The child sees these shuffled and taps them back into this order."
+        hint="The student sees these shuffled and taps them back into this order."
       />
       <TextField label="Translation (optional)" value={translation} onChange={setTranslation} />
     </div>

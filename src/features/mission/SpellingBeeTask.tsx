@@ -14,7 +14,7 @@ export interface SpellingBeeTaskProps {
 }
 
 /**
- * The child hears the word — from an authored audio clip, or the device's speech
+ * The student hears the word — from an authored audio clip, or the device's speech
  * synthesis as a fallback — and types its spelling. The check is case- and
  * space-insensitive.
  */

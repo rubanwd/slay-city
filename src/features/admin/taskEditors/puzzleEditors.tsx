@@ -201,7 +201,7 @@ export function MemoryCardsEditor({ initialContent, onChange }: TaskEditorProps)
         pairs={pairs}
         onChange={setPairs}
         matchPlaceholder={mode === "word-to-image" ? "Image URL" : "Translation"}
-        hint="Each pair becomes two cards the child flips to match. 2–6 pairs works best."
+        hint="Each pair becomes two cards the student flips to match. 2–6 pairs works best."
       />
     </div>
   );

@@ -23,9 +23,9 @@ export interface MapPositionPickerProps {
   yName?: string;
   defaultX?: number;
   defaultY?: number;
-  /** District background image — the same one the child sees on the map. */
+  /** District background image — the same one the student sees on the map. */
   backgroundUrl?: string | null;
-  /** Location icon, shown as the pin so it matches the child's map marker. */
+  /** Location icon, shown as the pin so it matches the student's map marker. */
   iconUrl?: string | null;
   /** Crop/preview aspect ratio (width / height). Defaults to the map ratio. */
   aspect?: number;
@@ -34,7 +34,7 @@ export interface MapPositionPickerProps {
 /**
  * Interactive map-position picker. Shows the district background at the map
  * ratio; tapping/clicking (or arrow keys when focused) drops the pin and fills
- * the Map X / Map Y fields. The preview mirrors the child's `/map` so admins
+ * the Map X / Map Y fields. The preview mirrors the student's `/map` so admins
  * place stops exactly where players will see them.
  */
 export default function MapPositionPicker({
@@ -47,7 +47,7 @@ export default function MapPositionPicker({
   aspect = MAP_ASPECT,
 }: MapPositionPickerProps) {
   const [pos, setPos] = useState({ x: clampPercent(defaultX), y: clampPercent(defaultY) });
-  // Same treatment as the child's map: hold a loader over the frame until the
+  // Same treatment as the student's map: hold a loader over the frame until the
   // district background has decoded, so admins don't place a pin against a
   // blank preview and mis-position it.
   const bgLoaded = useImageLoaded(backgroundUrl);
@@ -113,7 +113,7 @@ export default function MapPositionPicker({
       <span className={LABEL_CLASS}>Map Position</span>
       <p className="text-xs text-white/40">
         Tap the map to drop the pin (or use arrow keys / the fields below). This is exactly
-        where the location appears on the child&apos;s map.
+        where the location appears on the student&apos;s map.
       </p>
 
       <div

@@ -19,7 +19,7 @@ interface Chip {
 }
 
 /**
- * The items arrive shuffled; the child taps them into the answer row in the
+ * The items arrive shuffled; the student taps them into the answer row in the
  * authored order (e.g. smallest to largest). Tapping a placed chip returns it
  * to the pool.
  */

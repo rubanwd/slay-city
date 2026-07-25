@@ -15,7 +15,7 @@ export interface TopicMessage {
 /**
  * The Q&A thread for one topic, newest last. Backed by the
  * `get_topic_messages()` SECURITY DEFINER RPC — the only path to another
- * user's username, since neither a child nor a teacher has direct SELECT on
+ * user's username, since neither a student nor a teacher has direct SELECT on
  * other people's `profiles` rows (see `20260722000001_homework_qa.sql`).
  */
 export async function getTopicMessages(

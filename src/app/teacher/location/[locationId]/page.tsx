@@ -11,7 +11,7 @@ interface TeacherLocationPageProps {
 /**
  * Every mission at one location, for a teacher to walk through.
  *
- * This is the step the child map doesn't need: a child is always handed the
+ * This is the step the student map doesn't need: a student is always handed the
  * next mission in order, while a teacher checking the content wants to open any
  * of them. Missions run in review mode (`/teacher/mission/[missionId]`) — no
  * progress, no rewards — so nothing here reports whether anything is "done".

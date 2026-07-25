@@ -19,7 +19,7 @@ interface Chip {
 }
 
 /**
- * The sentence's words are shuffled into chips. The child taps them into the
+ * The sentence's words are shuffled into chips. The student taps them into the
  * answer row in order (tapping a placed chip returns it), and the row turns
  * green when the word order matches the authored sentence.
  */

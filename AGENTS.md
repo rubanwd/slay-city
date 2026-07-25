@@ -156,11 +156,11 @@ Vitest/Node instead of only the Deno runtime.
 
 ## MVP Scope
 
-The MVP must prove one hypothesis: **children are motivated to return daily, complete short English missions, and progress through the city.**
+The MVP must prove one hypothesis: **students are motivated to return daily, complete short English missions, and progress through the city.**
 
 ### Include in MVP
 - User registration and login (email/password and magic link)
-- Role assignment: `child`, `parent`, `admin`
+- Role assignment: `student`, `parent`, `admin`
 - City map screen showing unlocked, current, completed, and locked locations
 - Daily mission flow: vocabulary → matching → listening → mini quiz
 - Reward screen after mission completion (XP, coins)
@@ -239,7 +239,7 @@ Follow this workflow for every task:
 - **Never allow the browser to directly update** `user_stats`, `user_progress`, or `user_wardrobe_items` tables.
 - Apply Row Level Security (RLS) to every user-related table. No exceptions.
 - Enforce role checks on both frontend routes (redirect unauthorized users) and backend Edge Functions (reject unauthorized requests).
-- Child users must only access their own profile and progress data.
+- Student users must only access their own profile and progress data.
 - Parent users must only access profiles explicitly linked to their account.
 - Admin-only Edge Functions must verify the caller has the `admin` role before executing.
 - Validate all inputs server-side before processing any user action.
@@ -256,7 +256,7 @@ Implement all of the following tables. Do not rename them:
 
 | Table | Purpose |
 |---|---|
-| `profiles` | Child profile data (incl. `level`, the knowledge level being studied) |
+| `profiles` | Student profile data (incl. `level`, the knowledge level being studied) |
 | `districts` | City districts, each belonging to one knowledge `level` |
 | `locations` | Map locations inside districts |
 | `missions` | Learning missions connected to locations |
@@ -270,17 +270,17 @@ Implement all of the following tables. Do not rename them:
 | `user_achievements` | Achievements unlocked by a user |
 | `ai_content_drafts` | AI-generated content pending review |
 | `admin_emails` | Allowlist of emails permitted to self-claim the admin role (`claim_admin` RPC) |
-| `parent_child_links` | Links a parent account to child profile(s) (`link_child_by_email` RPC) |
+| `parent_student_links` | Links a parent account to student profile(s) (`link_student_by_email` RPC) |
 | `task_type_templates` | Default config per task type, used by the admin Task Types configurator/tester |
 
 ### Content hierarchy
 Content is nested `Level → District → Location → Mission → Task`. The level is
 the `knowledge_level` enum (`beginner`, `elementary`, `pre_intermediate`,
-`intermediate`, `upper_intermediate`) on `districts`; a child's map shows only
+`intermediate`, `upper_intermediate`) on `districts`; a student's map shows only
 the published districts matching their own `profiles.level`. A level is offered
-to children only once it has a published district with a published location —
+to students only once it has a published district with a published location —
 `available_knowledge_levels()` is the single source of truth for that, and
-`set_my_knowledge_level()` is the only way a child changes level.
+`set_my_knowledge_level()` is the only way a student changes level.
 
 ### Rules
 - All user-related tables must have RLS enabled and appropriate policies defined.
@@ -323,7 +323,7 @@ to children only once it has a published district with a published location —
 Do not implement any of the following in the MVP. File a note in the PR if you feel the temptation:
 
 - Google OAuth or Apple OAuth
-- Parent-managed child login flow
+- Parent-managed student login flow
 - Real-time speech recognition or pronunciation scoring
 - AI-powered adaptive personalization (personalized learning paths)
 - Complex AI tutoring or conversational AI features
@@ -363,7 +363,7 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
 - The core product loop: `Map → Mission → Reward → Unlock → Return Tomorrow`.
 - The decision to process all reward and progress mutations server-side.
 - The decision to call OpenAI exclusively from Edge Functions.
-- The three-role system: `child`, `parent`, `admin`.
+- The three-role system: `student`, `parent`, `admin`.
 - The Supabase + Vercel hosting architecture.
 - RLS policies on any user-related table — do not disable or weaken them.
 

@@ -53,7 +53,7 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
 
   // Vocabulary + grammar sets for this topic, plus the group roster used to
   // cross-reference completions. `teacher_group_members` (with member usernames)
-  // is the RLS-allowed path to child names.
+  // is the RLS-allowed path to student names.
   const [
     vocabWordsRes,
     vocabTasksRes,
@@ -81,10 +81,10 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
       .order("order_index"),
     supabase
       .from("teacher_group_members")
-      .select("child_id, profiles(username)")
+      .select("student_id, profiles(username)")
       .eq("group_id", groupId),
-    supabase.from("homework_vocab_completions").select("child_id").eq("topic_id", topicId),
-    supabase.from("homework_grammar_completions").select("child_id").eq("topic_id", topicId),
+    supabase.from("homework_vocab_completions").select("student_id").eq("topic_id", topicId),
+    supabase.from("homework_grammar_completions").select("student_id").eq("topic_id", topicId),
   ]);
 
   const vocabWords = (vocabWordsRes.data ?? []).map((w) => ({
@@ -110,18 +110,18 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
   const messages = await getTopicMessages(supabase, topicId);
   const unreadCount = (await getUnreadCounts(supabase)).get(topicId) ?? 0;
 
-  const vocabPassed = new Set((vocabCompletionsRes.data ?? []).map((r) => r.child_id));
+  const vocabPassed = new Set((vocabCompletionsRes.data ?? []).map((r) => r.student_id));
   const vocabRows: VocabularyCompletionRow[] = members.map((m) => ({
-    childId: m.child_id,
+    studentId: m.student_id,
     username: m.profiles?.username ?? "Unknown",
-    passed: vocabPassed.has(m.child_id),
+    passed: vocabPassed.has(m.student_id),
   }));
 
-  const grammarPassed = new Set((grammarCompletionsRes.data ?? []).map((r) => r.child_id));
+  const grammarPassed = new Set((grammarCompletionsRes.data ?? []).map((r) => r.student_id));
   const grammarRows: GrammarCompletionRow[] = members.map((m) => ({
-    childId: m.child_id,
+    studentId: m.student_id,
     username: m.profiles?.username ?? "Unknown",
-    passed: grammarPassed.has(m.child_id),
+    passed: grammarPassed.has(m.student_id),
   }));
 
   return (

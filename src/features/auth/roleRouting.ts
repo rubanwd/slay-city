@@ -18,7 +18,7 @@ type AuthUser = {
   app_metadata?: Record<string, unknown> | null;
 };
 
-/** A role we may auto-provision a profile for (never `child` — that's onboarding). */
+/** A role we may auto-provision a profile for (never `student` — that's onboarding). */
 type ProvisionRole = "parent" | "admin";
 
 /** The screen a given role lands on after auth. */
@@ -39,8 +39,8 @@ function deriveUsername(email: string | null | undefined, fallback: string): str
 }
 
 /**
- * Ensures a signed-in non-child user has a `profiles` row, so they skip the
- * child-focused onboarding flow. The `profiles_insert_own` RLS policy permits
+ * Ensures a signed-in non-student user has a `profiles` row, so they skip the
+ * student-focused onboarding flow. The `profiles_insert_own` RLS policy permits
  * setting `role` on insert; the escalation guard only blocks role *changes*.
  * Returns true once the profile exists. Best-effort — a failure just leaves the
  * caller to fall back to the default landing page.
@@ -69,7 +69,7 @@ export async function ensureRoleProfile(
     if (!error) {
       if (role === "parent") {
         // Parents have no gameplay stats yet, but a zeroed row keeps the parent
-        // dashboard's stats query symmetrical with the child flow.
+        // dashboard's stats query symmetrical with the student flow.
         await supabase.from("user_stats").insert({ profile_id: user.id });
       }
       return true;
@@ -83,9 +83,9 @@ export async function ensureRoleProfile(
 /**
  * Where a freshly-authenticated user should land. A user with a profile goes to
  * their role's home (admins to the admin console, parents to their dashboard,
- * children to the map). A profile-less user is provisioned if they carry a
+ * students to the map). A profile-less user is provisioned if they carry a
  * trusted role flag — admins skip onboarding straight to `/admin`, parents to
- * `/parent`; everyone else goes to the map, where middleware routes children
+ * `/parent`; everyone else goes to the map, where middleware routes students
  * on to onboarding.
  */
 export async function resolveHomePath(supabase: SupabaseServerClient): Promise<string> {
@@ -110,7 +110,7 @@ export async function resolveHomePath(supabase: SupabaseServerClient): Promise<s
   }
 
   // No profile yet — provision one for a trusted role flag so the user skips the
-  // child onboarding. Admin can also come from app_metadata (service-role-set);
+  // student onboarding. Admin can also come from app_metadata (service-role-set);
   // parent from user_metadata (self-selected at signup).
   if (user.app_metadata?.role === "admin") {
     if (await ensureRoleProfile(supabase, user, "admin")) return "/admin";

@@ -20,7 +20,7 @@ interface Item {
 }
 
 /**
- * The child sorts every word into the right category: tap a word to pick it up,
+ * The student sorts every word into the right category: tap a word to pick it up,
  * then tap a bucket to drop it. A correct drop sticks; a wrong one flashes and
  * releases the word. The task is done once the tray is empty.
  */

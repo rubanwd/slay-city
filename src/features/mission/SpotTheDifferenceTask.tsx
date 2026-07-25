@@ -13,7 +13,7 @@ export interface SpotTheDifferenceTaskProps {
 }
 
 /**
- * A grid of identical emoji hides one impostor. The child scans the grid and
+ * A grid of identical emoji hides one impostor. The student scans the grid and
  * taps it; a wrong tap just flashes so they can keep looking.
  */
 export default function SpotTheDifferenceTask({

@@ -14,13 +14,13 @@ export interface RecentActivityItem {
 }
 
 export interface ParentProgressSummary {
-  /** Total missions the child has completed. */
+  /** Total missions the student has completed. */
   missionsCompleted: number;
   /** Current daily streak. */
   currentStreak: number;
   /** Best daily streak ever reached. */
   longestStreak: number;
-  /** Distinct locations the child has unlocked (i.e. completed at least one mission in). */
+  /** Distinct locations the student has unlocked (i.e. completed at least one mission in). */
   locationsUnlocked: number;
   /** Total published locations available in the game. */
   totalLocations: number;
@@ -36,7 +36,7 @@ export interface ParentProgressSummary {
  *
  * Joins `user_progress` (completed missions), `user_stats` (streaks),
  * `missions` (titles for recent activity) and `mission_tasks` (vocabulary words
- * actually seen — the words a child learns live in each mission's tasks, not
+ * actually seen — the words a student learns live in each mission's tasks, not
  * in the separate, unused `vocabulary_items` table). Every figure is derived
  * from missions actually marked complete (`completed_at IS NOT NULL`), so the
  * dashboard only ever reflects real work.
@@ -70,7 +70,7 @@ export async function getParentProgressSummary(
   const unlockedLocationIds = new Set(completed.map((row) => row.location_id));
 
   // Count vocabulary tasks belonging to any completed mission — this is the
-  // actual authored content a child sees in-game (via mission_tasks.content),
+  // actual authored content a student sees in-game (via mission_tasks.content),
   // regardless of whether it came from the seed data or the admin console.
   // Skip the query entirely when nothing is completed — `.in()` with an empty
   // list is wasteful.
@@ -104,37 +104,37 @@ export async function getParentProgressSummary(
   };
 }
 
-/** The child a parent follows, once the accounts are linked. */
-export interface LinkedChild {
+/** The student a parent follows, once the accounts are linked. */
+export interface LinkedStudent {
   id: string;
   username: string | null;
 }
 
 /**
- * The child account linked to this parent, or null while none is (the child
+ * The student account linked to this parent, or null while none is (the student
  * hasn't registered yet). Reads the link the dashboard establishes via
- * `link_child_by_email` — this is the read-only half, used by screens that
- * show the child's progress without owning the linking flow.
+ * `link_student_by_email` — this is the read-only half, used by screens that
+ * show the student's progress without owning the linking flow.
  */
-export async function getLinkedChild(
+export async function getLinkedStudent(
   supabase: SupabaseServerClient,
   parentId: string
-): Promise<LinkedChild | null> {
+): Promise<LinkedStudent | null> {
   const { data: links } = await supabase
-    .from("parent_child_links")
-    .select("child_id")
+    .from("parent_student_links")
+    .select("student_id")
     .eq("parent_id", parentId)
     .order("created_at")
     .limit(1);
 
-  const childId = links?.[0]?.child_id;
-  if (!childId) return null;
+  const studentId = links?.[0]?.student_id;
+  if (!studentId) return null;
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("username")
-    .eq("id", childId)
+    .eq("id", studentId)
     .maybeSingle();
 
-  return { id: childId, username: profile?.username ?? null };
+  return { id: studentId, username: profile?.username ?? null };
 }

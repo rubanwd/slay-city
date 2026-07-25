@@ -68,7 +68,7 @@ export async function createProfile(
     username,
     age,
     level: levelRaw,
-    role: "child",
+    role: "student",
   });
 
   if (profileError) {

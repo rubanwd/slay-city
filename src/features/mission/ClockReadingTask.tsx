@@ -15,7 +15,7 @@ export interface ClockReadingTaskProps {
 const TICKS = Array.from({ length: 12 }, (_, i) => i);
 
 /**
- * An analog clock face renders the authored time; the child reads it and taps
+ * An analog clock face renders the authored time; the student reads it and taps
  * the matching digital time from the choices.
  */
 export default function ClockReadingTask({

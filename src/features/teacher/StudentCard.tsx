@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import type { TeacherGroupChild } from "./queries";
+import type { TeacherGroupStudent } from "./queries";
 
 function StatChip({ label, value }: { label: string; value: string | number }) {
   return (
@@ -19,11 +19,11 @@ function StatChip({ label, value }: { label: string; value: string | number }) {
  * row expands the full per-topic pass breakdown, so the detail lives on the same
  * page without cluttering a class-sized list.
  */
-export default function StudentCard({ child }: { child: TeacherGroupChild }) {
+export default function StudentCard({ student }: { student: TeacherGroupStudent }) {
   const [expanded, setExpanded] = useState(false);
 
-  const totalTopics = child.topicResults.length;
-  const passedCount = child.topicResults.filter((t) => t.passed).length;
+  const totalTopics = student.topicResults.length;
+  const passedCount = student.topicResults.filter((t) => t.passed).length;
   const hasTopics = totalTopics > 0;
 
   return (
@@ -34,10 +34,10 @@ export default function StudentCard({ child }: { child: TeacherGroupChild }) {
         aria-expanded={expanded}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
       >
-        <span className="min-w-0 truncate text-body-strong text-white">{child.username}</span>
+        <span className="min-w-0 truncate text-body-strong text-white">{student.username}</span>
         <div className="flex shrink-0 items-center gap-2">
           {hasTopics && <StatChip label="Topics" value={`${passedCount}/${totalTopics}`} />}
-          <StatChip label="Missions" value={child.missionsCompleted} />
+          <StatChip label="Missions" value={student.missionsCompleted} />
           <svg
             width="18"
             height="18"
@@ -68,7 +68,7 @@ export default function StudentCard({ child }: { child: TeacherGroupChild }) {
                 Topics passed {passedCount}/{totalTopics}
               </p>
               <ul className="flex flex-wrap gap-1.5">
-                {child.topicResults.map((topic) => (
+                {student.topicResults.map((topic) => (
                   <li
                     key={topic.topicId}
                     className={[

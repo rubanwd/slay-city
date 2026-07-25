@@ -3,7 +3,7 @@
  *
  * Deliberately not an audio file: the hiss is band-passed white noise, which
  * costs nothing to ship (no asset, no network fetch on tap) and can never be
- * blocked by a slow Storage response the first time a child taps Slay.
+ * blocked by a slow Storage response the first time a student taps Slay.
  */
 
 import { resumeSharedAudioContext } from "./audioContext";

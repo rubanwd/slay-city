@@ -26,7 +26,7 @@ export interface VocabularyFlowProps {
   words: HomeworkWord[];
   /** The test tasks that check the words (roughly half as many as words). */
   tasks: MissionTaskViewModel[];
-  /** Whether the child has already passed this topic's vocabulary before. */
+  /** Whether the student has already passed this topic's vocabulary before. */
   alreadyPassed: boolean;
   /** Return to the topic's intro screen. */
   onExit: () => void;
@@ -35,10 +35,10 @@ export interface VocabularyFlowProps {
 type FlowMode = "intro" | "cards" | "test" | "done";
 
 /**
- * The child's vocabulary learning flow for one topic: step through every word
+ * The student's vocabulary learning flow for one topic: step through every word
  * card (image, word, transcription, translation, pronunciation), then take the
  * test built from those words. Finishing the whole flow records a pass
- * (`completeHomeworkVocab`) that both the child and the teacher can see, and
+ * (`completeHomeworkVocab`) that both the student and the teacher can see, and
  * grants XP for a first-time pass (coins stay mission-driven).
  */
 export default function VocabularyFlow({

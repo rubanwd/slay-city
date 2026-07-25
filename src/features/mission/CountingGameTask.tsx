@@ -14,7 +14,7 @@ export interface CountingGameTaskProps {
 }
 
 /**
- * A grid of the same emoji, repeated `count` times. The child counts them and
+ * A grid of the same emoji, repeated `count` times. The student counts them and
  * taps the matching number from the choices.
  */
 export default function CountingGameTask({

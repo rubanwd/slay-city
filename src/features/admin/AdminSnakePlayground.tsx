@@ -110,7 +110,7 @@ export default function AdminSnakePlayground() {
             />
             {/* Sits next to the D-pad, so quitting mid-game never means scrolling
                 back up to the modal's ✕. Deliberately not part of SnakeGameTask:
-                a child must not be able to walk out of a real mission task. */}
+                a student must not be able to walk out of a real mission task. */}
             <div className="flex gap-2">
               <SlayButton type="button" variant="ghost" size="md" className="flex-1" onClick={close}>
                 Exit to admin
