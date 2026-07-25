@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import { BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import SlayCharacter from "@/components/ui/SlayCharacter";
 import { signOut } from "@/features/auth/actions";
+import FeedbackButton from "@/features/feedback/FeedbackButton";
 import { resetMissionProgress } from "@/features/mission/actions";
 import type { KnowledgeLevel } from "@/types";
 
@@ -22,7 +23,17 @@ function LogoutButton() {
         "disabled:pointer-events-none disabled:opacity-50 transition-colors",
       ].join(" ")}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
         <polyline points="16 17 21 12 16 7" />
         <line x1="21" y1="12" x2="9" y2="12" />
@@ -49,7 +60,17 @@ function ResetProgressButton() {
         "disabled:pointer-events-none disabled:opacity-50 transition-colors",
       ].join(" ")}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
         <polyline points="3 6 5 6 21 6" />
         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
       </svg>
@@ -116,6 +137,9 @@ export default function ProfileScreen({
         <ProfileLevelCard current={level} available={availableLevels} hint={levelHint} />
 
         <div className="mt-auto flex flex-col gap-3">
+          {/* Reporting a bug or sending an idea — reaches the admin console's inbox. */}
+          <FeedbackButton />
+
           {/* TEMPORARY: dev-only progress reset. Remove or gate to admins before launch. */}
           {showProgressReset && (
             <form

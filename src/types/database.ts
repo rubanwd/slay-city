@@ -136,6 +136,74 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_report_reads: {
+        Row: {
+          admin_id: string
+          read_at: string
+          report_id: string
+        }
+        Insert: {
+          admin_id: string
+          read_at?: string
+          report_id: string
+        }
+        Update: {
+          admin_id?: string
+          read_at?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_report_reads_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_report_reads_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_reports: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          image_urls: string[]
+          kind: string
+          message: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          image_urls?: string[]
+          kind?: string
+          message: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          image_urls?: string[]
+          kind?: string
+          message?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_reports_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homework_grammar_completions: {
         Row: {
           completed_at: string
@@ -1170,6 +1238,22 @@ export type Database = {
         }[]
       }
       equip_wardrobe_item: { Args: { p_item_id: string }; Returns: undefined }
+      list_feedback_reports: {
+        Args: never
+        Returns: {
+          author_id: string
+          author_role: Database["public"]["Enums"]["user_role"]
+          author_username: string
+          created_at: string
+          id: string
+          image_urls: string[]
+          is_read: boolean
+          kind: string
+          message: string
+        }[]
+      }
+      mark_feedback_read: { Args: never; Returns: number }
+      unread_feedback_count: { Args: never; Returns: number }
       get_topic_messages: {
         Args: { p_topic_id: string }
         Returns: {
