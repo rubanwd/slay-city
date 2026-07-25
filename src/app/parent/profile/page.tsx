@@ -1,45 +1,39 @@
 import AuthGuard from "@/components/auth/AuthGuard";
-import { BottomNav } from "@/components/layout";
-import { DEFAULT_KNOWLEDGE_LEVEL, isKnowledgeLevel } from "@/features/levels/levels";
-import { getAvailableLevels } from "@/features/levels/queries";
+import { resolveLocale } from "@/features/i18n/server";
+import ParentProfileScreen from "@/features/parent/ParentProfileScreen";
 import { requireParentPage } from "@/features/parent/guard";
-import ProfileScreen from "@/features/profile/ProfileScreen";
-import { DEFAULT_MASCOT_IMAGE } from "@/features/wardrobe/mascot";
+import { getLinkedStudent } from "@/features/parent/queries";
 
 /**
- * Parent's own account screen at `/parent/profile`. The same screen the student
- * gets, minus what only a player has: no equipped wardrobe look (the plain
- * snake stands in as the avatar) and no progress to reset.
+ * Parent's own account screen at `/parent/profile`.
  *
- * The level picker here is the one place a parent chooses which level their
- * map preview shows; it only offers levels that already have content, so today
- * it stays on Elementary.
+ * Two things the student's screen has are deliberately absent: the wardrobe
+ * look (a parent never plays, so there is nothing to wear) and the level picker
+ * (the level is the student's own choice — it is shown here read-only, next to
+ * their name). What remains is the account, the language of this console, and
+ * the way out.
  */
 export default async function ParentProfilePage() {
-  const { supabase, profileId, email } = await requireParentPage();
-
-  const [profileRes, availableLevels] = await Promise.all([
-    supabase.from("profiles").select("username, level").eq("id", profileId).maybeSingle(),
-    getAvailableLevels(supabase),
+  const [{ supabase, profileId, email }, { locale, detected, manual }] = await Promise.all([
+    requireParentPage(),
+    resolveLocale(),
   ]);
 
-  const level = isKnowledgeLevel(profileRes.data?.level)
-    ? profileRes.data.level
-    : DEFAULT_KNOWLEDGE_LEVEL;
+  const [profileRes, student] = await Promise.all([
+    supabase.from("profiles").select("username").eq("id", profileId).maybeSingle(),
+    getLinkedStudent(supabase, profileId),
+  ]);
 
   return (
     <AuthGuard>
-      <ProfileScreen
+      <ParentProfileScreen
         username={profileRes.data?.username ?? null}
         email={email}
-        mascotImageUrl={DEFAULT_MASCOT_IMAGE}
-        level={level}
-        availableLevels={availableLevels}
-        roleLabel="Parent"
-        levelHint="Sets which level your city map shows."
-        showProgressReset={false}
+        locale={locale}
+        manualLocale={manual}
+        detectedLocale={detected}
+        student={student ? { username: student.username, level: student.level } : null}
       />
-      <BottomNav role="parent" />
     </AuthGuard>
   );
 }

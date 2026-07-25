@@ -734,6 +734,35 @@ export type Database = {
         }
         Relationships: []
       }
+      study_time_daily: {
+        Row: {
+          day: string
+          profile_id: string
+          seconds: number
+          updated_at: string
+        }
+        Insert: {
+          day?: string
+          profile_id: string
+          seconds?: number
+          updated_at?: string
+        }
+        Update: {
+          day?: string
+          profile_id?: string
+          seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_time_daily_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_type_templates: {
         Row: {
           content: Json
@@ -1184,6 +1213,19 @@ export type Database = {
           teacher_username: string
         }[]
       }
+      parent_student_homework: {
+        Args: { p_student_id: string }
+        Returns: {
+          grammar_completed_at: string | null
+          grammar_count: number
+          group_name: string
+          teacher_username: string | null
+          title: string
+          topic_id: string
+          vocab_completed_at: string | null
+          word_count: number
+        }[]
+      }
       promote_teacher: {
         Args: { p_identifier: string }
         Returns: {
@@ -1200,6 +1242,7 @@ export type Database = {
           item_id: string
         }[]
       }
+      record_study_time: { Args: { p_seconds: number }; Returns: number }
       reset_level_progress: { Args: never; Returns: undefined }
       reset_location_progress: {
         Args: { p_location_id: string }

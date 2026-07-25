@@ -6,6 +6,7 @@ import { useState } from "react";
 import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import { CoinAmount, XpAmount } from "@/components/ui";
 import FullScreenLoader from "@/components/ui/FullScreenLoader";
+import { DEFAULT_LOCALE, getMessages, type Locale } from "@/features/i18n";
 import { useImageLoaded } from "@/hooks/useImageLoaded";
 
 import MapBackground from "./MapBackground";
@@ -22,10 +23,12 @@ import type { MapDistrictViewModel } from "./mapState";
 /** ‹ / › district stepper — the adults' stand-in for playing through the city. */
 function StepButton({
   direction,
+  label,
   onClick,
   disabled,
 }: {
   direction: "previous" | "next";
+  label: string;
   onClick: () => void;
   disabled: boolean;
 }) {
@@ -34,7 +37,7 @@ function StepButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={`${direction === "previous" ? "Previous" : "Next"} district`}
+      aria-label={label}
       className={[
         "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20",
         "text-lg font-black leading-none text-white/70 transition-colors",
@@ -67,6 +70,13 @@ export interface CityMapPreviewProps {
    * left unset for the parent, whose map is purely something to look at.
    */
   locationHrefBase?: string | null;
+  /**
+   * Language for this screen's own copy. The parent console passes the parent's
+   * language; the teacher console omits it and gets English. Only the wording
+   * around the map changes — district, location and mission names are authored
+   * content and always render as written.
+   */
+  locale?: Locale;
 }
 
 /**
@@ -84,9 +94,9 @@ export interface CityMapPreviewProps {
  * console uses it to open a location's missions and play through them in review
  * mode. Without it, the panel just describes the stop.
  *
- * Which level is shown comes from the viewer's own profile (Elementary by
- * default, changeable on their profile screen), so this always mirrors a real
- * student map for that level.
+ * Which level is shown is the caller's decision: the parent console follows the
+ * level their student picked, the teacher console their own — either way this
+ * mirrors a real student map for that level.
  */
 export default function CityMapPreview({
   districts,
@@ -95,7 +105,14 @@ export default function CityMapPreview({
   subtitle,
   progressLabel = null,
   locationHrefBase = null,
+  locale = DEFAULT_LOCALE,
 }: CityMapPreviewProps) {
+  // Resolved here rather than passed in: several of these messages take a count
+  // only this component knows, and a function cannot cross the server → client
+  // boundary as a prop.
+  const messages = getMessages(locale);
+  const strings = messages.map;
+
   const [districtIndex, setDistrictIndex] = useState(() =>
     defaultPreviewDistrictIndex(districts)
   );
@@ -114,7 +131,9 @@ export default function CityMapPreview({
     <main className="relative h-dvh bg-black flex flex-col overflow-hidden mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-between gap-2 px-5 py-3 border-b border-white/10 shrink-0">
         <div className="min-w-0">
-          <h1 className="text-lg font-black text-lime-green leading-tight uppercase">City Map</h1>
+          <h1 className="text-lg font-black text-lime-green leading-tight uppercase">
+            {strings.title}
+          </h1>
           <p className="truncate text-small text-white/50">{subtitle}</p>
         </div>
         <span className="shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold text-white whitespace-nowrap">
@@ -124,17 +143,15 @@ export default function CityMapPreview({
 
       {districts.length === 0 ? (
         <section className={`flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center ${BOTTOM_NAV_CLEARANCE}`}>
-          <h2 className="text-h3 font-bold text-white">Nothing to show yet</h2>
-          <p className="max-w-xs text-small text-white/60">
-            No districts have been published for {levelName} yet. They&apos;ll appear here as soon
-            as the city grows.
-          </p>
+          <h2 className="text-h3 font-bold text-white">{strings.nothingTitle}</h2>
+          <p className="max-w-xs text-small text-white/60">{strings.nothingBody(levelName)}</p>
         </section>
       ) : (
         <>
           <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-2 shrink-0">
             <StepButton
               direction="previous"
+              label={strings.previousDistrict}
               onClick={() => setDistrictIndex((index) => Math.max(0, index - 1))}
               disabled={districtIndex === 0}
             />
@@ -146,11 +163,12 @@ export default function CityMapPreview({
                 {district?.name}
               </p>
               <p className="text-label uppercase tracking-widest text-white/40">
-                District {districtIndex + 1} of {districts.length}
+                {strings.districtOf(districtIndex + 1, districts.length)}
               </p>
             </div>
             <StepButton
               direction="next"
+              label={strings.nextDistrict}
               onClick={() =>
                 setDistrictIndex((index) => Math.min(districts.length - 1, index + 1))
               }
@@ -160,7 +178,7 @@ export default function CityMapPreview({
 
           {progressLabel && (
             <p className="shrink-0 border-b border-white/10 px-5 py-1.5 text-center text-label uppercase tracking-widest text-lime-green/80">
-              ✓ completed by {progressLabel}
+              {strings.completedBy(progressLabel)}
             </p>
           )}
 
@@ -215,13 +233,13 @@ export default function CityMapPreview({
             </div>
 
             {backgroundUrl && !backgroundLoaded && (
-              <FullScreenLoader fullScreen={false} label="Loading map…" />
+              <FullScreenLoader fullScreen={false} label={strings.loadingMap} />
             )}
           </div>
 
           <section
             className={`shrink-0 border-t border-white/10 px-5 pt-4 ${BOTTOM_NAV_CLEARANCE}`}
-            aria-label="Selected location"
+            aria-label={strings.selectedLocation}
           >
             {selected ? (
               <>
@@ -241,10 +259,11 @@ export default function CityMapPreview({
                       {/* Without followed players every count would read "0 of n" — misleading,
                           since nobody's progress is being shown at all. */}
                       {progressLabel
-                        ? `${selected.missionsCompleted}/${selected.totalMissions} missions`
-                        : `${selected.totalMissions} ${
-                            selected.totalMissions === 1 ? "mission" : "missions"
-                          }`}
+                        ? strings.missionsProgress(
+                            selected.missionsCompleted,
+                            selected.totalMissions
+                          )
+                        : strings.missionsCount(selected.totalMissions)}
                     </span>
                   )}
                 </div>
@@ -258,7 +277,9 @@ export default function CityMapPreview({
                     <CoinAmount value={`+${selected.totalCoins}`} className="text-yellow-300" />
                     <span aria-hidden="true">·</span>
                     <XpAmount value={`+${selected.totalXp}`} />
-                    <span>{selected.state === "completed" ? "earned here" : "to earn here"}</span>
+                    <span>
+                      {selected.state === "completed" ? strings.earnedHere : strings.toEarnHere}
+                    </span>
                   </p>
                 )}
 
@@ -273,21 +294,26 @@ export default function CityMapPreview({
                     ].join(" ")}
                   >
                     <span className="truncate">
-                      {selected.totalMissions > 0 ? "▶ Open missions" : "Open location"}
+                      {selected.totalMissions > 0 ? strings.openMissions : strings.openLocation}
                     </span>
                   </Link>
                 )}
               </>
             ) : (
-              <p className="text-small text-white/50">
-                This district has no published locations yet.
-              </p>
+              <p className="text-small text-white/50">{strings.noLocations}</p>
             )}
           </section>
         </>
       )}
 
-      <BottomNav role={role} />
+      <BottomNav
+        role={role}
+        labels={{
+          dashboard: messages.nav.dashboard,
+          map: messages.nav.map,
+          profile: messages.nav.profile,
+        }}
+      />
     </main>
   );
 }

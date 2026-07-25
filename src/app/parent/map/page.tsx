@@ -1,6 +1,7 @@
 import AuthGuard from "@/components/auth/AuthGuard";
-import { KNOWLEDGE_LEVEL_LABELS } from "@/features/levels/levels";
-import { getMyLevel } from "@/features/levels/queries";
+import { getMessages } from "@/features/i18n";
+import { resolveLocale } from "@/features/i18n/server";
+import { DEFAULT_KNOWLEDGE_LEVEL, KNOWLEDGE_LEVEL_LABELS } from "@/features/levels/levels";
 import CityMapPreview from "@/features/map/CityMapPreview";
 import { loadMapPreview } from "@/features/map/previewMap";
 import { requireParentPage } from "@/features/parent/guard";
@@ -11,17 +12,20 @@ import { getLinkedStudent } from "@/features/parent/queries";
  * their student works through, with everything the student has already finished
  * marked ✓, and nothing to play.
  *
- * The level comes from the parent's own profile, which defaults to Elementary
- * (the database default for every profile, and today the only level with
- * content). They can switch it on `/parent/profile` once other levels exist.
+ * The level shown is the *student's*: they pick it on their own profile, and a
+ * parent following a different level's map would be looking at a city their
+ * child never sees. Before a student is linked there is no level to follow, so
+ * the map falls back to the default one.
  */
 export default async function ParentMapPage() {
-  const { supabase, profileId } = await requireParentPage();
-
-  const [level, student] = await Promise.all([
-    getMyLevel(supabase, profileId),
-    getLinkedStudent(supabase, profileId),
+  const [{ supabase, profileId }, { locale }] = await Promise.all([
+    requireParentPage(),
+    resolveLocale(),
   ]);
+
+  const messages = getMessages(locale);
+  const student = await getLinkedStudent(supabase, profileId);
+  const level = student?.level ?? DEFAULT_KNOWLEDGE_LEVEL;
 
   // No linked student yet — the dashboard explains why; here the map simply
   // shows the city with no progress on it.
@@ -33,8 +37,11 @@ export default async function ParentMapPage() {
         districts={districts}
         levelName={KNOWLEDGE_LEVEL_LABELS[level]}
         role="parent"
-        subtitle="What your student explores"
-        progressLabel={student ? (student.username ?? "your student") : null}
+        subtitle={messages.map.subtitle}
+        progressLabel={
+          student ? (student.username ?? messages.dashboard.yourStudent) : null
+        }
+        locale={locale}
       />
     </AuthGuard>
   );

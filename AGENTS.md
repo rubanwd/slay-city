@@ -272,6 +272,7 @@ Implement all of the following tables. Do not rename them:
 | `admin_emails` | Allowlist of emails permitted to self-claim the admin role (`claim_admin` RPC) |
 | `parent_student_links` | Links a parent account to student profile(s) (`link_student_by_email` RPC) |
 | `task_type_templates` | Default config per task type, used by the admin Task Types configurator/tester |
+| `study_time_daily` | Seconds a student spent on learning screens, bucketed per UTC day (`record_study_time` RPC) |
 
 ### Content hierarchy
 Content is nested `Level → District → Location → Mission → Task`. The level is
@@ -331,7 +332,10 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
 - Leaderboards
 - In-app purchases or payment processing
 - Push notifications
-- Multiple language support beyond English
+- Multiple language support beyond English — **except the parent console**, which
+  is translated (English / Ukrainian / Russian, see `src/features/i18n/`) on the
+  product owner's request: a parent is an adult who never signed up to learn
+  English. The student game, and all authored content, stay English-only.
 - Additional district content beyond the MVP test set
 - Advanced analytics dashboards
 - Any feature that does not directly serve the loop: `Map → Mission → Reward → Unlock → Return Tomorrow`

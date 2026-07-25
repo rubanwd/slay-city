@@ -4,6 +4,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import HomeworkTopicScreen from "@/features/homework/HomeworkTopicScreen";
 import { getTopicMessages } from "@/features/homework/qa/queries";
 import type { MissionTaskViewModel } from "@/features/mission/types";
+import StudyTimeTracker from "@/features/study/StudyTimeTracker";
 import { createClient } from "@/lib/supabase/server";
 
 interface HomeworkTopicPageProps {
@@ -113,6 +114,8 @@ export default async function HomeworkTopicPage({ params }: HomeworkTopicPagePro
 
   return (
     <AuthGuard>
+      {/* Homework counts towards study time exactly like a mission does. */}
+      <StudyTimeTracker />
       <HomeworkTopicScreen
         topic={{ id: topic.id, title: topic.title, description: topic.description }}
         note={{
