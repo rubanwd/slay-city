@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { AudioUnlock } from "@/components/AudioUnlock";
+import { MediaGuard } from "@/components/MediaGuard";
+import { PortraitLock } from "@/components/PortraitLock";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { resolveLocale } from "@/features/i18n/server";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -32,18 +35,26 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Only for the rotate-your-phone overlay, which has to be in the first paint
+  // to be of any use. Every route here is server-rendered on demand already, so
+  // reading the request costs no static rendering.
+  const { locale } = await resolveLocale();
+
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col bg-black text-white antialiased">
         <ServiceWorkerRegistration />
         <AudioUnlock />
+        <MediaGuard />
         <InstallPrompt />
         {children}
+        {/* Last, so it covers the app on stacking order as well as z-index. */}
+        <PortraitLock locale={locale} />
       </body>
     </html>
   );

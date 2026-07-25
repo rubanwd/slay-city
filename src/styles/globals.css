@@ -10,6 +10,50 @@ body {
   color: var(--color-foreground);
 }
 
+/* ── Artwork long-press guard ──────────────────────────────────────────────
+   Pressing and holding the mascot or the city map used to open the OS
+   "Save Image / Copy" sheet, which both interrupts play and hands the artwork
+   out for download. `-webkit-touch-callout` is what suppresses that sheet on
+   iOS/WebKit; Android ignores the property, so `MediaGuard` cancels the
+   `contextmenu` event there. The rest keeps a long press from turning into a
+   drag or a selection highlight on the artwork. */
+
+img,
+picture,
+svg,
+video,
+canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── Portrait lock ─────────────────────────────────────────────────────────
+   Every screen is laid out for a tall phone, so a sideways one crops artwork
+   and squashes the layout. Installed PWAs are held in portrait by the manifest
+   and `screen.orientation.lock()`; where neither is honored (iOS Safari above
+   all) `PortraitLock` renders this overlay instead.
+
+   The conditions describe a phone held sideways and nothing else: landscape,
+   short enough that no tablet qualifies, and a touch pointer so a small
+   desktop window is never covered. Scrolling is pinned while it shows, so the
+   app underneath can't be nudged around behind it. */
+
+.portrait-lock {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+  .portrait-lock {
+    display: flex;
+  }
+
+  body {
+    overflow: hidden;
+  }
+}
+
 @keyframes glow-pulse {
   0%,
   100% {
