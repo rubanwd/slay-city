@@ -38,8 +38,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col bg-black text-white antialiased">
+    // No `height: 100%` on <html>/<body>: an installed iOS PWA refuses to
+    // scroll the document at all when the root elements are locked to the
+    // viewport that way. `min-h-dvh` keeps a short page filling the screen
+    // without capping how tall the document may grow.
+    <html lang="en">
+      <body className="min-h-dvh flex flex-col bg-black text-white antialiased">
         <ServiceWorkerRegistration />
         <AudioUnlock />
         <InstallPrompt />
