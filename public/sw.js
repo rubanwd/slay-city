@@ -1,4 +1,4 @@
-const CACHE_NAME = "slay-city-v4";
+const CACHE_NAME = "slay-city-v5";
 // Images (map backgrounds, location icons, wardrobe art) live in their own
 // cache that survives app-shell version bumps, so a released update never
 // re-downloads the heavy artwork.
