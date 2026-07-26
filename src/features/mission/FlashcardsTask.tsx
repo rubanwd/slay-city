@@ -98,7 +98,7 @@ export default function FlashcardsTask({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <p className="font-semibold text-white">{prompt}</p>
+        <p className="text-h3 font-semibold text-white">{prompt}</p>
         <span className="text-small font-bold text-white/50">
           {index + 1}/{cards.length}
         </span>

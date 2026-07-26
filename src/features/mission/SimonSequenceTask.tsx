@@ -95,7 +95,7 @@ export default function SimonSequenceTask({
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <p className="font-semibold text-white">{prompt}</p>
+        <p className="text-h3 font-semibold text-white">{prompt}</p>
         <p className="text-small text-white/50">
           {phase === "watching" && "Watch the pattern…"}
           {phase === "input" && `Your turn — tile ${input.length + 1} of ${sequence.length}`}

@@ -104,7 +104,7 @@ export default function CrosswordTask({
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="text-center font-semibold text-white">{prompt}</p>
+      <p className="text-center text-h3 font-semibold text-white">{prompt}</p>
 
       <div className="overflow-x-auto">
         <div
