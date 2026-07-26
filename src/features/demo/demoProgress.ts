@@ -94,17 +94,41 @@ export function advanceDemoProgress(
   return { completedMissionIds, gated: progress.gated || locationCleared };
 }
 
+export interface DemoDistrictOptions {
+  /**
+   * The district the visitor is already playing in — where the missions they
+   * have finished live. Keeps a run in one place instead of moving the map out
+   * from under them between missions.
+   */
+  pinnedId?: string | null;
+  /** Injectable for tests; defaults to `Math.random`. */
+  random?: () => number;
+}
+
 /**
- * Which district the demo map opens on: the first published district of the
- * demo level that actually has somewhere to play. Districts arrive in
- * `order_index` order (see `buildMapViewModel`), so this is the level's opening
- * district — the same one a new student would start in.
+ * Which district the demo map opens on, out of the published districts of the
+ * demo level that actually have somewhere to play.
+ *
+ * A fresh visitor gets a **random** one, so the demo shows off the city rather
+ * than always opening on the same district a new student starts in. Once they
+ * have finished a mission the choice is pinned to that district for the rest of
+ * the run — a reset (the "Back" button on the sign-up wall) rolls again.
  *
  * Unlike the signed-in map, the demo never moves on to the next district: the
  * visitor only ever gets one location, so a single district is the whole demo.
  */
-export function selectDemoDistrict<T extends { locations: unknown[] }>(
-  districts: readonly T[]
+export function selectDemoDistrict<T extends { id: string; locations: unknown[] }>(
+  districts: readonly T[],
+  { pinnedId = null, random = Math.random }: DemoDistrictOptions = {}
 ): T | null {
-  return districts.find((district) => district.locations.length > 0) ?? null;
+  const playable = districts.filter((district) => district.locations.length > 0);
+  if (playable.length === 0) return null;
+
+  const pinned = pinnedId ? playable.find((district) => district.id === pinnedId) : undefined;
+  if (pinned) return pinned;
+
+  // Clamped rather than trusted: a random() of exactly 1 (or anything out of
+  // range) would otherwise index past the end.
+  const index = Math.min(playable.length - 1, Math.max(0, Math.floor(random() * playable.length)));
+  return playable[index];
 }
