@@ -308,10 +308,10 @@ to students only once it has a published district with a published location —
 - **Do not hardcode text content.** Mission text, vocabulary, and quiz content must come from the database via the service layer.
 - **Implement as PWA.** Include a valid `manifest.json` and service worker. The app must be installable on mobile.
 - Required screens for MVP (implement all of these):
-  - `WelcomeScreen` — **as-built:** no longer the landing route. A visitor who
-    has never signed in lands on the signed-out demo map instead (`/demo`, see
-    `src/features/demo/`), so the first thing they do is play rather than read.
-    The component is kept for reuse.
+  - `WelcomeScreen` — still the landing screen for a signed-out visitor. Its
+    primary action opens the signed-out demo map (`/demo`, see
+    `src/features/demo/`) so the first thing they do is play; a secondary
+    button goes to the login screen for someone who already has an account.
   - `OnboardingForm`
   - City map (`CityMap` with `MapLocationNode` nodes)
   - `MissionScreen` (with `VocabularyTask`, `MatchingTask`, `QuizTask`)

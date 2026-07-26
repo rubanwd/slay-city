@@ -192,9 +192,14 @@ export default function WelcomeScreen() {
         </div>
       </div>
 
-      <Section py="lg" className="gap-4">
+      <Section py="lg" className="gap-3">
+        {/*
+          The one primary action: start playing. It opens the signed-out demo
+          map (see `src/features/demo/`) rather than a login form — a visitor
+          gets to play a location before the app asks who they are.
+        */}
         <Link
-          href="/auth/login"
+          href="/demo"
           className={[
             "inline-flex items-center justify-center gap-2.5 w-full h-16 px-8 rounded-2xl",
             "font-extrabold uppercase tracking-wide text-lg",
@@ -205,6 +210,20 @@ export default function WelcomeScreen() {
         >
           Let&apos;s Go!
           <ChevronIcon />
+        </Link>
+
+        {/* Secondary, for someone who already has an account and just wants in. */}
+        <Link
+          href="/auth/login"
+          className={[
+            "inline-flex items-center justify-center w-full h-14 px-8 rounded-2xl",
+            "font-extrabold uppercase tracking-wide text-base",
+            "border-2 border-white/25 text-white",
+            "hover:bg-white/10 active:bg-white/5 transition-colors",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+          ].join(" ")}
+        >
+          Log In
         </Link>
       </Section>
     </AppContainer>

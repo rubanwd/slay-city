@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { roleHome } from "@/features/auth/roleRouting";
+import WelcomeScreen from "@/components/WelcomeScreen";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -20,8 +21,8 @@ export default async function HomePage() {
     redirect(profile ? roleHome(profile.role) : "/onboarding");
   }
 
-  // Everyone else starts by playing: the signed-out demo map, not a login form.
-  // The app only asks who they are once they've finished a location (see
-  // `src/features/demo/`).
-  redirect("/demo");
+  // Everyone else gets the welcome screen. Its primary action opens the
+  // signed-out demo map, not a login form — the app only asks who they are once
+  // they've played a location (see `src/features/demo/`).
+  return <WelcomeScreen />;
 }
