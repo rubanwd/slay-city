@@ -173,6 +173,12 @@ export default function CityMapPreview({
   const backgroundUrl = district?.backgroundUrl ?? null;
   const backgroundLoaded = useImageLoaded(backgroundUrl);
 
+  // The teacher console's action button (open a location's missions) is the
+  // only thing in this panel with no student-map equivalent, so shrinking it
+  // — instead of the parent's read-only panel — is what buys the map area
+  // back the height it has on the student's own map.
+  const isTeacher = role === "teacher";
+
   /** Steps to another district and starts it over: first stop, no move in flight. */
   function showDistrict(nextIndex: number) {
     setDistrictIndex(nextIndex);
@@ -363,7 +369,7 @@ export default function CityMapPreview({
           </div>
 
           <section
-            className={`shrink-0 border-t border-white/10 px-5 pt-4 ${BOTTOM_NAV_CLEARANCE}`}
+            className={`shrink-0 border-t border-white/10 px-5 ${isTeacher ? "pt-2" : "pt-4"} ${BOTTOM_NAV_CLEARANCE}`}
             aria-label={strings.selectedLocation}
           >
             {selected ? (
@@ -430,8 +436,9 @@ export default function CityMapPreview({
                   <Link
                     href={`${locationHrefBase}/${selected.id}`}
                     className={[
-                      "mt-3 flex h-14 items-center justify-center gap-2 rounded-2xl",
-                      "bg-lime-green text-black font-extrabold uppercase tracking-wide text-lg",
+                      isTeacher ? "mt-2 flex h-11 text-base" : "mt-3 flex h-14 text-lg",
+                      "items-center justify-center gap-2 rounded-2xl",
+                      "bg-lime-green text-black font-extrabold uppercase tracking-wide",
                       "hover:brightness-110 active:brightness-90 transition-all",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-green focus-visible:ring-offset-2 focus-visible:ring-offset-black",
                     ].join(" ")}
