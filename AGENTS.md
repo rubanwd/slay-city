@@ -34,8 +34,8 @@ npm run start
 # Start Supabase local stack
 npx supabase start
 
-# Apply database migrations
-npx supabase db push
+# Inspect which migrations are pending (READ-ONLY — safe)
+npx supabase migration list
 
 # Generate TypeScript types from the database schema
 npx supabase gen types typescript --local > src/types/supabase.ts
@@ -45,6 +45,8 @@ npx supabase functions deploy <function-name>
 ```
 
 > If these scripts are not yet defined in `package.json`, add them before executing. Never run a command that could mutate production data unless explicitly authorized.
+
+> **Never run `npx supabase db push` by hand.** There is only one Supabase environment and it is production — the dev server talks to it too, so `db push` is a production schema change with no PR, no review and no rollback. The `migrate` job in `.github/workflows/ci.yml` applies migrations automatically on every push to `main`. Write the migration file, merge the PR, and let CI apply it. See [Git and Release Workflow](#git-and-release-workflow).
 
 ---
 
@@ -230,6 +232,38 @@ Follow this workflow for every task:
 
 ---
 
+## Git and Release Workflow
+
+Every change reaches production the same way: **branch → PR → green CI → squash merge → verify the deploy.** There are no shortcuts, and "merge it" means this entire sequence, not just the merge button.
+
+### Before writing any code
+
+1. `git fetch origin` and fast-forward `main`. **Never start from a stale checkout.** Work lands here via PRs merged on GitHub, often from another machine, so a local `main` can be dozens of commits behind without any sign. If the user describes or screenshots a screen you cannot find in the code, suspect a stale checkout before concluding the feature does not exist — `git log --oneline main..origin/main` shows the gap immediately.
+2. Never commit directly to `main`. Branch first: `feat/…`, `fix/…`, or `docs/…`.
+
+### Shipping the change
+
+3. Run `lint`, `type-check`, `test` locally and fix everything before committing.
+4. Commit, push the branch, and open a PR whose description states what was built and anything left unverified.
+5. **Wait for CI to pass** — `gh pr checks <n> --watch`. Never merge into a red or still-running build.
+6. Merge with `gh pr merge <n> --squash --delete-branch`. Squash is the house style: it keeps `main` one commit per change.
+
+### After merging — always verify, never assume
+
+7. Confirm `main` moved: `git checkout main && git pull --ff-only && git log --oneline -1`.
+8. Confirm CI on `main` is green, **including the `migrate` job** if the change carried a migration.
+9. Confirm Vercel promoted the new commit to **Production** — a merge is not a deploy:
+   `gh api repos/<owner>/<repo>/deployments --jq '.[0] | "\(.environment) \(.sha[0:7])"'`
+10. Report what actually shipped, and state plainly anything you could not verify.
+
+### Standing rules
+
+- **Squash merge hides what is merged from git.** `git branch --merged` can never recognise a squash-merged branch, so branch state must be checked against PRs (`gh pr list --state merged`), never against `git --merged`.
+- Branch auto-delete is enabled on the repository. If you delete branches manually, verify each branch's tip SHA equals the tip its PR merged (`headRefOid`) — a branch pushed to after its PR merged holds work that exists nowhere else.
+- Migrations apply themselves via CI (see above). Pick a migration timestamp not already applied on remote; reusing one makes `db push` treat your file as applied and **silently skip it**.
+
+---
+
 ## Security Rules
 
 - **Never expose the OpenRouter API key to the frontend.** All OpenRouter calls must go through Next.js Server Actions (this project does not use OpenAI or an Edge Function for this).
@@ -401,3 +435,4 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
 8. Confirm all new user-related tables have RLS enabled.
 9. Confirm all new screens are mobile-first and use only the defined brand color tokens.
 10. Write a PR description that states: what you built, which part of the core loop it serves, and any deviations from this manual with justification.
+11. If the work is being merged, follow [Git and Release Workflow](#git-and-release-workflow) to the end — green CI, squash merge, and a verified Production deploy. A merged PR is not a shipped change until Vercel reports the new commit in Production.
