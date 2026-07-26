@@ -59,7 +59,6 @@ export default async function DemoPage() {
       demo={{
         loginHref: "/auth/login",
         loginLabel: messages.demo.logIn,
-        hint: messages.demo.hint,
         missionHrefBase: "/demo/mission",
       }}
     />

@@ -73,13 +73,35 @@ describe("advanceDemoProgress", () => {
 });
 
 describe("selectDemoDistrict", () => {
-  it("picks the first district that has somewhere to play", () => {
-    const districts = [
-      { id: "empty", locations: [] },
-      { id: "first", locations: ["a"] },
-      { id: "second", locations: ["b"] },
-    ];
-    expect(selectDemoDistrict(districts)?.id).toBe("first");
+  const DISTRICTS = [
+    { id: "empty", locations: [] },
+    { id: "first", locations: ["a"] },
+    { id: "second", locations: ["b"] },
+    { id: "third", locations: ["c"] },
+  ];
+
+  it("picks a random district out of those that have somewhere to play", () => {
+    expect(selectDemoDistrict(DISTRICTS, { random: () => 0 })?.id).toBe("first");
+    expect(selectDemoDistrict(DISTRICTS, { random: () => 0.5 })?.id).toBe("second");
+    expect(selectDemoDistrict(DISTRICTS, { random: () => 0.99 })?.id).toBe("third");
+  });
+
+  it("never indexes past the end when random returns its upper bound", () => {
+    expect(selectDemoDistrict(DISTRICTS, { random: () => 1 })?.id).toBe("third");
+  });
+
+  it("stays in the district the run is already being played in", () => {
+    expect(selectDemoDistrict(DISTRICTS, { pinnedId: "third", random: () => 0 })?.id).toBe("third");
+  });
+
+  it("rolls again when the pinned district is gone (unpublished mid-run)", () => {
+    expect(selectDemoDistrict(DISTRICTS, { pinnedId: "removed", random: () => 0 })?.id).toBe(
+      "first"
+    );
+  });
+
+  it("never pins to a district with nothing to play", () => {
+    expect(selectDemoDistrict(DISTRICTS, { pinnedId: "empty", random: () => 0 })?.id).toBe("first");
   });
 
   it("returns null when no district has a location", () => {

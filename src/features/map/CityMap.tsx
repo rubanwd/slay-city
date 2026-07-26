@@ -25,12 +25,12 @@ import MapLocationNode from "./MapLocationNode";
 import MascotMarker from "./MascotMarker";
 
 /**
- * Bottom padding the panel needs under the demo's log-in bar — the hint line
- * and the button (56px) plus their padding, and the device's safe-area inset on
- * top. The equivalent of `BOTTOM_NAV_CLEARANCE`, but the demo bar is one button
- * rather than a tab row with a watermark strip, so it is much shorter.
+ * Bottom padding the panel needs under the demo's log-in bar — the button
+ * (56px) plus the bar's padding, and the device's safe-area inset on top. The
+ * equivalent of `BOTTOM_NAV_CLEARANCE`, but the demo bar is one button rather
+ * than a tab row with a watermark strip, so it is much shorter.
  */
-const DEMO_BAR_CLEARANCE = "pb-[calc(128px+env(safe-area-inset-bottom))]";
+const DEMO_BAR_CLEARANCE = "pb-[calc(112px+env(safe-area-inset-bottom))]";
 
 function RestartLocationButton() {
   const { pending } = useFormStatus();
@@ -97,7 +97,7 @@ export interface HudStats {
  * The signed-out demo's version of the map. A visitor has no tabs to move
  * between and no progress to edit, so the tab bar becomes a single log-in call
  * to action and the restart/replay controls (which write to the database) are
- * left out. Strings arrive translated — the demo follows the browser's
+ * left out. The label arrives translated — the demo follows the browser's
  * language, see `resolveBrowserLocale`.
  */
 export interface MapDemoMode {
@@ -105,8 +105,6 @@ export interface MapDemoMode {
   loginHref: string;
   /** Label for that button, in the visitor's language. */
   loginLabel: string;
-  /** One line naming what the demo includes, in the visitor's language. */
-  hint: string;
   /** Route prefix for a mission — the demo has its own public player. */
   missionHrefBase: string;
 }
@@ -209,8 +207,7 @@ export default function CityMap({
     <main className="relative h-dvh bg-black flex flex-col overflow-hidden mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-between gap-2 px-5 py-3 border-b border-white/10 shrink-0">
         <h1 className="text-lg font-black text-lime-green leading-tight uppercase">Slay City</h1>
-        {/* A visitor has no XP or coins yet, so the demo shows no scoreboard —
-            its bottom bar says what the demo includes instead. */}
+        {/* A visitor has no XP or coins yet, so the demo shows no scoreboard. */}
         {!demo && (
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-white whitespace-nowrap">
@@ -462,8 +459,7 @@ export default function CityMap({
       )}
 
       {demo ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md border-t border-white/10 bg-black/95 px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur md:border-x">
-          <p className="pb-2 text-center text-xs font-bold text-white/50">{demo.hint}</p>
+        <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md border-t border-white/10 bg-black/95 px-5 pt-3 pb-[calc(2rem+env(safe-area-inset-bottom))] backdrop-blur md:border-x">
           <Link
             href={demo.loginHref}
             className={[

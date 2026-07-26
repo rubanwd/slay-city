@@ -39,6 +39,10 @@ export async function readDemoProgress(): Promise<DemoProgress> {
  * selectable — exactly like the signed-in map, except progress comes from the
  * visitor's cookie instead of `user_progress`.
  *
+ * Which district that is, is a random pick among the demo level's published
+ * ones, held steady for the rest of a run once the visitor has played something
+ * (see {@link selectDemoDistrict}).
+ *
  * Every table read here is published content, which the `anon` role is granted
  * SELECT on (see the RLS policies in the initial schema migration), so this
  * works with no session at all.
@@ -86,7 +90,30 @@ export async function getDemoDistrict(
     missionCountsByLocation
   );
 
-  return selectDemoDistrict(mapDistricts);
+  return selectDemoDistrict(mapDistricts, {
+    pinnedId: districtOfPlayedMissions(locations, missions, completedMissionIds),
+  });
+}
+
+/**
+ * The district a run is already happening in — the one holding the missions the
+ * visitor has finished — or null while they have played nothing. Keeps the
+ * random pick in {@link selectDemoDistrict} from re-rolling mid-run.
+ */
+function districtOfPlayedMissions(
+  locations: { id: string; district_id: string }[],
+  missions: { id: string; location_id: string }[],
+  completedMissionIds: ReadonlySet<string>
+): string | null {
+  if (completedMissionIds.size === 0) return null;
+
+  const districtByLocation = new Map(locations.map((location) => [location.id, location.district_id]));
+  for (const mission of missions) {
+    if (completedMissionIds.has(mission.id)) {
+      return districtByLocation.get(mission.location_id) ?? null;
+    }
+  }
+  return null;
 }
 
 /**
