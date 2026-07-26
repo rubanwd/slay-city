@@ -29,11 +29,15 @@ export default function EmojiDecodeTask({
 
   return (
     <div className="flex flex-col gap-6">
+      <h2 className="text-center text-h2 font-black text-white">
+        Which word does this emoji mean?
+      </h2>
+
       <div className="flex flex-col items-center gap-2">
         <div className="rounded-2xl border border-white/15 bg-white/5 px-6 py-8 text-center text-5xl leading-tight">
           {emojis}
         </div>
-        <p className="text-small text-white/50">What word is this?</p>
+        <p className="text-small text-white/50">Pick the matching word below.</p>
       </div>
 
       <div className="flex flex-col gap-3">
