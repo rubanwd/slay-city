@@ -5,9 +5,15 @@ import type { Database } from "@/types/database";
 import { roleHome } from "@/features/auth/roleRouting";
 import { VIEW_AS_TEACHER_COOKIE } from "@/features/teacher/viewAsCookie";
 
-/** Routes reachable without a session. Everything else requires auth. */
+/**
+ * Routes reachable without a session. Everything else requires auth.
+ *
+ * `/demo` is the signed-out landing experience — a playable slice of the map
+ * (see `src/features/demo/`). It is public by design; the pages themselves send
+ * a signed-in visitor on to their own home.
+ */
 function isPublicPath(pathname: string): boolean {
-  return pathname === "/" || pathname.startsWith("/auth");
+  return pathname === "/" || pathname.startsWith("/auth") || pathname.startsWith("/demo");
 }
 
 export async function middleware(request: NextRequest) {

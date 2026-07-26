@@ -24,6 +24,14 @@ import type { MapDistrictViewModel } from "./mapState";
 import MapLocationNode from "./MapLocationNode";
 import MascotMarker from "./MascotMarker";
 
+/**
+ * Bottom padding the panel needs under the demo's log-in bar — the hint line
+ * and the button (56px) plus their padding, and the device's safe-area inset on
+ * top. The equivalent of `BOTTOM_NAV_CLEARANCE`, but the demo bar is one button
+ * rather than a tab row with a watermark strip, so it is much shorter.
+ */
+const DEMO_BAR_CLEARANCE = "pb-[calc(128px+env(safe-area-inset-bottom))]";
+
 function RestartLocationButton() {
   const { pending } = useFormStatus();
   return (
@@ -85,6 +93,24 @@ export interface HudStats {
   currentStreak: number;
 }
 
+/**
+ * The signed-out demo's version of the map. A visitor has no tabs to move
+ * between and no progress to edit, so the tab bar becomes a single log-in call
+ * to action and the restart/replay controls (which write to the database) are
+ * left out. Strings arrive translated — the demo follows the browser's
+ * language, see `resolveBrowserLocale`.
+ */
+export interface MapDemoMode {
+  /** Where the log-in button goes. */
+  loginHref: string;
+  /** Label for that button, in the visitor's language. */
+  loginLabel: string;
+  /** One line naming what the demo includes, in the visitor's language. */
+  hint: string;
+  /** Route prefix for a mission — the demo has its own public player. */
+  missionHrefBase: string;
+}
+
 export interface CityMapProps {
   /** The district the player is currently in (see selectActiveDistrict). */
   district: MapDistrictViewModel | null;
@@ -101,6 +127,8 @@ export interface CityMapProps {
    * automatically as soon as one does.
    */
   levelStatus?: LevelStatus | null;
+  /** Set for signed-out visitors — see {@link MapDemoMode}. */
+  demo?: MapDemoMode | null;
 }
 
 export default function CityMap({
@@ -110,6 +138,7 @@ export default function CityMap({
   showHomework,
   navLabels,
   levelStatus,
+  demo = null,
 }: CityMapProps) {
   const locations = selectVisibleLocations(district?.locations ?? [], MAX_VISIBLE_LOCATIONS);
 
@@ -155,7 +184,9 @@ export default function CityMap({
     }
 
     if (focus || milestone) {
-      window.history.replaceState(null, "", "/map");
+      // Drop the query string but stay on whichever map this is — the signed-in
+      // one at /map or the signed-out demo.
+      window.history.replaceState(null, "", window.location.pathname);
     }
     // Only ever read the URL the map was opened with, once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -178,16 +209,20 @@ export default function CityMap({
     <main className="relative h-dvh bg-black flex flex-col overflow-hidden mx-auto w-full max-w-md md:border-x md:border-white/10">
       <header className="flex items-center justify-between gap-2 px-5 py-3 border-b border-white/10 shrink-0">
         <h1 className="text-lg font-black text-lime-green leading-tight uppercase">Slay City</h1>
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-white whitespace-nowrap">
-            Lvl {hud.level} · {hud.xp} XP
-          </span>
-          <CoinAmount
-            value={hud.coins}
-            label={`${hud.coins} coins`}
-            className="px-3 py-1.5 rounded-full bg-white/10 text-sm text-yellow-300"
-          />
-        </div>
+        {/* A visitor has no XP or coins yet, so the demo shows no scoreboard —
+            its bottom bar says what the demo includes instead. */}
+        {!demo && (
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/10 text-sm font-bold text-white whitespace-nowrap">
+              Lvl {hud.level} · {hud.xp} XP
+            </span>
+            <CoinAmount
+              value={hud.coins}
+              label={`${hud.coins} coins`}
+              className="px-3 py-1.5 rounded-full bg-white/10 text-sm text-yellow-300"
+            />
+          </div>
+        )}
       </header>
 
       {milestoneBanner && (
@@ -286,7 +321,7 @@ export default function CityMap({
         yet — offer the replay instead of leaving them on a map where every
         stop reads "Completed".
       */}
-      {levelStatus?.completed && (
+      {!demo && levelStatus?.completed && (
         <div className="shrink-0 border-t border-white/10 px-5 pt-4">
           <div className="rounded-2xl border-2 border-lime-green bg-lime-green/10 px-4 py-3">
             <p className="text-base font-black uppercase tracking-wide text-lime-green">
@@ -320,7 +355,9 @@ export default function CityMap({
       )}
 
       {selected && (
-        <div className={`px-5 pt-4 ${BOTTOM_NAV_CLEARANCE} border-t border-white/10 shrink-0`}>
+        <div
+          className={`px-5 pt-4 ${demo ? DEMO_BAR_CLEARANCE : BOTTOM_NAV_CLEARANCE} border-t border-white/10 shrink-0`}
+        >
           {/*
             Always-visible name + "done so far" count for the selected stop,
             so the player never has to guess how many missions are left here —
@@ -368,7 +405,7 @@ export default function CityMap({
           <div className="flex items-center">
             {selected.missionId ? (
               <Link
-                href={`/mission/${selected.missionId}`}
+                href={`${demo?.missionHrefBase ?? "/mission"}/${selected.missionId}`}
                 onClick={() => {
                   void playMissionStartSfx();
                 }}
@@ -392,12 +429,15 @@ export default function CityMap({
               </div>
             )}
 
+            {/* Restarting a location rewrites progress in the database, which a
+                signed-out visitor has none of — their demo run resets from the
+                sign-up wall instead. */}
             <div
               className={[
                 "shrink-0 overflow-hidden transition-all duration-300 ease-out motion-reduce:transition-none",
-                isCompleted ? "w-14 ml-2 opacity-100" : "w-0 ml-0 opacity-0",
+                isCompleted && !demo ? "w-14 ml-2 opacity-100" : "w-0 ml-0 opacity-0",
               ].join(" ")}
-              inert={!isCompleted}
+              inert={!isCompleted || Boolean(demo)}
             >
               <form
                 action={async () => {
@@ -421,7 +461,24 @@ export default function CityMap({
         </div>
       )}
 
-      <BottomNav showHomework={showHomework} labels={navLabels} />
+      {demo ? (
+        <div className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md border-t border-white/10 bg-black/95 px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur md:border-x">
+          <p className="pb-2 text-center text-xs font-bold text-white/50">{demo.hint}</p>
+          <Link
+            href={demo.loginHref}
+            className={[
+              "flex h-14 items-center justify-center rounded-2xl bg-neon-pink px-4",
+              "text-lg font-extrabold uppercase tracking-wide text-white",
+              "hover:brightness-110 active:brightness-90 transition-all",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-pink focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+            ].join(" ")}
+          >
+            {demo.loginLabel}
+          </Link>
+        </div>
+      ) : (
+        <BottomNav showHomework={showHomework} labels={navLabels} />
+      )}
     </main>
   );
 }

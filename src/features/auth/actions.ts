@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { DEMO_PROGRESS_COOKIE } from "@/features/demo/demoProgress";
 import { VIEW_AS_TEACHER_COOKIE } from "@/features/teacher/viewAsCookie";
 
 import { resolveHomePath } from "./roleRouting";
@@ -133,7 +134,11 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
   // Drop any admin "View as Teacher" impersonation so it can't leak into the
   // next session on this browser.
-  (await cookies()).delete(VIEW_AS_TEACHER_COOKIE);
+  const cookieStore = await cookies();
+  cookieStore.delete(VIEW_AS_TEACHER_COOKIE);
+  // A finished demo run would otherwise send whoever logs out next straight to
+  // the sign-up wall instead of the demo map.
+  cookieStore.delete(DEMO_PROGRESS_COOKIE);
   revalidatePath("/", "layout");
   redirect("/auth/login");
 }
