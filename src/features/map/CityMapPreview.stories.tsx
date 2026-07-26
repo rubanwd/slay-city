@@ -100,12 +100,18 @@ export const WithStudentProgress: Story = {
   },
 };
 
-/** The teacher's map: no student progress, and every stop opens its missions. */
+/**
+ * The teacher's map: no student progress, every stop opens its missions, and
+ * the selected stop's label can be picked up and dropped elsewhere. Move saves
+ * through a server action, so here it reports a failure and the label snaps
+ * back — the tap-to-place interaction itself still runs.
+ */
 export const Teacher: Story = {
   args: {
     role: "teacher",
     subtitle: "Every district and mission",
     locationHrefBase: "/teacher/location",
+    canMoveLocations: true,
   },
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState, useTransition, type MouseEvent } from "react";
 
 import { BottomNav, BOTTOM_NAV_CLEARANCE } from "@/components/layout";
 import { CoinAmount, XpAmount } from "@/components/ui";
@@ -9,6 +9,7 @@ import FullScreenLoader from "@/components/ui/FullScreenLoader";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "@/features/i18n";
 import { useImageLoaded } from "@/hooks/useImageLoaded";
 
+import { moveLocationOnMap } from "./actions";
 import MapBackground from "./MapBackground";
 import { MAP_ASPECT } from "./mapConstants";
 import MapLocationNode from "./MapLocationNode";
@@ -18,7 +19,26 @@ import {
   MAX_VISIBLE_LOCATIONS,
   selectVisibleLocations,
 } from "./mapState";
-import type { MapDistrictViewModel } from "./mapState";
+import type { MapDistrictViewModel, MapLocationViewModel } from "./mapState";
+
+/** A map coordinate is a percentage of the frame, rounded like the admin picker. */
+function toMapPercent(offset: number, size: number): number {
+  const percent = Math.round(((offset / size) * 100) * 10) / 10;
+  return Math.min(100, Math.max(0, percent));
+}
+
+/** Where a label sits right now, once a pending move has been applied to it. */
+type MovedPositions = Record<string, { x: number; y: number }>;
+
+function applyMoves(
+  locations: MapLocationViewModel[],
+  moved: MovedPositions
+): MapLocationViewModel[] {
+  return locations.map((location) => {
+    const position = moved[location.id];
+    return position ? { ...location, mapX: position.x, mapY: position.y } : location;
+  });
+}
 
 /** ‹ / › district stepper — the adults' stand-in for playing through the city. */
 function StepButton({
@@ -77,6 +97,14 @@ export interface CityMapPreviewProps {
    * content and always render as written.
    */
   locale?: Locale;
+  /**
+   * Adds a Move button to the selected stop, which lets the viewer drop its
+   * label anywhere on the map. Set on the teacher console — teachers review
+   * every district here and are the ones who spot a label covering the artwork
+   * it names. The database decides who may actually save the new spot
+   * (`set_location_map_position`); this only offers the button.
+   */
+  canMoveLocations?: boolean;
 }
 
 /**
@@ -106,6 +134,7 @@ export default function CityMapPreview({
   progressLabel = null,
   locationHrefBase = null,
   locale = DEFAULT_LOCALE,
+  canMoveLocations = false,
 }: CityMapPreviewProps) {
   // Resolved here rather than passed in: several of these messages take a count
   // only this component knows, and a function cannot cross the server → client
@@ -116,16 +145,82 @@ export default function CityMapPreview({
   const [districtIndex, setDistrictIndex] = useState(() =>
     defaultPreviewDistrictIndex(districts)
   );
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Three states, not two: `undefined` lets the district's first stop stand in
+  // (the map should never open on an empty panel), while `null` means the
+  // selection was deliberately cleared — which is where a finished move leaves
+  // things, so nothing is lit up over the label's new home.
+  const [selectedId, setSelectedId] = useState<string | null | undefined>(undefined);
+  // The stop whose label is being repositioned; the next tap on the map lands it.
+  const [movingId, setMovingId] = useState<string | null>(null);
+  // New positions held locally so a moved label jumps under the finger straight
+  // away, rather than after the server round trip and revalidation.
+  const [moved, setMoved] = useState<MovedPositions>({});
+  const [moveFailed, setMoveFailed] = useState(false);
+  const [, startSaving] = useTransition();
+  const frameRef = useRef<HTMLDivElement>(null);
 
   const district = districts[districtIndex] ?? null;
-  const locations = selectVisibleLocations(district?.locations ?? [], MAX_VISIBLE_LOCATIONS);
-  // Stepping to another district drops the previous selection automatically:
-  // its id isn't in this district's list, so the first stop takes over.
-  const selected = locations.find((location) => location.id === selectedId) ?? locations[0] ?? null;
+  const locations = applyMoves(
+    selectVisibleLocations(district?.locations ?? [], MAX_VISIBLE_LOCATIONS),
+    moved
+  );
+  const selected =
+    selectedId === null
+      ? null
+      : locations.find((location) => location.id === selectedId) ?? locations[0] ?? null;
+  const moving = movingId ? locations.find((location) => location.id === movingId) ?? null : null;
 
   const backgroundUrl = district?.backgroundUrl ?? null;
   const backgroundLoaded = useImageLoaded(backgroundUrl);
+
+  /** Steps to another district and starts it over: first stop, no move in flight. */
+  function showDistrict(nextIndex: number) {
+    setDistrictIndex(nextIndex);
+    setSelectedId(undefined);
+    setMovingId(null);
+  }
+
+  /**
+   * Drops the label being moved wherever the map was tapped, then leaves the map
+   * with nothing selected so the teacher can see the new arrangement plainly.
+   * The save runs behind that; if it fails the label snaps back to its stored
+   * spot rather than showing a move that isn't there.
+   */
+  function dropLabel(event: MouseEvent<HTMLDivElement>) {
+    const locationId = movingId;
+    const rect = frameRef.current?.getBoundingClientRect();
+    if (!locationId || !rect || rect.width === 0 || rect.height === 0) return;
+
+    const x = toMapPercent(event.clientX - rect.left, rect.width);
+    const y = toMapPercent(event.clientY - rect.top, rect.height);
+
+    setMoved((current) => ({ ...current, [locationId]: { x, y } }));
+    setMovingId(null);
+    setSelectedId(null);
+    setMoveFailed(false);
+
+    startSaving(async () => {
+      const result = await moveLocationOnMap(locationId, x, y);
+      if (result.ok) return;
+      setMoved((current) => {
+        const rest = { ...current };
+        delete rest[locationId];
+        return rest;
+      });
+      setMoveFailed(true);
+    });
+  }
+
+  // Escape backs out of a move — the usual way out of a mode, and the only one
+  // that doesn't require finding the small Cancel button on a phone.
+  useEffect(() => {
+    if (!movingId) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMovingId(null);
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [movingId]);
 
   return (
     <main className="relative h-dvh bg-black flex flex-col overflow-hidden mx-auto w-full max-w-md md:border-x md:border-white/10">
@@ -152,7 +247,7 @@ export default function CityMapPreview({
             <StepButton
               direction="previous"
               label={strings.previousDistrict}
-              onClick={() => setDistrictIndex((index) => Math.max(0, index - 1))}
+              onClick={() => showDistrict(Math.max(0, districtIndex - 1))}
               disabled={districtIndex === 0}
             />
             <div className="min-w-0 text-center">
@@ -169,9 +264,7 @@ export default function CityMapPreview({
             <StepButton
               direction="next"
               label={strings.nextDistrict}
-              onClick={() =>
-                setDistrictIndex((index) => Math.min(districts.length - 1, index + 1))
-              }
+              onClick={() => showDistrict(Math.min(districts.length - 1, districtIndex + 1))}
               disabled={districtIndex === districts.length - 1}
             />
           </div>
@@ -200,6 +293,7 @@ export default function CityMapPreview({
 
             <div className="absolute inset-0 flex items-start justify-center">
               <div
+                ref={frameRef}
                 className="relative w-full max-h-full overflow-hidden"
                 style={{ aspectRatio: String(MAP_ASPECT) }}
               >
@@ -229,6 +323,37 @@ export default function CityMapPreview({
                     onSelect={() => setSelectedId(location.id)}
                   />
                 ))}
+
+                {/*
+                  While a label is being moved this sheet takes every tap on the
+                  frame — including taps that land on another label — so the
+                  whole map is a drop target and nothing else can be picked up
+                  mid-move. It only exists during a move, so the map stays
+                  ordinarily clickable the rest of the time.
+                */}
+                {moving && (
+                  <div
+                    className="absolute inset-0 z-20 cursor-crosshair bg-black/20"
+                    onClick={dropLabel}
+                    role="presentation"
+                  >
+                    <div className="pointer-events-none absolute inset-x-3 top-3 flex flex-col items-center gap-2">
+                      <p className="rounded-full bg-black/80 px-4 py-1.5 text-center text-xs font-bold text-white shadow-lg">
+                        {strings.moveHint(moving.name)}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setMovingId(null);
+                        }}
+                        className="pointer-events-auto rounded-full border border-white/30 bg-black/80 px-3 py-1 text-xs font-bold text-white/80 hover:bg-white/10"
+                      >
+                        {strings.moveCancel}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -247,6 +372,24 @@ export default function CityMapPreview({
                   <h2 className="min-w-0 truncate text-base font-black text-white">
                     {selected.name}
                   </h2>
+                  {canMoveLocations && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMovingId(selected.id);
+                        setMoveFailed(false);
+                      }}
+                      aria-pressed={movingId === selected.id}
+                      className={[
+                        "shrink-0 rounded-full border px-2.5 py-1 text-xs font-bold transition-colors",
+                        movingId === selected.id
+                          ? "border-neon-pink bg-neon-pink/15 text-neon-pink"
+                          : "border-white/25 text-white/70 hover:bg-white/10 hover:text-white",
+                      ].join(" ")}
+                    >
+                      {strings.move}
+                    </button>
+                  )}
                   {selected.totalMissions > 0 && (
                     <span
                       className={[
@@ -300,7 +443,18 @@ export default function CityMapPreview({
                 )}
               </>
             ) : (
-              <p className="text-small text-white/50">{strings.noLocations}</p>
+              // Two ways to end up without a stop: the district genuinely has
+              // none, or a move just finished and deliberately left nothing
+              // selected.
+              <p className="text-small text-white/50">
+                {locations.length === 0 ? strings.noLocations : strings.tapLocation}
+              </p>
+            )}
+
+            {moveFailed && (
+              <p role="alert" className="pt-2 text-small font-bold text-neon-pink">
+                {strings.moveFailed}
+              </p>
             )}
           </section>
         </>

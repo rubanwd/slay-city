@@ -1334,6 +1334,10 @@ export type Database = {
       }
       reset_my_progress: { Args: never; Returns: undefined }
       revoke_teacher: { Args: { p_profile_id: string }; Returns: boolean }
+      set_location_map_position: {
+        Args: { p_location_id: string; p_map_x: number; p_map_y: number }
+        Returns: undefined
+      }
       set_my_knowledge_level: {
         Args: { p_level: Database["public"]["Enums"]["knowledge_level"] }
         Returns: undefined

@@ -178,5 +178,11 @@ export interface Messages {
     /** Only the teacher console can open a location; kept so the shape is complete. */
     openMissions: string;
     openLocation: string;
+    /** Repositioning a label — teacher console only, same completeness reason. */
+    tapLocation: string;
+    move: string;
+    moveHint: (name: string) => string;
+    moveCancel: string;
+    moveFailed: string;
   };
 }
