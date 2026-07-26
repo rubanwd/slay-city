@@ -20,6 +20,16 @@ import {
 /** Task types that take over the whole panel and manage their own layout/progress. */
 const IMMERSIVE_TASK_TYPES: MissionTaskType[] = ["snake_game", "bubble_pop"];
 
+/**
+ * What happens when the last task is done, for a caller that records the
+ * completion itself. Returns where to go next, or the error to show above a
+ * "Try Again" button. Used by the signed-out demo, which has no account to
+ * grant rewards to and so cannot go through `submitMissionCompletion`.
+ */
+export type MissionFinishHandler = (
+  rewardFraction: number
+) => Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }>;
+
 export interface MissionScreenProps {
   mission: MissionViewModel;
   /** The location this mission belongs to — its icon and name head the screen. */
@@ -35,6 +45,11 @@ export interface MissionScreenProps {
   exitHref?: string;
   /** Review mode only: the next mission at this location, offered at the end. */
   nextMission?: { title: string; href: string } | null;
+  /**
+   * Records the completion instead of the default reward flow — see
+   * {@link MissionFinishHandler}. Ignored in review mode, which records nothing.
+   */
+  onFinish?: MissionFinishHandler;
 }
 
 export default function MissionScreen({
@@ -44,6 +59,7 @@ export default function MissionScreen({
   review = false,
   exitHref = "/map",
   nextMission = null,
+  onFinish,
 }: MissionScreenProps) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -69,6 +85,16 @@ export default function MissionScreen({
       return;
     }
     startSubmit(async () => {
+      if (onFinish) {
+        const result = await onFinish(rewardFraction);
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.push(result.redirectTo);
+        return;
+      }
+
       const result = await submitMissionCompletion(mission.id, rewardFraction);
       if (!result.ok) {
         setError(result.error);

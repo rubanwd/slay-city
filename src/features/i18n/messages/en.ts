@@ -135,6 +135,15 @@ export const en: Messages = {
     },
   },
 
+  demo: {
+    logIn: "Log in",
+    hint: "Demo — one location free",
+    gateTitle: "That's the demo!",
+    gateBody:
+      "To keep exploring the city, create an account or log in. Then your XP, coins and progress are saved.",
+    gateBack: "← Back to the map",
+  },
+
   map: {
     title: "City Map",
     subtitle: "What your student explores",

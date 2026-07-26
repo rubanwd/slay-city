@@ -56,7 +56,7 @@ Follow this directory layout exactly. Do not create top-level directories outsid
 src/
   app/              # Next.js App Router pages and layouts
   components/       # Shared, reusable UI primitives (+ Storybook stories/docs)
-  features/         # Feature-scoped modules (map, mission, wardrobe, parent, admin, auth, onboarding, profile, reward)
+  features/         # Feature-scoped modules (map, mission, wardrobe, parent, admin, auth, demo, onboarding, profile, reward)
   hooks/            # Custom React hooks
   lib/              # Third-party client instances (Supabase client, etc.)
   types/            # TypeScript types and generated Supabase types
@@ -308,7 +308,10 @@ to students only once it has a published district with a published location —
 - **Do not hardcode text content.** Mission text, vocabulary, and quiz content must come from the database via the service layer.
 - **Implement as PWA.** Include a valid `manifest.json` and service worker. The app must be installable on mobile.
 - Required screens for MVP (implement all of these):
-  - `WelcomeScreen`
+  - `WelcomeScreen` — still the landing screen for a signed-out visitor. Its
+    primary action opens the signed-out demo map (`/demo`, see
+    `src/features/demo/`) so the first thing they do is play; a secondary
+    button goes to the login screen for someone who already has an account.
   - `OnboardingForm`
   - City map (`CityMap` with `MapLocationNode` nodes)
   - `MissionScreen` (with `VocabularyTask`, `MatchingTask`, `QuizTask`)
@@ -332,15 +335,19 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
 - Leaderboards
 - In-app purchases or payment processing
 - Push notifications
-- Multiple language support beyond English — **except the parent console and two
-  parts of the student game**, translated (English / Ukrainian / Russian, see
-  `src/features/i18n/`) on the product owner's request:
+- Multiple language support beyond English — **except the parent console and
+  three parts of the student game**, translated (English / Ukrainian / Russian,
+  see `src/features/i18n/`) on the product owner's request:
   - The whole parent console: a parent is an adult who never signed up to learn
     English. It follows the browser's `Accept-Language` by default.
   - The student's **profile screen and tab bar** only, switchable on their
     profile. The default is a fixed language (`STUDENT_DEFAULT_LOCALE`,
     currently English) rather than the browser's. Both consoles share one
     stored preference (the `slay_locale` cookie).
+  - The **signed-out demo's own chrome** (`src/features/demo/`): its log-in bar
+    and the sign-up wall behind it. A visitor has no profile to have chosen a
+    language on, so this follows the browser like the parent console does
+    (`resolveBrowserLocale`).
 
   Everything a mission puts on screen stays English — the English *is* the
   lesson — as does all authored content (district, location, mission and

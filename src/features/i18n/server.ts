@@ -42,6 +42,20 @@ export async function resolveLocale(): Promise<ResolvedLocale> {
 }
 
 /**
+ * The language the browser asks for, ignoring any stored choice.
+ *
+ * Used by the signed-out demo (the map a visitor lands on and the sign-up wall
+ * behind it): there is no account yet to hold a preference, and
+ * `Accept-Language` is the only thing the visitor has told us. A student who
+ * later signs up gets the game's own default until they pick on their profile
+ * (see {@link resolveStudentLocale}).
+ */
+export async function resolveBrowserLocale(): Promise<Locale> {
+  const headerList = await headers();
+  return matchLocale(headerList.get("accept-language")) ?? DEFAULT_LOCALE;
+}
+
+/**
  * Which language to render a student's screens in.
  *
  * Same stored choice as the parent console — one preference per device, written
