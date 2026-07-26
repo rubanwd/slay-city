@@ -48,7 +48,7 @@ export default function SentenceBuilderTask({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-2 text-center">
-        <p className="font-semibold text-white">{prompt}</p>
+        <p className="text-h3 font-semibold text-white">{prompt}</p>
         {translation && <p className="text-small text-white/60">{translation}</p>}
       </div>
 

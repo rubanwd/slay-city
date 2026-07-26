@@ -79,7 +79,7 @@ export default function BubblePopTask({
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <div className="shrink-0 text-center">
-        <p className="font-semibold text-white">{prompt}</p>
+        <p className="text-h3 font-semibold text-white">{prompt}</p>
         <p className="text-small text-white/50">{remaining} left to pop</p>
       </div>
 

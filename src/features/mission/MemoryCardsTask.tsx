@@ -78,7 +78,7 @@ export default function MemoryCardsTask({
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="text-center font-semibold text-white">{prompt}</p>
+      <p className="text-center text-h3 font-semibold text-white">{prompt}</p>
 
       <div className="grid grid-cols-4 gap-2.5">
         {cards.map((card) => {

@@ -55,7 +55,7 @@ export default function StorySequencingTask({
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="text-center font-semibold text-white">{prompt}</p>
+      <p className="text-center text-h3 font-semibold text-white">{prompt}</p>
 
       <ol className="flex flex-col gap-2.5">
         {order.map((step, index) => {

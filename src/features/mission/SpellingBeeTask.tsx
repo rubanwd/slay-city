@@ -48,7 +48,7 @@ export default function SpellingBeeTask({
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-center font-semibold text-white">{prompt}</p>
+      <p className="text-center text-h3 font-semibold text-white">{prompt}</p>
 
       {audioUrl && <audio ref={audioRef} src={audioUrl} preload="auto" />}
 

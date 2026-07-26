@@ -78,7 +78,7 @@ export default function ReactionTapTask({
   return (
     <div className="flex flex-col gap-4">
       <div className="text-center">
-        <p className="font-semibold text-white">{prompt}</p>
+        <p className="text-h3 font-semibold text-white">{prompt}</p>
         <p className={["text-small font-bold", secondsLeft <= 5 && !roundOver ? "text-neon-pink" : "text-white/50"].join(" ")}>
           {roundOver ? (won ? "All tapped! 🎉" : "Time's up!") : `⏱ ${secondsLeft}s left`}
         </p>

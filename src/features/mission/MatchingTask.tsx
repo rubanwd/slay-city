@@ -67,7 +67,7 @@ export default function MatchingTask({
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-white font-semibold text-center">{prompt}</p>
+      <p className="text-white text-h3 font-semibold text-center">{prompt}</p>
 
       <div className="grid grid-cols-2 gap-3">
         {/* Words column */}
