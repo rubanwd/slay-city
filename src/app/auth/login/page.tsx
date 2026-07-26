@@ -1,4 +1,5 @@
 import { AppContainer, Section } from "@/components/layout";
+import { BackLink } from "@/components/ui";
 import AuthBackdrop from "@/features/auth/AuthBackdrop";
 import AuthForm from "@/features/auth/AuthForm";
 import { loginFormAction } from "@/features/auth/actions";
@@ -26,6 +27,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           initialMessage={message}
           initialError={error}
         />
+
+        {/*
+          A way back for someone who only came to look. Left out after the demo:
+          that visitor already has a Back button above, which also resets their
+          demo run — the browser's own back would only bounce them here again.
+        */}
+        {!fromDemo && <BackLink className="mt-6" />}
       </Section>
     </AppContainer>
   );

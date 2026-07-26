@@ -3,6 +3,9 @@ export type { SlayButtonProps, SlayButtonVariant, SlayButtonSize } from "./SlayB
 
 export { default as NavLink } from "./NavLink";
 
+export { default as BackLink } from "./BackLink";
+export type { BackLinkProps } from "./BackLink";
+
 export { default as SlayCard } from "./SlayCard";
 export type { SlayCardProps, SlayCardVariant } from "./SlayCard";
 
