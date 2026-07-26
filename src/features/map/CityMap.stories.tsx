@@ -68,7 +68,6 @@ export const Demo: Story = {
     demo: {
       loginHref: "/auth/login",
       loginLabel: "Log in",
-      hint: "Demo — one location free",
       missionHrefBase: "/demo/mission",
     },
   },
