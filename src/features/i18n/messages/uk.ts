@@ -163,5 +163,10 @@ export const uk: Messages = {
     toEarnHere: "можна заробити тут",
     openMissions: "▶ Відкрити місії",
     openLocation: "Відкрити локацію",
+    tapLocation: "Натисніть на локацію на карті, щоб побачити, що там є.",
+    move: "Перемістити",
+    moveHint: (name) => `Натисніть, де має бути «${name}».`,
+    moveCancel: "Скасувати",
+    moveFailed: "Не вдалося перемістити напис. Спробуйте ще раз.",
   },
 };

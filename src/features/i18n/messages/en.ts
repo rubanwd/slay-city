@@ -162,5 +162,10 @@ export const en: Messages = {
     toEarnHere: "to earn here",
     openMissions: "▶ Open missions",
     openLocation: "Open location",
+    tapLocation: "Tap a location on the map to see what it holds.",
+    move: "Move",
+    moveHint: (name) => `Tap where “${name}” should sit.`,
+    moveCancel: "Cancel",
+    moveFailed: "Couldn't move that label. Please try again.",
   },
 };
