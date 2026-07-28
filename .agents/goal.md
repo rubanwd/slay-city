@@ -17,4 +17,10 @@ Technical goals:
 * Build a scalable PWA foundation.
 * Keep the backend simple and secure.
 * Store content in the database.
-* Support future expansion of districts, missions, languages, rewards, and AI features.
+* Support future expansion of districts, missions, rewards, and AI features.
+
+Some of this has already landed: AI-assisted content generation (admin art, teacher
+homework drafting via OpenRouter) and partial UI localization (parent console, student
+profile/tab-bar, demo chrome — English/Ukrainian/Russian) both exist today. The
+mission/learning content itself stays English by design (see [authentication-and-roles.md](authentication-and-roles.md)
+and [product-concepts.md](product-concepts.md) for current-state detail).

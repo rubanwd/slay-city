@@ -58,7 +58,9 @@ Follow this directory layout exactly. Do not create top-level directories outsid
 src/
   app/              # Next.js App Router pages and layouts
   components/       # Shared, reusable UI primitives (+ Storybook stories/docs)
-  features/         # Feature-scoped modules (map, mission, wardrobe, parent, admin, auth, demo, onboarding, profile, reward)
+  features/         # Feature-scoped modules — 16 directories today: admin, auth,
+                     # demo, feedback, homework, i18n, levels, map, mission,
+                     # onboarding, parent, profile, reward, study, teacher, wardrobe
   hooks/            # Custom React hooks
   lib/              # Third-party client instances (Supabase client, etc.)
   types/            # TypeScript types and generated Supabase types
@@ -69,12 +71,16 @@ supabase/
   migrations/       # Ordered SQL migration files
 ```
 
-> **As-built deviation:** there is no `src/services/` layer. Each
+> **As-built deviation:** `src/services/` exists only as an empty `.gitkeep` stub —
+> do not add code there without confirming with the user first. Each
 > `src/features/<feature-name>/` directory owns its own `actions.ts`
 > (Next.js Server Actions, `"use server"`) that talks to Supabase directly —
 > either a plain table query or `supabase.rpc(...)` against a Postgres
 > `SECURITY DEFINER` function in `supabase/migrations/`. Follow that pattern
-> for new features rather than reintroducing a `services/` layer.
+> for new features rather than reintroducing a `services/` layer. There is also a
+> `src/stories/` directory that is leftover Storybook/CRA-init boilerplate
+> (`Button`/`Header`/`Page`) — it is not real app code, do not treat it as a pattern
+> to follow.
 
 - Place feature-specific components directly inside `src/features/<feature-name>/` (this repo does not use a further `components/` subfolder per feature).
 - Place feature-specific hooks inside `src/features/<feature-name>/` or `src/hooks/`.
@@ -109,12 +115,26 @@ supabase/
 ### Components
 - Keep components small and single-purpose.
 - Use reusable UI components from `src/components/` wherever possible.
-- Required core components to implement (do not rename or split arbitrarily):
-  - `WelcomeScreen`, `OnboardingForm`, `CityMap`, `MapLocationNode`, `SlayCharacter`
-  - `MissionScreen`, `VocabularyTask`, `MatchingTask`, `QuizTask`
-  - `RewardModal`, `ProgressBar`, `StreakBadge`
-  - `WardrobeGrid`, `WardrobeItemCard`
-  - `ParentDashboard`, `AdminMissionEditor`
+- Core components as actually built today (names/locations have drifted from the
+  original spec — do not assume the old flat list; verify against the repo before
+  reusing a name):
+  - `WelcomeScreen` (`src/components/WelcomeScreen.tsx`), `OnboardingForm`
+    (`src/features/onboarding/`), `CityMap` + `MapLocationNode` (`src/features/map/`),
+    `SlayCharacter` (`src/components/ui/`)
+  - `MissionScreen` (`src/components/mission/`), plus 30+ task-type components in
+    `src/features/mission/` (of which `VocabularyTask`, `MatchingTask`, `QuizTask` are
+    only three — see [frontend.md](.agents/frontend.md) for the full list)
+  - `RewardModal` (`src/components/ui/` — a modal) is distinct from the full-screen
+    `RewardScreen` (`src/features/reward/`); `ProgressBar` exists in both
+    `src/components/ui/` and `src/features/mission/`; `StreakBadge`
+    (`src/components/ui/`)
+  - `WardrobeGrid` (`src/components/wardrobe/`) — there is no separate
+    `WardrobeItemCard`; item cards render inline inside `WardrobeGrid`
+  - `ParentDashboard` (`src/features/parent/`)
+  - Admin mission editing is `AdminMissionForm` + `AdminMissionItem`
+    (`src/features/admin/`), not a single `AdminMissionEditor`
+  - `TeacherDashboard`, group/student management, and grammar/vocabulary content
+    managers (`src/features/teacher/`) — a whole console added since the original spec
 
 ### Brand Colors
 Always use the defined brand tokens. Do not use arbitrary color values.
@@ -125,10 +145,14 @@ Always use the defined brand tokens. Do not use arbitrary color values.
 | Lime Green | `#9DFF00` |
 | Cyan | `#00F0FF` |
 | Purple | `#6A00FF` |
+| Neon Orange | `#FF8A00` |
 | Black | `#111111` |
 | White | `#FFFFFF` |
 
-Configure these in `tailwind.config.ts` under `theme.extend.colors` and reference them by name.
+Defined as RGB-channel CSS variables in `src/styles/theme.css` (consumed via
+`rgb(var(--color-x) / <alpha-value>)`) and wired into `tailwind.config.ts`. Semantic
+aliases also exist: `--color-background`, `--color-foreground`, `--color-accent`
+(= pink), `--color-highlight` (= lime).
 
 ### General Rules
 - Do not hardcode learning content (vocabulary, mission text, quiz questions) in frontend files.
@@ -146,7 +170,7 @@ Configure these in `tailwind.config.ts` under `theme.extend.colors` and referenc
 - CI/CD pipeline must include: lint → type-check → unit tests → build check.
 - Do not merge code that introduces TypeScript errors or lint failures.
 - **Test runner: Vitest** (`npm run test` runs `vitest run --project unit`). Do not introduce Jest.
-- Cover all game-state mutation paths (completeMission, purchaseWardrobeItem, equipWardrobeItem, updateStreak) with tests that verify server-side validation is enforced.
+- Cover all game-state mutation paths (`submitMissionCompletion`/`complete_mission`, `purchaseWardrobeItem`, `equipWardrobeItem`/`unequipWardrobeItem`, `updateStreak`, `completeHomeworkVocab`/`completeHomeworkGrammar`, `recordStudyTime`) with tests that verify server-side validation is enforced.
 
 Test file convention: colocate `*.test.ts` next to the module it covers
 (e.g. `src/features/map/mapState.test.ts`, `supabase/functions/update-streak/index.test.ts`).
@@ -161,23 +185,32 @@ Vitest/Node instead of only the Deno runtime.
 The MVP must prove one hypothesis: **students are motivated to return daily, complete short English missions, and progress through the city.**
 
 ### Include in MVP
-- User registration and login (email/password and magic link)
-- Role assignment: `student`, `parent`, `admin`
+- User registration and login (email/password, plus Google OAuth — magic link was
+  never actually implemented, do not assume it exists)
+- Role assignment: `student`, `parent`, `admin`, and `teacher` (promotion-only, added
+  after the original MVP — see [authentication-and-roles.md](.agents/authentication-and-roles.md))
 - City map screen showing unlocked, current, completed, and locked locations
-- Daily mission flow: vocabulary → matching → listening → mini quiz
+- Daily mission flow across 30+ task types (see `src/features/mission/`)
 - Reward screen after mission completion (XP, coins)
-- Basic streak tracking
-- Wardrobe screen for Slay customization (view and equip owned items)
-- Parent dashboard: completed missions, daily streaks, vocabulary learned, map progress
-- Admin content screen: create/edit districts, locations, missions, vocabulary; generate and approve AI content; publish/unpublish missions
-- Progressive Web App manifest and service worker
+- Basic streak tracking, plus per-day study-time telemetry
+- Wardrobe screen for Slay customization (view and equip one owned item at a time)
+- Parent dashboard: completed missions, daily streaks, vocabulary learned, map
+  progress, study time, homework summary
+- Teacher console: manage groups of students, author vocabulary/grammar homework
+  topics with AI-assisted drafting, per-topic Q&A, read-only map/mission preview
+- Admin content screen: create/edit districts, locations, missions, vocabulary,
+  wardrobe items, task-type templates; generate AI art; publish/unpublish content;
+  manage the admin allowlist, teachers, and the feedback inbox
+- Progressive Web App manifest and service worker (`public/manifest.json`, `public/sw.js`)
 
-### Core API Operations to Implement
-**Read:** `getProfile`, `getDistricts`, `getLocations`, `getMissions`, `getMissionDetails`, `getVocabularyItems`, `getUserProgress`, `getUserStats`, `getWardrobeItems`, `getOwnedWardrobeItems`, `getParentProgressSummary`
-
-**User Actions:** `createProfile`, `startMission`, `submitMissionAnswer`, `completeMission`, `purchaseWardrobeItem`, `equipWardrobeItem`
-
-**Admin Actions:** `createDistrict`, `updateDistrict`, `createLocation`, `updateLocation`, `createMission`, `updateMission`, `createVocabularyItem`, `createMissionTask`, `publishMission`, `unpublishMission`, `generateMissionContent`, `approveGeneratedContent`
+### Core API Operations — as actually implemented
+There is no centralized read-operation layer (no `getProfile`/`getDistricts`/etc.) —
+reads happen inline in server components or via feature-local `queries.ts` files. Full,
+current action inventory by feature directory lives in
+[api-architecture.md](.agents/api-architecture.md). Notably: `startMission` and
+`submitMissionAnswer` (from an earlier version of this doc) do not exist — mission
+completion is a single `submitMissionCompletion` action calling the `complete_mission`
+RPC.
 
 ### The Protected Loop
 Every task you implement must serve this loop:
@@ -286,27 +319,41 @@ Every change reaches production the same way: **branch → PR → green CI → s
 Maintain migrations in `supabase/migrations/` with sequential, descriptive filenames (e.g., `20240601_create_profiles.sql`).
 
 ### Required Tables
-Implement all of the following tables. Do not rename them:
+Implement all of the following tables. Do not rename them without a clear migration
+path (several already have a rename history — see notes below).
 
 | Table | Purpose |
 |---|---|
-| `profiles` | Student profile data (incl. `level`, the knowledge level being studied) |
+| `profiles` | Student/parent/teacher/admin profile data (incl. `level`, the knowledge level a student studies) |
 | `districts` | City districts, each belonging to one knowledge `level` |
 | `locations` | Map locations inside districts |
 | `missions` | Learning missions connected to locations |
 | `vocabulary_items` | English words, translations, images, audio, examples |
-| `mission_tasks` | Task steps (vocabulary, matching, listening, quiz) |
-| `user_progress` | Completed missions and unlocked progress |
+| `mission_tasks` | Task steps across 30+ task types |
+| `task_type_templates` | Default config per task type, used by the admin Task Types configurator/tester |
+| `user_progress` | Completed missions and unlocked progress (incl. `xp_earned`/`coins_earned` actually awarded) |
 | `user_stats` | XP, coins, level, current streak, longest streak |
 | `wardrobe_items` | Available Slay accessories |
-| `user_wardrobe_items` | Purchased or unlocked accessories per user |
-| `achievements` | Achievement definitions |
-| `user_achievements` | Achievements unlocked by a user |
-| `ai_content_drafts` | AI-generated content pending review |
+| `user_wardrobe_items` | Purchased/unlocked accessories per user (only one equipped at a time) |
 | `admin_emails` | Allowlist of emails permitted to self-claim the admin role (`claim_admin` RPC) |
-| `parent_student_links` | Links a parent account to student profile(s) (`link_student_by_email` RPC) |
-| `task_type_templates` | Default config per task type, used by the admin Task Types configurator/tester |
+| `parent_student_links` | Links a parent account to student profile(s) (`link_student_by_email` RPC). Renamed from `parent_child_links` when the `child` role was renamed to `student`. |
 | `study_time_daily` | Seconds a student spent on learning screens, bucketed per UTC day (`record_study_time` RPC) |
+| `teacher_groups` / `teacher_group_members` | A teacher's groups of students and their membership |
+| `homework_topics` | A teacher-assigned lesson topic (optionally with a note/link/image) |
+| `homework_vocab_words` / `homework_vocab_tasks` / `homework_vocab_completions` | The vocabulary module of a homework topic and per-student completion |
+| `homework_grammar_points` / `homework_grammar_tasks` / `homework_grammar_completions` | The grammar module of a homework topic and per-student completion |
+| `homework_topic_messages` / `homework_topic_reads` | Per-topic Q&A thread and read markers |
+| `vocab_image_cache` / `task_image_cache` | Shared caches of AI-generated flashcard/task images |
+| `feedback_reports` / `feedback_report_reads` | Student/teacher bug/feedback reports and admin read markers |
+| `achievements` / `user_achievements` | **Legacy — schema only, no current app code reads or writes these.** Do not build new features against them without checking whether they should be revived or replaced. |
+| `ai_content_drafts` | **Legacy — schema only, unused.** Same caution as above. |
+
+Full per-table detail and the current enum inventory (`user_role`, `mission_task_type`,
+`knowledge_level`, `ai_content_draft_status`) lives in
+[database-architecture.md](.agents/database-architecture.md) — read it before adding a
+migration, since several tables/columns have already been renamed once
+(`child`→`student`, `parent_child_links`→`parent_student_links`,
+`is_linked_child`→`is_linked_student`, `teaches_child`→`teaches_student`).
 
 ### Content hierarchy
 Content is nested `Level → District → Location → Mission → Task`. The level is
@@ -321,7 +368,7 @@ to students only once it has a published district with a published location —
 - All user-related tables must have RLS enabled and appropriate policies defined.
 - Admin content tables (`districts`, `locations`, `missions`, `vocabulary_items`, `mission_tasks`) must support `draft` and `published` states.
 - Never write to reward-related columns (`xp`, `coins`, `streak`, `unlocked_locations`) from the client.
-- All reward and progress mutations must go through named server-side functions: `complete_mission`, `purchase_wardrobe_item`, `equip_wardrobe_item`, `unequip_wardrobe_item` (Postgres `SECURITY DEFINER` RPCs) and `updateStreak` (the one actual Edge Function). Never grant the client direct UPDATE/INSERT on the underlying tables.
+- All reward and progress mutations must go through named server-side functions: `complete_mission`, `purchase_wardrobe_item`, `equip_wardrobe_item`, `unequip_wardrobe_item`, `complete_homework_vocab`, `complete_homework_grammar`, `record_study_time` (Postgres `SECURITY DEFINER` RPCs) and `updateStreak` (the one actual Edge Function). Never grant the client direct UPDATE/INSERT on the underlying tables. Full RPC inventory in [backend.md](.agents/backend.md).
 - Use `supabase gen types typescript` to regenerate `src/types/supabase.ts` after every schema change. Commit the updated types file with the migration.
 - Use `snake_case` for all column and table names.
 - Define foreign key constraints and appropriate indexes on all join columns.
@@ -341,18 +388,26 @@ to students only once it has a published district with a published location —
 - **Reward screens must be celebration-focused.** Use the `RewardModal` component with coins, XP, and positive feedback.
 - **Do not hardcode text content.** Mission text, vocabulary, and quiz content must come from the database via the service layer.
 - **Implement as PWA.** Include a valid `manifest.json` and service worker. The app must be installable on mobile.
-- Required screens for MVP (implement all of these):
+- Screens actually implemented (student-facing set below; teacher/admin consoles are
+  separate multi-page areas, see [ux-ui-concepts.md](.agents/ux-ui-concepts.md) for
+  the full current route inventory):
   - `WelcomeScreen` — still the landing screen for a signed-out visitor. Its
     primary action opens the signed-out demo map (`/demo`, see
     `src/features/demo/`) so the first thing they do is play; a secondary
     button goes to the login screen for someone who already has an account.
   - `OnboardingForm`
   - City map (`CityMap` with `MapLocationNode` nodes)
-  - `MissionScreen` (with `VocabularyTask`, `MatchingTask`, `QuizTask`)
-  - `RewardModal`
-  - Wardrobe (`WardrobeGrid` with `WardrobeItemCard`)
+  - `MissionScreen` (task-type components under `src/features/mission/`, of which
+    `VocabularyTask`, `MatchingTask`, `QuizTask` are only 3 of 30+)
+  - `RewardModal` (modal) / `RewardScreen` (full-screen variant)
+  - Wardrobe (`WardrobeGrid` — item cards render inline, no separate `WardrobeItemCard`)
+  - Profile screen (with knowledge-level picker)
+  - Homework screen (teacher-assigned topics, student side)
   - `ParentDashboard`
-  - Admin content screen (`AdminMissionEditor`)
+  - Teacher console (`TeacherDashboard`, groups, homework authoring, Q&A, map/mission
+    preview)
+  - Admin content screens (district/location/mission/task-type/wardrobe/teacher/admin
+    /feedback management — not one single `AdminMissionEditor`)
 
 ---
 
@@ -360,8 +415,14 @@ to students only once it has a published district with a published location —
 
 Do not implement any of the following in the MVP. File a note in the PR if you feel the temptation:
 
-- Google OAuth or Apple OAuth
-- Parent-managed student login flow
+- Apple OAuth (Google OAuth is already implemented — `signInWithGoogle` in
+  `src/features/auth/actions.ts` — do not re-propose it as future work)
+- Magic-link sign-in (never actually implemented despite earlier docs claiming it was
+  — no `signInWithOtp` call exists in the codebase)
+- A real parent-managed student login flow (a parent creating login credentials for
+  their child). Note this is distinct from parent↔student *linking*, which already
+  exists: a parent connects to an already-registered student's profile via
+  `link_student_by_email`.
 - Real-time speech recognition or pronunciation scoring
 - AI-powered adaptive personalization (personalized learning paths)
 - Complex AI tutoring or conversational AI features
@@ -397,8 +458,9 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
 - **Next.js App Router** is the routing and rendering model. Use Server Components by default; opt into Client Components only when interactivity or browser APIs are required.
 - **Supabase is the entire backend.** Do not introduce a separate Node.js/Express backend. Privileged server logic runs either as a Postgres `SECURITY DEFINER` RPC function (the default choice, e.g. `complete_mission`, `purchase_wardrobe_item`) or, when the service-role client or Deno runtime is genuinely needed, a Supabase Edge Function (currently only `update-streak`). Next.js Server Actions (`"use server"`) are the client-facing entry point that calls into these.
 - **PostgreSQL via Supabase** is the only database. Do not introduce additional databases or ORMs.
-- **Supabase Auth** handles all authentication. Do not introduce third-party auth providers (NextAuth, Clerk, etc.) without permission.
-- **OpenRouter API** (not OpenAI) powers AI image generation (`google/gemini-2.5-flash-image`, for admin district/location art). It is called exclusively from Next.js Server Actions in `src/features/admin/` (`openRouterImage.ts` and its callers), gated by `requireAdmin`. It is never called from the browser.
+- **Supabase Auth** handles all authentication (email/password + Google OAuth today; no magic link, no Apple OAuth). Do not introduce third-party auth providers (NextAuth, Clerk, etc.) without permission.
+- **OpenRouter API** (not OpenAI) powers AI generation: `google/gemini-2.5-flash-image` for admin/teacher art (district/location/task images, teacher vocabulary flashcards), and `google/gemini-2.5-flash` for teacher homework content drafting (grammar/vocabulary JSON). It is called exclusively from Next.js Server Actions — `src/features/admin/` (`openRouterImage.ts` and its callers, gated by `requireAdmin`) and `src/features/teacher/` (`openRouterChat.ts` and its callers, gated by `requireTeacher`). It is never called from the browser.
+- **Four roles, not three**: `student`, `parent`, `admin`, `teacher`. The `teacher` role was added after the original MVP and is promotion-only (an admin flips an existing account's role via `promote_teacher()`; there is no service-role key in this project to create accounts from scratch).
 - **Vercel** hosts the Next.js frontend. **Supabase Cloud** hosts all backend services.
 - **Tailwind CSS** is the only styling solution. No CSS-in-JS, no Styled Components, no Sass.
 - **Storybook** documents shared UI primitives and select feature components (`.stories.tsx`/`.mdx` files); it is a dev-time tool, not part of the CI pipeline.
@@ -412,12 +474,12 @@ Do not implement any of the following in the MVP. File a note in the PR if you f
 
 - The brand color palette (`#FF2D8E`, `#9DFF00`, `#00F0FF`, `#6A00FF`, `#111111`, `#FFFFFF`).
 - The names of the required database tables listed in the Database section.
-- The names of the required API operations (`completeMission`, `purchaseWardrobeItem`, etc.).
-- The names of the required core components (`CityMap`, `SlayCharacter`, `RewardModal`, etc.).
+- The names of the required RPC/action operations (`complete_mission`/`submitMissionCompletion`, `purchase_wardrobe_item`/`purchaseWardrobeItem`, etc. — see [api-architecture.md](.agents/api-architecture.md) and [backend.md](.agents/backend.md) for the current full inventory).
+- The names of the required core components (`CityMap`, `SlayCharacter`, `RewardModal`, etc. — see [frontend.md](.agents/frontend.md) for current file locations).
 - The core product loop: `Map → Mission → Reward → Unlock → Return Tomorrow`.
 - The decision to process all reward and progress mutations server-side.
-- The decision to call OpenAI exclusively from Edge Functions.
-- The three-role system: `student`, `parent`, `admin`.
+- The decision to call OpenRouter exclusively from Next.js Server Actions (never OpenAI, never from the browser).
+- The four-role system: `student`, `parent`, `teacher`, `admin` — and the rule that `teacher` accounts are promotion-only.
 - The Supabase + Vercel hosting architecture.
 - RLS policies on any user-related table — do not disable or weaken them.
 

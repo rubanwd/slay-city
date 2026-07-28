@@ -13,7 +13,9 @@ Storage: Supabase Storage
 Server logic: mostly Next.js Server Actions ("use server" files in src/features/*/actions.ts)
             calling Postgres SECURITY DEFINER RPC functions; a Supabase Edge
             Function is used only for update-streak (see backend.md)
-AI: OpenRouter (google/gemini-2.5-flash-image) for admin art generation — not OpenAI
+AI: OpenRouter — google/gemini-2.5-flash-image for admin/teacher art generation,
+    google/gemini-2.5-flash for teacher homework content drafting (grammar/vocabulary).
+    Not OpenAI.
 Dev/UI tooling: Storybook (component catalogue under src/components/ui, src/features/*)
 Hosting: Vercel + Supabase Cloud
 ```
@@ -32,4 +34,7 @@ OpenRouter API for AI-assisted image generation (admin only)
 
 The frontend is responsible for the user interface and user experience. The backend is responsible for authentication, data storage, progress tracking, reward validation, role permissions, and AI API calls.
 
-AI must not be called directly from the browser. All OpenRouter requests go through Next.js Server Actions (`src/features/admin/openRouterImage.ts` and its callers), gated by `requireAdmin`.
+AI must not be called directly from the browser. All OpenRouter requests go through
+Next.js Server Actions: image generation via `src/features/admin/openRouterImage.ts`
+and its callers (gated by `requireAdmin`), and teacher homework content drafting via
+`src/features/teacher/openRouterChat.ts` and its callers (gated by `requireTeacher`).
