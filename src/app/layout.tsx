@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { AudioUnlock } from "@/components/AudioUnlock";
 import { MediaGuard } from "@/components/MediaGuard";
 import { PortraitLock } from "@/components/PortraitLock";
@@ -56,6 +57,9 @@ export default async function RootLayout({
         {/* Last, so it covers the app on stacking order as well as z-index. */}
         <PortraitLock locale={locale} />
       </body>
+      {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+      )}
     </html>
   );
 }
