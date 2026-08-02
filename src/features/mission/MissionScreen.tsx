@@ -8,6 +8,7 @@ import { SlayButton } from "@/components/ui";
 
 import { submitMissionCompletion } from "./actions";
 import HowToPlayButton from "./HowToPlayButton";
+import { clampTaskFraction, missionRewardFraction } from "./missionReward";
 import ProgressBar from "./ProgressBar";
 import TaskRunner from "./TaskRunner";
 import {
@@ -68,15 +69,24 @@ export default function MissionScreen({
   /** Review mode has no reward screen to move on to — this end card stands in. */
   const [reviewFinished, setReviewFinished] = useState(false);
 
-  // Running share of the mission reward the player has earned. Tasks that can be
-  // finished early (the word search) report a fraction in [0, 1]; every fully
-  // completed task reports 1. Multiplying keeps the mission reward proportional
-  // to how much of it the player actually completed.
+  // Running share of the reward the tasks the player *played* have earned. Tasks
+  // that can be finished early (the word search) report a fraction in [0, 1];
+  // every fully completed task reports 1.
   const rewardFractionRef = useRef(1);
+  // How many tasks the player skipped outright. Combined with the above by
+  // `missionRewardFraction`, which owns the arithmetic.
+  const skippedCountRef = useRef(0);
 
   const total = tasks.length;
   const currentTask = tasks[currentIndex];
   const isLastTask = currentIndex === total - 1;
+
+  const earnedFraction = () =>
+    missionRewardFraction({
+      playedFraction: rewardFractionRef.current,
+      skipped: skippedCountRef.current,
+      total,
+    });
 
   const finishMission = (rewardFraction: number) => {
     setError(null);
@@ -104,14 +114,31 @@ export default function MissionScreen({
     });
   };
 
-  const handleTaskComplete = (rewardFraction = 1) => {
-    const fraction = Math.min(1, Math.max(0, rewardFraction));
-    rewardFractionRef.current *= fraction;
+  const advance = () => {
     if (isLastTask) {
-      finishMission(rewardFractionRef.current);
+      finishMission(earnedFraction());
     } else {
       setCurrentIndex((index) => index + 1);
     }
+  };
+
+  const handleTaskComplete = (rewardFraction = 1) => {
+    rewardFractionRef.current *= clampTaskFraction(rewardFraction);
+    advance();
+  };
+
+  /**
+   * Moves past a task the player can't (or won't) finish — the escape hatch that
+   * keeps a single broken or unplayable task from walling off the rest of the
+   * mission, and with it every mission behind it. The mission still counts as
+   * completed; the skipped task simply pays nothing.
+   */
+  const handleSkip = () => {
+    if (!window.confirm("Skip this task? You'll move on, but you won't earn anything for it.")) {
+      return;
+    }
+    skippedCountRef.current += 1;
+    advance();
   };
 
   const handleExit = () => {
@@ -127,6 +154,7 @@ export default function MissionScreen({
 
   const restart = () => {
     rewardFractionRef.current = 1;
+    skippedCountRef.current = 0;
     setCurrentIndex(0);
     setReviewFinished(false);
   };
@@ -228,8 +256,23 @@ export default function MissionScreen({
           content={currentTask.content}
           actionLabel={actionLabel}
           onComplete={handleTaskComplete}
+          onSkip={handleSkip}
         />
       </Section>
+
+      {/* Hidden once the run is over (submitting, or failed and waiting on "Try
+          Again") — at that point there is no task left to skip. */}
+      {!isSubmitting && !error && (
+        <Section py="xs" className="shrink-0 items-center">
+          <button
+            type="button"
+            onClick={handleSkip}
+            className="text-small text-white/40 underline underline-offset-4 transition-colors hover:text-white/70"
+          >
+            Skip this task
+          </button>
+        </Section>
+      )}
 
       {(error || isSubmitting) && (
         <Section py="sm" className="shrink-0 items-center">
@@ -239,7 +282,7 @@ export default function MissionScreen({
               <p className="text-neon-pink text-center">{error}</p>
               <SlayButton
                 variant="pink"
-                onClick={() => finishMission(rewardFractionRef.current)}
+                onClick={() => finishMission(earnedFraction())}
                 loading={isSubmitting}
               >
                 Try Again
@@ -251,4 +294,3 @@ export default function MissionScreen({
     </AppContainer>
   );
 }
-

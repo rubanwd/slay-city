@@ -81,6 +81,13 @@ export interface TaskRunnerProps {
    * with no argument, which counts as full completion.
    */
   onComplete: (rewardFraction?: number) => void;
+  /**
+   * Moves past the task without earning anything for it. Used for the card shown
+   * when a task can't be played at all; callers that have no notion of skipping
+   * (the admin tester, the homework flows) can leave it unset, and the card then
+   * just completes the task the way it always has.
+   */
+  onSkip?: () => void;
   actionLabel: string;
 }
 
@@ -90,9 +97,22 @@ export interface TaskRunnerProps {
  * malformed. Shared by the live mission runner and the admin task-type tester so
  * both play a task exactly the same way.
  */
-export default function TaskRunner({ taskType, content, onComplete, actionLabel }: TaskRunnerProps) {
+export default function TaskRunner({
+  taskType,
+  content,
+  onComplete,
+  onSkip,
+  actionLabel,
+}: TaskRunnerProps) {
   const rendered = renderTaskByType(taskType, content, onComplete, actionLabel);
-  return rendered ?? <UnsupportedTask onComplete={onComplete} actionLabel={actionLabel} />;
+  return (
+    rendered ?? (
+      <UnsupportedTask
+        onContinue={onSkip ?? onComplete}
+        actionLabel={onSkip ? "Skip" : actionLabel}
+      />
+    )
+  );
 }
 
 /**
@@ -243,16 +263,16 @@ function renderTaskByType(
 }
 
 function UnsupportedTask({
-  onComplete,
+  onContinue,
   actionLabel,
 }: {
-  onComplete: () => void;
+  onContinue: () => void;
   actionLabel: string;
 }) {
   return (
     <div className="flex flex-col items-center gap-6 text-center">
       <p className="text-white/60">This task type isn&apos;t available yet — skip ahead.</p>
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={onContinue}>
         {actionLabel}
       </SlayButton>
     </div>
