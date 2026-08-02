@@ -1,3 +1,5 @@
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/features/profile/username";
+
 import type { Messages } from "../messages";
 import { pluralSlavic } from "../plural";
 
@@ -119,6 +121,22 @@ export const uk: Messages = {
 
       languageTitle: "Мова",
       languageHint: "Змінює кнопки й меню. Місії лишаються англійською — це і є урок.",
+
+      usernameTitle: "Ім’я",
+      usernameChange: "Змінити",
+      usernameCancel: "Скасувати",
+      usernameSave: "Зберегти",
+      usernameSaving: "Зберігаємо…",
+      usernameSaved: "Ім’я оновлено!",
+      usernameHint: `До ${USERNAME_MAX_LENGTH} символів. Літери, цифри, пробіли та _ - ' .`,
+      usernameErrors: {
+        too_short: `В імені має бути щонайменше ${USERNAME_MIN_LENGTH} символи.`,
+        too_long: `В імені може бути щонайбільше ${USERNAME_MAX_LENGTH} символів.`,
+        invalid_chars: "Можна використати літери, цифри, пробіли та _ - ' .",
+        needs_letter: "Додай хоча б одну літеру або цифру.",
+        taken: "Таке ім’я вже зайняте. Спробуй інше.",
+        unknown: "Не вдалося зберегти ім’я. Спробуй ще раз.",
+      },
 
       levelTitle: "Рівень",
       levelChange: "Змінити",

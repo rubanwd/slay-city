@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { isKnowledgeLevel, knowledgeLevelLabel } from "@/features/levels/levels";
 import { getAvailableLevels } from "@/features/levels/queries";
+import { checkUsername, usernameProblemMessage } from "@/features/profile/username";
 import { createClient } from "@/lib/supabase/server";
 
 export type OnboardingState = {
@@ -12,7 +13,6 @@ export type OnboardingState = {
   error?: string;
 };
 
-const USERNAME_PATTERN = /^[a-zA-Z0-9_ ]+$/;
 const MIN_AGE = 5;
 const MAX_AGE = 20;
 
@@ -20,16 +20,16 @@ export async function createProfile(
   _prevState: OnboardingState,
   formData: FormData
 ): Promise<OnboardingState> {
-  const username = String(formData.get("username") ?? "").trim();
   const ageRaw = String(formData.get("age") ?? "").trim();
   const levelRaw = String(formData.get("level") ?? "").trim();
 
-  if (username.length < 2 || username.length > 20) {
-    return { error: "Username must be 2-20 characters." };
+  // Any alphabet, up to 32 characters — players type their real first name
+  // here. See {@link checkUsername} for the full rules.
+  const usernameCheck = checkUsername(String(formData.get("username") ?? ""));
+  if (!usernameCheck.ok) {
+    return { error: usernameProblemMessage(usernameCheck.problem) };
   }
-  if (!USERNAME_PATTERN.test(username)) {
-    return { error: "Username can only contain letters, numbers, spaces, and underscores." };
-  }
+  const username = usernameCheck.username;
 
   let age: number | null = null;
   if (ageRaw) {
@@ -73,7 +73,7 @@ export async function createProfile(
 
   if (profileError) {
     if (profileError.code === "23505") {
-      return { error: "That username is already taken." };
+      return { error: usernameProblemMessage("taken") };
     }
     return { error: profileError.message };
   }

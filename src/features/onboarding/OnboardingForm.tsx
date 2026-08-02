@@ -8,6 +8,7 @@ import { signOut } from "@/features/auth/actions";
 import LevelPicker from "@/features/levels/LevelPicker";
 import LockedLevelsNote from "@/features/levels/LockedLevelsNote";
 import { resolveSelectableLevel } from "@/features/levels/levels";
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/features/profile/username";
 import type { KnowledgeLevel } from "@/types";
 
 import { createProfile, type OnboardingState } from "./actions";
@@ -71,8 +72,8 @@ export default function OnboardingForm({ levels }: OnboardingFormProps) {
             name="username"
             type="text"
             required
-            minLength={2}
-            maxLength={20}
+            minLength={USERNAME_MIN_LENGTH}
+            maxLength={USERNAME_MAX_LENGTH}
             placeholder="Enter your name"
             className={INPUT_CLASS}
           />

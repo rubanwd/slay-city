@@ -46,6 +46,8 @@ mission     — submitMissionCompletion, resetMissionProgress, resetLocationProg
               completion call to the complete_mission RPC, plus a streak update via
               the update-streak Edge Function)
 onboarding  — createProfile
+profile     — changeMyUsername (the username rules themselves live in
+              features/profile/username.ts, shared with onboarding)
 study       — recordStudyTime
 teacher     — createHomeworkTopic, updateHomeworkTopic, deleteHomeworkTopic
               (plus grammarActions.ts, vocabularyActions.ts, viewAsActions.ts for

@@ -41,6 +41,7 @@ export default async function ProfilePage() {
         availableLevels={availableLevels}
         locale={locale}
         showLanguagePicker
+        showUsernameEditor
       />
       <BottomNav showHomework={showHomework} labels={studentNavLabels(locale)} />
     </AuthGuard>

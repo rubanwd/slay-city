@@ -12,6 +12,7 @@ import { resetMissionProgress } from "@/features/mission/actions";
 import type { KnowledgeLevel } from "@/types";
 
 import ProfileLevelCard from "./ProfileLevelCard";
+import ProfileUsernameCard from "./ProfileUsernameCard";
 
 function LogoutButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus();
@@ -111,6 +112,12 @@ export interface ProfileScreenProps {
    * English throughout, so a picker there would promise more than it delivers.
    */
   showLanguagePicker?: boolean;
+  /**
+   * Offers the rename card. Students only: a teacher's name is how admins find
+   * them (`promote_teacher` looks accounts up by username), so it is not theirs
+   * to change from here.
+   */
+  showUsernameEditor?: boolean;
 }
 
 export default function ProfileScreen({
@@ -124,6 +131,7 @@ export default function ProfileScreen({
   showProgressReset = true,
   locale = DEFAULT_LOCALE,
   showLanguagePicker = false,
+  showUsernameEditor = false,
 }: ProfileScreenProps) {
   const messages = getMessages(locale).student.profile;
 
@@ -152,6 +160,8 @@ export default function ProfileScreen({
             )}
           </div>
         </div>
+
+        {showUsernameEditor && <ProfileUsernameCard username={username} locale={locale} />}
 
         <ProfileLevelCard
           current={level}
