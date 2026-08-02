@@ -101,6 +101,23 @@ export const uk: Messages = {
     languageHint: "Змінює мову вашого кабінету, карти та профілю.",
     languageAuto: "Автоматично",
     languageAutoHint: (detected) => `За мовою браузера — зараз ${detected}.`,
+
+    usernameTitle: "Ім’я",
+    usernameChange: "Змінити",
+    usernameCancel: "Скасувати",
+    usernameSave: "Зберегти",
+    usernameSaving: "Зберігаємо…",
+    usernameSaved: "Ім’я оновлено!",
+    usernameHint: `До ${USERNAME_MAX_LENGTH} символів. Літери, цифри, пробіли та _ - ' .`,
+    usernameErrors: {
+      too_short: `В імені має бути щонайменше ${USERNAME_MIN_LENGTH} символи.`,
+      too_long: `В імені може бути щонайбільше ${USERNAME_MAX_LENGTH} символів.`,
+      invalid_chars: "Можна використати літери, цифри, пробіли та _ - ' .",
+      needs_letter: "Додай хоча б одну літеру або цифру.",
+      taken: "Таке ім’я вже зайняте. Спробуй інше.",
+      unknown: "Не вдалося зберегти ім’я. Спробуй ще раз.",
+    },
+
     studentTitle: "Ваша дитина",
     studentLevelHint: "Рівень, який вивчає дитина — вона обирає його сама.",
     studentNone: "Дитину ще не підключено.",

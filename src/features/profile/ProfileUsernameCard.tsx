@@ -3,36 +3,37 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 
 import { SlayButton } from "@/components/ui";
-import { DEFAULT_LOCALE, getMessages, type Locale } from "@/features/i18n";
 
 import { changeMyUsername } from "./actions";
 import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   normalizeUsername,
+  type UsernameCardMessages,
   type UsernameProblem,
 } from "./username";
 
 export interface ProfileUsernameCardProps {
   /** The name on the profile row right now. */
   username: string | null;
-  /** Language for the card's own words. */
-  locale?: Locale;
+  /**
+   * The caller's own message namespace — student, teacher (same namespace as
+   * student today), or parent — so the card speaks whatever language that
+   * screen already renders in.
+   */
+  messages: UsernameCardMessages;
 }
 
 /**
- * Lets a player rename themselves from their own profile. The name is chosen in
- * a hurry at signup, so typos and outgrown nicknames are common — this is the
- * only way to fix one without a new account.
+ * Lets a signed-in user rename themselves from their own profile — student,
+ * teacher, or parent. The name is chosen in a hurry at signup, so typos and
+ * outgrown nicknames are common; this is the only way to fix one without a
+ * new account.
  *
  * Collapsed by default: the card shows the current name and a Change button, so
  * the profile screen keeps its single obvious primary action.
  */
-export default function ProfileUsernameCard({
-  username,
-  locale = DEFAULT_LOCALE,
-}: ProfileUsernameCardProps) {
-  const messages = getMessages(locale).student.profile;
+export default function ProfileUsernameCard({ username, messages }: ProfileUsernameCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [open, setOpen] = useState(false);

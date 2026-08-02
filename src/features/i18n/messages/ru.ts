@@ -101,6 +101,23 @@ export const ru: Messages = {
     languageHint: "Меняет язык вашего кабинета, карты и профиля.",
     languageAuto: "Автоматически",
     languageAutoHint: (detected) => `По языку браузера — сейчас ${detected}.`,
+
+    usernameTitle: "Имя",
+    usernameChange: "Изменить",
+    usernameCancel: "Отмена",
+    usernameSave: "Сохранить",
+    usernameSaving: "Сохраняем…",
+    usernameSaved: "Имя обновлено!",
+    usernameHint: `До ${USERNAME_MAX_LENGTH} символов. Буквы, цифры, пробелы и _ - ' .`,
+    usernameErrors: {
+      too_short: `В имени должно быть минимум ${USERNAME_MIN_LENGTH} символа.`,
+      too_long: `В имени может быть максимум ${USERNAME_MAX_LENGTH} символов.`,
+      invalid_chars: "Можно использовать буквы, цифры, пробелы и _ - ' .",
+      needs_letter: "Добавь хотя бы одну букву или цифру.",
+      taken: "Такое имя уже занято. Попробуй другое.",
+      unknown: "Не удалось сохранить имя. Попробуй ещё раз.",
+    },
+
     studentTitle: "Ваш ребёнок",
     studentLevelHint: "Уровень, который изучает ребёнок — он выбирает его сам.",
     studentNone: "Ребёнок ещё не подключён.",

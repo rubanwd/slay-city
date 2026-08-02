@@ -38,6 +38,7 @@ export default async function TeacherProfilePage() {
         availableLevels={availableLevels}
         roleLabel="Teacher"
         levelHint="Sets which level your city map shows."
+        showUsernameEditor
       />
       <BottomNav role="teacher" />
     </>

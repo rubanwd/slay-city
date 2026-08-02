@@ -71,9 +71,9 @@ export interface ProfileScreenProps {
    */
   showLanguagePicker?: boolean;
   /**
-   * Offers the rename card. Students only: a teacher's name is how admins find
-   * them (`promote_teacher` looks accounts up by username), so it is not theirs
-   * to change from here.
+   * Offers the rename card. `promote_teacher` looks an account up by username,
+   * but only once, at the moment of promotion — after that a teacher is always
+   * addressed by profile id, so renaming later is safe for them too.
    */
   showUsernameEditor?: boolean;
 }
@@ -118,7 +118,7 @@ export default function ProfileScreen({
           </div>
         </div>
 
-        {showUsernameEditor && <ProfileUsernameCard username={username} locale={locale} />}
+        {showUsernameEditor && <ProfileUsernameCard username={username} messages={messages} />}
 
         <ProfileLevelCard
           current={level}
