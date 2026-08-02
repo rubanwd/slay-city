@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { SlayButton } from "@/components/ui";
+import { EmojiText, SlayButton } from "@/components/ui";
 
 import type { EmojiDecodeContent } from "./types";
 
@@ -35,7 +35,7 @@ export default function EmojiDecodeTask({
 
       <div className="flex flex-col items-center gap-2">
         <div className="rounded-2xl border border-white/15 bg-white/5 px-6 py-8 text-center text-5xl leading-tight">
-          {emojis}
+          <EmojiText value={emojis} />
         </div>
         <p className="text-small text-white/50">Pick the matching word below.</p>
       </div>

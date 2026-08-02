@@ -32,3 +32,6 @@ export type { XpIconProps } from "./XpIcon";
 
 export { CoinAmount, XpAmount } from "./CurrencyAmount";
 export type { CurrencyAmountProps } from "./CurrencyAmount";
+
+export { default as EmojiText } from "./EmojiText";
+export type { EmojiTextProps } from "./EmojiText";
