@@ -15,6 +15,11 @@ export default defineConfig({
   test: {
     projects: [
       {
+        // Mirrors the `@/*` -> `src/*` path alias from tsconfig.json, so a
+        // module under test can import across features the way app code does.
+        resolve: {
+          alias: { '@': path.join(dirname, 'src') },
+        },
         test: {
           name: 'unit',
           environment: 'node',

@@ -1,3 +1,5 @@
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/features/profile/username";
+
 import type { Messages } from "../messages";
 import { pluralEn } from "../plural";
 
@@ -120,6 +122,22 @@ export const en: Messages = {
       languageTitle: "Language",
       languageHint: "Changes the buttons and menus. Missions stay in English — that's the lesson.",
 
+      usernameTitle: "Name",
+      usernameChange: "Change",
+      usernameCancel: "Cancel",
+      usernameSave: "Save",
+      usernameSaving: "Saving…",
+      usernameSaved: "Name updated!",
+      usernameHint: `Up to ${USERNAME_MAX_LENGTH} characters. Letters, numbers, spaces and _ - ' .`,
+      usernameErrors: {
+        too_short: `Your name needs at least ${USERNAME_MIN_LENGTH} characters.`,
+        too_long: `Your name can be at most ${USERNAME_MAX_LENGTH} characters.`,
+        invalid_chars: "You can use letters, numbers, spaces and _ - ' .",
+        needs_letter: "Add at least one letter or number.",
+        taken: "Someone already has that name. Try another one.",
+        unknown: "Couldn't save that name. Try again.",
+      },
+
       levelTitle: "Level",
       levelChange: "Change",
       levelClose: "Close",
@@ -129,9 +147,6 @@ export const en: Messages = {
 
       logOut: "Log Out",
       loggingOut: "Logging out…",
-      resetProgress: "Reset Progress (dev)",
-      resetting: "Resetting…",
-      resetConfirm: "Wipe all your mission progress, XP, coins, and streaks? This can't be undone.",
     },
   },
 

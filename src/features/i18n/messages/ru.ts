@@ -1,3 +1,5 @@
+import { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "@/features/profile/username";
+
 import type { Messages } from "../messages";
 import { pluralSlavic } from "../plural";
 
@@ -120,6 +122,22 @@ export const ru: Messages = {
       languageTitle: "Язык",
       languageHint: "Меняет кнопки и меню. Миссии остаются на английском — это и есть урок.",
 
+      usernameTitle: "Имя",
+      usernameChange: "Изменить",
+      usernameCancel: "Отмена",
+      usernameSave: "Сохранить",
+      usernameSaving: "Сохраняем…",
+      usernameSaved: "Имя обновлено!",
+      usernameHint: `До ${USERNAME_MAX_LENGTH} символов. Буквы, цифры, пробелы и _ - ' .`,
+      usernameErrors: {
+        too_short: `В имени должно быть минимум ${USERNAME_MIN_LENGTH} символа.`,
+        too_long: `В имени может быть максимум ${USERNAME_MAX_LENGTH} символов.`,
+        invalid_chars: "Можно использовать буквы, цифры, пробелы и _ - ' .",
+        needs_letter: "Добавь хотя бы одну букву или цифру.",
+        taken: "Такое имя уже занято. Попробуй другое.",
+        unknown: "Не удалось сохранить имя. Попробуй ещё раз.",
+      },
+
       levelTitle: "Уровень",
       levelChange: "Изменить",
       levelClose: "Закрыть",
@@ -129,9 +147,6 @@ export const ru: Messages = {
 
       logOut: "Выйти",
       loggingOut: "Выходим…",
-      resetProgress: "Сбросить прогресс (dev)",
-      resetting: "Сбрасываем…",
-      resetConfirm: "Стереть весь твой прогресс в миссиях, XP, монеты и серии? Это нельзя отменить.",
     },
   },
 

@@ -1,4 +1,5 @@
 import type { TaskFamily } from "@/features/parent/taskFamilies";
+import type { UsernameProblem } from "@/features/profile/username";
 
 /**
  * Every string the parent console shows — plus the student's own profile and
@@ -126,6 +127,17 @@ export interface Messages {
       languageTitle: string;
       languageHint: string;
 
+      usernameTitle: string;
+      usernameChange: string;
+      usernameCancel: string;
+      usernameSave: string;
+      usernameSaving: string;
+      usernameSaved: string;
+      /** Explains what the name is for, under the field. */
+      usernameHint: string;
+      /** Why a chosen name was refused, keyed by {@link UsernameProblem}. */
+      usernameErrors: Record<UsernameProblem, string>;
+
       levelTitle: string;
       levelChange: string;
       levelClose: string;
@@ -136,9 +148,6 @@ export interface Messages {
 
       logOut: string;
       loggingOut: string;
-      resetProgress: string;
-      resetting: string;
-      resetConfirm: string;
     };
   };
 

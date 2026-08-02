@@ -41,11 +41,13 @@ homework/qa — postTopicMessage, markTopicRead, deleteTopicMessage
 i18n        — setLocalePreference
 levels      — restartMyLevel, changeMyLevel
 map         — moveLocationOnMap
-mission     — submitMissionCompletion, resetMissionProgress, resetLocationProgress
+mission     — submitMissionCompletion, resetLocationProgress
               (there is no startMission/submitMissionAnswer — the flow is a single
               completion call to the complete_mission RPC, plus a streak update via
               the update-streak Edge Function)
 onboarding  — createProfile
+profile     — changeMyUsername (the username rules themselves live in
+              features/profile/username.ts, shared with onboarding)
 study       — recordStudyTime
 teacher     — createHomeworkTopic, updateHomeworkTopic, deleteHomeworkTopic
               (plus grammarActions.ts, vocabularyActions.ts, viewAsActions.ts for

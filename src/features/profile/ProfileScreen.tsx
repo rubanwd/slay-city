@@ -8,10 +8,10 @@ import { signOut } from "@/features/auth/actions";
 import FeedbackButton from "@/features/feedback/FeedbackButton";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "@/features/i18n";
 import LocalePicker from "@/features/i18n/LocalePicker";
-import { resetMissionProgress } from "@/features/mission/actions";
 import type { KnowledgeLevel } from "@/types";
 
 import ProfileLevelCard from "./ProfileLevelCard";
+import ProfileUsernameCard from "./ProfileUsernameCard";
 
 function LogoutButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus();
@@ -45,42 +45,6 @@ function LogoutButton({ label, pendingLabel }: { label: string; pendingLabel: st
   );
 }
 
-/**
- * TEMPORARY dev/test action — wipes the current user's mission progress and
- * stats so content can be replayed. Exposed to everyone for now; before launch
- * this should be gated to admins only (or removed). See {@link resetMissionProgress}.
- */
-function ResetProgressButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className={[
-        "flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-semibold",
-        "border border-amber-400/40 text-amber-400 hover:bg-amber-400/10 active:bg-amber-400/5",
-        "disabled:pointer-events-none disabled:opacity-50 transition-colors",
-      ].join(" ")}
-    >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <polyline points="3 6 5 6 21 6" />
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-      </svg>
-      {pending ? pendingLabel : label}
-    </button>
-  );
-}
-
 export interface ProfileScreenProps {
   /** Display name chosen at signup; null only for profiles predating onboarding. */
   username: string | null;
@@ -96,11 +60,6 @@ export interface ProfileScreenProps {
   /** Explains what the level controls here — the student map vs. the teacher preview. */
   levelHint?: string;
   /**
-   * The dev-only progress reset. Students only: a teacher has no mission
-   * progress of their own to wipe.
-   */
-  showProgressReset?: boolean;
-  /**
    * Language for this screen's own chrome. Defaults to English, which is what
    * the teacher console — the other user of this screen — speaks; the student
    * page passes whatever that student has chosen.
@@ -111,6 +70,12 @@ export interface ProfileScreenProps {
    * English throughout, so a picker there would promise more than it delivers.
    */
   showLanguagePicker?: boolean;
+  /**
+   * Offers the rename card. Students only: a teacher's name is how admins find
+   * them (`promote_teacher` looks accounts up by username), so it is not theirs
+   * to change from here.
+   */
+  showUsernameEditor?: boolean;
 }
 
 export default function ProfileScreen({
@@ -121,9 +86,9 @@ export default function ProfileScreen({
   availableLevels,
   roleLabel,
   levelHint,
-  showProgressReset = true,
   locale = DEFAULT_LOCALE,
   showLanguagePicker = false,
+  showUsernameEditor = false,
 }: ProfileScreenProps) {
   const messages = getMessages(locale).student.profile;
 
@@ -153,6 +118,8 @@ export default function ProfileScreen({
           </div>
         </div>
 
+        {showUsernameEditor && <ProfileUsernameCard username={username} locale={locale} />}
+
         <ProfileLevelCard
           current={level}
           available={availableLevels}
@@ -171,28 +138,6 @@ export default function ProfileScreen({
         <div className="mt-auto flex flex-col gap-3">
           {/* Reporting a bug or sending an idea — reaches the admin console's inbox. */}
           <FeedbackButton />
-
-          {/* TEMPORARY: dev-only progress reset. Remove or gate to admins before launch. */}
-          {showProgressReset && (
-            <form
-              action={async () => {
-                const result = await resetMissionProgress();
-                if (!result.ok) {
-                  window.alert(result.error);
-                }
-              }}
-              onSubmit={(event) => {
-                if (!window.confirm(messages.resetConfirm)) {
-                  event.preventDefault();
-                }
-              }}
-            >
-              <ResetProgressButton
-                label={messages.resetProgress}
-                pendingLabel={messages.resetting}
-              />
-            </form>
-          )}
 
           <form action={signOut}>
             <LogoutButton label={messages.logOut} pendingLabel={messages.loggingOut} />
