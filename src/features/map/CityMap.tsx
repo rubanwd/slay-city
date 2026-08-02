@@ -222,10 +222,21 @@ export default function CityMap({
         )}
       </header>
 
-      {milestoneBanner && (
-        <div role="status" className="absolute inset-x-4 top-16 z-20 flex justify-center">
-          <p className="animate-banner-drop rounded-full border-2 border-lime-green bg-black/85 px-4 py-2 text-center text-sm font-extrabold text-lime-green shadow-[0_0_16px_rgba(157,255,0,0.45)]">
-            {milestoneBanner}
+      {/*
+        A row of its own rather than a pill floating over the map: floating it
+        used to sit right alongside the location pills below and looked enough
+        like one that students kept tapping it expecting a mission. A full-width
+        bar above the map reads as chrome, not as a stop.
+      */}
+      {district && (
+        <div className="shrink-0 border-b border-white/10 px-5 py-2 text-center">
+          <p className="truncate text-body-strong font-black uppercase tracking-wide text-white">
+            {district.name}
+            {/* Every location here is done — the whole game is finished
+                (there's no further district to advance to). */}
+            {isDistrictCompleted(district) && (
+              <span className="ml-1.5 text-lime-green">✓ cleared</span>
+            )}
           </p>
         </div>
       )}
@@ -237,6 +248,19 @@ export default function CityMap({
         of the screen so the frame never shows black bars.
       */}
       <div className="relative flex-1 min-h-0 overflow-hidden">
+        {/*
+          Positioned relative to this map area rather than <main>, so it always
+          sits just below the header + district bar above it regardless of
+          their combined height.
+        */}
+        {milestoneBanner && (
+          <div role="status" className="absolute inset-x-4 top-3 z-20 flex justify-center">
+            <p className="animate-banner-drop rounded-full border-2 border-lime-green bg-black/85 px-4 py-2 text-center text-sm font-extrabold text-lime-green shadow-[0_0_16px_rgba(157,255,0,0.45)]">
+              {milestoneBanner}
+            </p>
+          </div>
+        )}
+
         {activeBackgroundUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -265,20 +289,6 @@ export default function CityMap({
               />
             ) : (
               <MapBackground />
-            )}
-
-            {district && (
-              <span
-                className="absolute top-3 left-1/2 -translate-x-1/2 z-0 whitespace-nowrap text-center rounded-full bg-black/55 backdrop-blur px-4 py-1.5 text-sm font-extrabold uppercase tracking-[0.15em] text-white shadow-[0_0_14px_rgba(255,255,255,0.35)] pointer-events-none"
-                aria-hidden="true"
-              >
-                {district.name}
-                {/* Every location here is done — the whole game is finished
-                    (there's no further district to advance to). */}
-                {isDistrictCompleted(district) && (
-                  <span className="ml-1.5 text-lime-green">✓ cleared</span>
-                )}
-              </span>
             )}
 
             {locations.map((loc) => (
