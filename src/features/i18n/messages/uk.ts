@@ -147,10 +147,6 @@ export const uk: Messages = {
 
       logOut: "Вийти",
       loggingOut: "Виходимо…",
-      resetProgress: "Скинути прогрес (dev)",
-      resetting: "Скидаємо…",
-      resetConfirm:
-        "Стерти весь твій прогрес у місіях, XP, монети та серії? Це не можна скасувати.",
     },
   },
 

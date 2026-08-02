@@ -147,9 +147,6 @@ export const ru: Messages = {
 
       logOut: "Выйти",
       loggingOut: "Выходим…",
-      resetProgress: "Сбросить прогресс (dev)",
-      resetting: "Сбрасываем…",
-      resetConfirm: "Стереть весь твой прогресс в миссиях, XP, монеты и серии? Это нельзя отменить.",
     },
   },
 

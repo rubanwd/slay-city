@@ -147,9 +147,6 @@ export const en: Messages = {
 
       logOut: "Log Out",
       loggingOut: "Logging out…",
-      resetProgress: "Reset Progress (dev)",
-      resetting: "Resetting…",
-      resetConfirm: "Wipe all your mission progress, XP, coins, and streaks? This can't be undone.",
     },
   },
 

@@ -148,9 +148,6 @@ export interface Messages {
 
       logOut: string;
       loggingOut: string;
-      resetProgress: string;
-      resetting: string;
-      resetConfirm: string;
     };
   };
 

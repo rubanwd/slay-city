@@ -35,8 +35,11 @@ Main backend functions, by category:
 complete_mission(p_mission_id, p_reward_fraction default 1) — SECURITY DEFINER RPC
 reset_location_progress          — SECURITY DEFINER RPC
 reset_level_progress             — SECURITY DEFINER RPC
-reset_my_progress                — SECURITY DEFINER RPC (temporary dev/test helper,
-                                    open to any authenticated user — not admin-gated)
+reset_my_progress                — SECURITY DEFINER RPC, still granted to authenticated
+                                    but no longer called from anywhere: the dev-only
+                                    "Reset Progress" button and its server action were
+                                    removed from the profile screen. Drop or admin-gate
+                                    it in a future migration.
 advance_my_level_if_cleared / knowledge_level_completed — internal only, not granted
                                     to authenticated
 
