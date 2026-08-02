@@ -100,6 +100,16 @@ export interface Messages {
     languageHint: string;
     languageAuto: string;
     languageAutoHint: (detected: string) => string;
+
+    usernameTitle: string;
+    usernameChange: string;
+    usernameCancel: string;
+    usernameSave: string;
+    usernameSaving: string;
+    usernameSaved: string;
+    usernameHint: string;
+    usernameErrors: Record<UsernameProblem, string>;
+
     studentTitle: string;
     studentLevelHint: string;
     studentNone: string;

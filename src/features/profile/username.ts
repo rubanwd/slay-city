@@ -42,6 +42,24 @@ export type UsernameCheck =
   | { ok: false; problem: Exclude<UsernameProblem, "taken" | "unknown"> };
 
 /**
+ * The strings `ProfileUsernameCard` needs. Every role that can rename itself
+ * (student, teacher, parent) has its own copy of these under its own message
+ * namespace — same shape, so the same card renders all three — because each
+ * namespace already carries its own translations independently (see
+ * `Messages`).
+ */
+export interface UsernameCardMessages {
+  usernameTitle: string;
+  usernameChange: string;
+  usernameCancel: string;
+  usernameSave: string;
+  usernameSaving: string;
+  usernameSaved: string;
+  usernameHint: string;
+  usernameErrors: Record<UsernameProblem, string>;
+}
+
+/**
  * Trims the edges and collapses runs of whitespace, so "  Anna   Maria " and
  * "Anna Maria" are stored as the same name. Any whitespace character (tab,
  * non-breaking space, …) becomes a plain space first.

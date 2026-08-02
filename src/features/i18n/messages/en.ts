@@ -101,6 +101,23 @@ export const en: Messages = {
     languageHint: "Changes the language of your dashboard, map and profile.",
     languageAuto: "Automatic",
     languageAutoHint: (detected) => `Following your browser — currently ${detected}.`,
+
+    usernameTitle: "Name",
+    usernameChange: "Change",
+    usernameCancel: "Cancel",
+    usernameSave: "Save",
+    usernameSaving: "Saving…",
+    usernameSaved: "Name updated!",
+    usernameHint: `Up to ${USERNAME_MAX_LENGTH} characters. Letters, numbers, spaces and _ - ' .`,
+    usernameErrors: {
+      too_short: `Your name needs at least ${USERNAME_MIN_LENGTH} characters.`,
+      too_long: `Your name can be at most ${USERNAME_MAX_LENGTH} characters.`,
+      invalid_chars: "You can use letters, numbers, spaces and _ - ' .",
+      needs_letter: "Add at least one letter or number.",
+      taken: "Someone already has that name. Try another one.",
+      unknown: "Couldn't save that name. Try again.",
+    },
+
     studentTitle: "Your student",
     studentLevelHint: "The level your student is studying — they choose it themselves.",
     studentNone: "No student linked yet.",

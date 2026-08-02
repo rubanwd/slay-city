@@ -7,6 +7,7 @@ import { signOut } from "@/features/auth/actions";
 import { getMessages, LOCALE_LABELS, type Locale } from "@/features/i18n";
 import LocalePicker from "@/features/i18n/LocalePicker";
 import { KNOWLEDGE_LEVEL_LABELS } from "@/features/levels/levels";
+import ProfileUsernameCard from "@/features/profile/ProfileUsernameCard";
 import type { KnowledgeLevel } from "@/types";
 
 function LogoutButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
@@ -78,6 +79,8 @@ export default function ParentProfileScreen({
             {messages.profile.roleLabel}
           </span>
         </div>
+
+        <ProfileUsernameCard username={username} messages={messages.profile} />
 
         <LocalePicker
           locale={locale}
