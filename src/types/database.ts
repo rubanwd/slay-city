@@ -1206,6 +1206,52 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_profile: {
+        Args: {
+          p_level?: string
+          p_role: string
+          p_user_id: string
+          p_username: string
+        }
+        Returns: {
+          reason: string
+          success: boolean
+        }[]
+      }
+      admin_delete_user: {
+        Args: { p_profile_id: string }
+        Returns: {
+          reason: string
+          success: boolean
+        }[]
+      }
+      admin_derive_username: { Args: { p_email: string }; Returns: string }
+      admin_list_users: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_role?: string
+          p_search?: string
+        }
+        Returns: {
+          created_at: string
+          email: string
+          has_profile: boolean
+          id: string
+          is_confirmed: boolean
+          level: Database["public"]["Enums"]["knowledge_level"]
+          role: Database["public"]["Enums"]["user_role"]
+          total_count: number
+          username: string
+        }[]
+      }
+      admin_set_user_role: {
+        Args: { p_profile_id: string; p_role: string }
+        Returns: {
+          reason: string
+          success: boolean
+        }[]
+      }
       advance_my_level_if_cleared: {
         Args: never
         Returns: Database["public"]["Enums"]["knowledge_level"]

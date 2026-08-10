@@ -24,6 +24,7 @@ const ITEMS: SidebarItem[] = [
   { href: "/admin/wardrobe", title: "Wardrobe", accent: "text-neon-pink" },
   { href: "/admin/admins", title: "Manage Admins", accent: "text-purple" },
   { href: "/admin/teachers", title: "Manage Teachers", accent: "text-neon-orange" },
+  { href: "/admin/users", title: "Manage Users", accent: "text-lime-green" },
   { href: "/admin/feedback", title: "Feedback & Bugs", accent: "text-cyan" },
 ];
 

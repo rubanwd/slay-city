@@ -45,7 +45,7 @@ src/
 
 ```txt
 admin      — admin console: districts/locations/missions/task-types/wardrobe/teachers
-             /admins/feedback CRUD, AI image generation
+             /admins/users/feedback CRUD, AI image generation
 auth       — login/register/forgot/reset-password forms, role-based post-login routing
 demo       — no-login guest demo (random district reveal, demo mission, demo progress)
 feedback   — in-app feedback widget + admin inbox/unread badge
