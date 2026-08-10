@@ -3,6 +3,7 @@ import NavLink from "@/components/ui/NavLink";
 import AdminHeader from "@/features/admin/AdminHeader";
 import AdminSnakePlayground from "@/features/admin/AdminSnakePlayground";
 import { requireAdminPage } from "@/features/admin/guard";
+import { listAdminUsers } from "@/features/admin/userQueries";
 import { getUnreadFeedbackCount } from "@/features/feedback/queries";
 import UnreadFeedbackBadge from "@/features/feedback/UnreadFeedbackBadge";
 import { KNOWLEDGE_LEVELS } from "@/features/levels/levels";
@@ -21,6 +22,7 @@ export default async function AdminPage() {
     wardrobeRes,
     publishedTaskTypesRes,
     unreadFeedback,
+    userList,
   ] = await Promise.all([
     supabase.from("missions").select("id", { count: "exact", head: true }),
     supabase.from("districts").select("id", { count: "exact", head: true }),
@@ -31,6 +33,9 @@ export default async function AdminPage() {
       .select("task_type", { count: "exact", head: true })
       .eq("is_published", true),
     getUnreadFeedbackCount(supabase),
+    // Only the total is used here; the RPC always reports the full match count
+    // alongside the page, so one row is enough.
+    listAdminUsers(supabase, { limit: 1 }),
   ]);
 
   const cards: {
@@ -76,6 +81,13 @@ export default async function AdminPage() {
       count: null,
       description: "Add teacher accounts and assign student groups.",
       accent: "text-neon-orange",
+    },
+    {
+      href: "/admin/users",
+      title: "Manage Users",
+      count: userList.total,
+      description: "Every account — add one, change a role, or delete it.",
+      accent: "text-lime-green",
     },
     {
       href: "/admin/feedback",

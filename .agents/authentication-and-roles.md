@@ -33,14 +33,29 @@ teacher
 admin
 ```
 
-Teachers are promotion-only, never created from scratch: an admin resolves an
+Teachers are promotion-only from the Manage Teachers screen: an admin resolves an
 existing account (by username or email, any role except admin/teacher) and calls the
 `promote_teacher()` RPC to flip its role to `teacher` (`revoke_teacher()` reverses it
-back to `parent` and deletes the teacher's groups). This is deliberate — the project
-has no Supabase service-role key configured, so there is no safe way to call
-`supabase.auth.admin.createUser()` from a server action. If a future request wants
-teachers created from scratch with a password, that requires adding a service-role
-key first.
+back to `parent` and deletes the teacher's groups).
+
+The Manage Users screen (`/admin/users`) is the general case of the same idea, and
+adds account creation and deletion:
+
+* `admin_list_users()` lists every account with the email only `auth.users` knows.
+* `admin_set_user_role()` moves any account between the four roles. It deletes a
+  departing teacher's groups (like `revoke_teacher()`) and drops a departing admin's
+  `admin_emails` row — otherwise `claim_admin()` would restore the role at their next
+  login. It refuses to change the caller's own role, so an admin can't lock themselves
+  out of the console.
+* `admin_delete_user()` deletes the `auth.users` row itself; every user-owned table
+  cascades off it. It also refuses self-deletion.
+* Creating an account still does **not** use `supabase.auth.admin.createUser()` —
+  there is no service-role key. `createUser` (src/features/admin/userActions.ts)
+  registers the account through the ordinary `auth.signUp` API on a standalone client
+  with `persistSession: false` (so the admin's own session is untouched), then calls
+  `admin_create_profile()` for the profile and `user_stats` rows. Consequence: if the
+  Supabase project requires email confirmation, the new account must confirm before
+  its first sign-in — the console says so after creating one.
 
 Student permissions:
 

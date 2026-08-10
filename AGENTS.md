@@ -200,7 +200,8 @@ The MVP must prove one hypothesis: **students are motivated to return daily, com
   topics with AI-assisted drafting, per-topic Q&A, read-only map/mission preview
 - Admin content screen: create/edit districts, locations, missions, vocabulary,
   wardrobe items, task-type templates; generate AI art; publish/unpublish content;
-  manage the admin allowlist, teachers, and the feedback inbox
+  manage the admin allowlist, teachers, every user account (add, change role,
+  delete — `/admin/users`), and the feedback inbox
 - Progressive Web App manifest and service worker (`public/manifest.json`, `public/sw.js`)
 
 ### Core API Operations — as actually implemented

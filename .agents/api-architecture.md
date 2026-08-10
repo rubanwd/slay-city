@@ -28,7 +28,9 @@ admin       — createMission, updateMission, publishMission, unpublishMission,
               reorderDistricts, createLocation, updateLocation, deleteDistrict,
               deleteLocation, createWardrobeItem, updateWardrobeItem,
               publishWardrobeItem, unpublishWardrobeItem, deleteWardrobeItem
-              (plus generateLocationIcon.ts, generateMapBackground.ts,
+              (plus userActions.ts — createUser, setUserRole, deleteUser for the
+              /admin/users screen, and userQueries.ts::listAdminUsers;
+              plus generateLocationIcon.ts, generateMapBackground.ts,
               generateTaskImage.ts, missionImageActions.ts — AI art generation,
               all requireAdmin-gated)
 auth        — signUp, signIn, signInWithGoogle, googleFormAction, signOut,

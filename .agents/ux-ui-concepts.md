@@ -56,8 +56,10 @@ Teacher dashboard, groups, homework topic authoring + Q&A, read-only map/mission
 preview, profile (/teacher/*)
 
 # Admin
-Districts, locations, missions, task types, wardrobe, teachers, admins, feedback inbox
-(/admin/*) — several multi-page consoles, not one flat "admin content screen"
+Districts, locations, missions, task types, wardrobe, teachers, admins, users,
+feedback inbox (/admin/*) — several multi-page consoles, not one flat "admin content
+screen". /admin/users is the account list: username, email, join date, role change
+and account deletion.
 ```
 
 The UX must always be simple, mobile-first, and child-friendly for the student-facing

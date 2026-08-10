@@ -79,6 +79,16 @@ record_study_time                — SECURITY DEFINER RPC (student-only, clamps 
 # Admin
 is_admin / claim_admin           — SECURITY DEFINER RPCs
 prevent_role_escalation          — trigger function
+admin_list_users                 — SECURITY DEFINER RPC (admin-only; every account
+                                    with its auth.users email, paged + filtered)
+admin_create_profile             — SECURITY DEFINER RPC (profile + user_stats for an
+                                    account the console just signed up)
+admin_set_user_role              — SECURITY DEFINER RPC (any role → any role; drops
+                                    the old role's groups/allow-list entry, refuses
+                                    self-demotion)
+admin_delete_user                — SECURITY DEFINER RPC (deletes the auth.users row;
+                                    everything cascades, refuses self-deletion)
+admin_derive_username            — internal helper (execute revoked from public)
 
 # Edge Function
 updateStreak                     — Supabase Edge Function
