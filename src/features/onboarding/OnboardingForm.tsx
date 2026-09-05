@@ -83,14 +83,12 @@ export default function OnboardingForm({ levels }: OnboardingFormProps) {
           <span className="text-label text-white/50 uppercase tracking-widest">
             Age <span className="normal-case text-white/30">(optional)</span>
           </span>
-          {/* Placeholder stays "7-14" as the suggested range; the accepted range
-              is wider so older and younger players aren't blocked. */}
           <input
             name="age"
             type="number"
             min={5}
-            max={20}
-            placeholder="7-14"
+            max={99}
+            placeholder="5-99"
             className={INPUT_CLASS}
           />
         </label>
