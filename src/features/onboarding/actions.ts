@@ -14,7 +14,7 @@ export type OnboardingState = {
 };
 
 const MIN_AGE = 5;
-const MAX_AGE = 20;
+const MAX_AGE = 99;
 
 export async function createProfile(
   _prevState: OnboardingState,
