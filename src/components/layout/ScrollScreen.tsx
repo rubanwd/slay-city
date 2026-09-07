@@ -20,10 +20,19 @@ interface ScrollScreenProps {
  *
  * Content still needs `BOTTOM_NAV_CLEARANCE` worth of bottom padding: the nav
  * is fixed on top of this area, not below it.
+ *
+ * Anything a layout stacks above the screen — the teacher console's "viewing
+ * as" banner — has to come off that height, or the bottom of the scroll area
+ * ends up below the fold and the last rows of content can never clear the nav.
+ * Such a layout sets `--screen-top-offset` to its own height (see
+ * `VIEW_AS_BANNER_OFFSET`); with nothing stacked above, the screen is the full
+ * viewport as before.
  */
 export default function ScrollScreen({ children, footer, className = "" }: ScrollScreenProps) {
   return (
-    <main className={`h-dvh overflow-hidden bg-black text-white ${className}`.trim()}>
+    <main
+      className={`h-[calc(100dvh-var(--screen-top-offset,0px))] overflow-hidden bg-black text-white ${className}`.trim()}
+    >
       <div className="h-full overflow-y-auto overscroll-contain">{children}</div>
       {footer}
     </main>
