@@ -51,10 +51,15 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
     );
 
   const membersByGroup = new Map<string, { studentId: string; username: string }[]>();
+  const groupIdsByStudent = new Map<string, string[]>();
   for (const row of members ?? []) {
     const list = membersByGroup.get(row.group_id) ?? [];
     list.push({ studentId: row.student_id, username: row.profiles?.username ?? "Unknown" });
     membersByGroup.set(row.group_id, list);
+
+    const studentGroupIds = groupIdsByStudent.get(row.student_id) ?? [];
+    studentGroupIds.push(row.group_id);
+    groupIdsByStudent.set(row.student_id, studentGroupIds);
   }
 
   const query = (q ?? "").trim();
@@ -171,7 +176,9 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
               </p>
             ) : (
               <ul className="flex flex-col gap-2">
-                {studentResults.map((student) => (
+                {studentResults.map((student) => {
+                  const currentGroupId = groupIdsByStudent.get(student.id)?.[0];
+                  return (
                   <li
                     key={student.id}
                     className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-3"
@@ -185,6 +192,7 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
                       <select
                         name="group_id"
                         required
+                        defaultValue={currentGroupId ?? groupRows[0]?.id}
                         className="rounded-full border border-white/15 bg-black px-2.5 py-1.5 text-xs text-white"
                       >
                         {groupRows.map((group) => (
@@ -201,7 +209,8 @@ export default async function TeacherGroupsPage({ params, searchParams }: Teache
                       </button>
                     </form>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
           </section>
