@@ -115,7 +115,9 @@ async function dataUrlToUpload(dataUrl: string): Promise<{ blob: Blob; ext: stri
  * The teacher's vocabulary authoring surface for one homework topic. One
  * editable list of words serves both authoring modes: fill it in by hand, or
  * populate it from the topic with AI (title + description + extra instructions
- * + word count). Each word gets an AI-generated or uploaded flashcard image.
+ * + word count). Flashcard images are optional: the "Generate images" toggle
+ * decides whether an AI draft also illustrates every word, and each row can
+ * always be illustrated (or re-illustrated) on its own via AI or an upload.
  * Publishing replaces the topic's whole set and rebuilds its test — a set of
  * checking tasks equal to (by default) half the number of words.
  *
@@ -140,6 +142,10 @@ export default function VocabularyManager({
   const [wordCount, setWordCount] = useState<string>(String(initialWords.length || 6));
   const [testSeed, setTestSeed] = useState(0);
   const [extra, setExtra] = useState("");
+  // Whether an AI draft also illustrates every word it returns. Off, the words
+  // arrive without pictures and the teacher illustrates only the ones that need
+  // it, one row at a time — images are slow and not every word wants one.
+  const [autoImages, setAutoImages] = useState(true);
   const [busyImages, setBusyImages] = useState<Set<string>>(new Set());
   const [imageJob, setImageJob] = useState<ImageJob | null>(null);
   // Fingerprint of the last state that was published (or that was loaded from
@@ -275,6 +281,12 @@ export default function VocabularyManager({
       setWords(drafted);
       setTaskCount(String(defaultTestTaskCount(drafted.length)));
       setTestSeed(0);
+      if (!autoImages) {
+        toast.success(
+          `Drafted ${drafted.length} words. Use the AI button on a word to illustrate it.`
+        );
+        return;
+      }
       toast.success(`Drafted ${drafted.length} words. Generating images…`);
       // Fire-and-forget: images stream in while the teacher reviews the words.
       void runBackgroundImages(
@@ -416,6 +428,21 @@ export default function VocabularyManager({
             onChange={(e) => setExtra(e.target.value)}
             placeholder="e.g. beginner level, only nouns"
             className={`${INPUT_CLASS} !py-2 text-small`}
+          />
+        </label>
+        <label className="flex items-center justify-between gap-3 rounded-xl border border-white/15 bg-white/5 px-3 py-2.5">
+          <span className="flex min-w-0 flex-col">
+            <span className="text-small font-semibold text-white">Generate images for all words</span>
+            <span className="text-[11px] text-white/40">
+              Off — words come without pictures; add one per word with its AI button.
+            </span>
+          </span>
+          <input
+            type="checkbox"
+            checked={autoImages}
+            onChange={(e) => setAutoImages(e.target.checked)}
+            disabled={busy}
+            className="h-5 w-5 shrink-0 accent-lime-green"
           />
         </label>
         <SlayButton
