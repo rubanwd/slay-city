@@ -183,3 +183,63 @@ export async function clearGrammar(topicId: string): Promise<GrammarActionResult
   revalidateTopic(access.groupId, topicId);
   return { ok: true };
 }
+
+/* ── Reuse (copy another topic's grammar into this one's draft) ─────────────── */
+
+export type CopyGrammarResult =
+  | { ok: true; points: PublishGrammarPoint[]; tasks: GrammarDraftTask[] }
+  | { ok: false; error: string };
+
+export interface CopyGrammarInput {
+  /** The topic being edited (target of the eventual publish). */
+  topicId: string;
+  /** The already-authored topic whose grammar set is being reused. */
+  sourceTopicId: string;
+}
+
+/**
+ * Reads another topic's published grammar set so the teacher can reuse it here
+ * — the sibling of {@link copyVocabularyFromTopic}. The test tasks are copied
+ * along with the rule points, because a grammar test can't be rebuilt from the
+ * points the way the vocabulary test can.
+ *
+ * Writes nothing: the draft comes back for review and only Publish persists it.
+ * Both topics are ownership-gated, so only the teacher's own groups are
+ * reachable as sources.
+ */
+export async function copyGrammarFromTopic(input: CopyGrammarInput): Promise<CopyGrammarResult> {
+  const supabase = await createClient();
+  const target = await requireTopicAccess(supabase, input.topicId);
+  if (!target.ok) return { ok: false, error: target.error };
+  const source = await requireTopicAccess(supabase, input.sourceTopicId);
+  if (!source.ok) return { ok: false, error: "That topic isn't yours to copy from." };
+
+  const [pointsRes, tasksRes] = await Promise.all([
+    supabase
+      .from("homework_grammar_points")
+      .select("title, explanation, example, order_index")
+      .eq("topic_id", input.sourceTopicId)
+      .order("order_index"),
+    supabase
+      .from("homework_grammar_tasks")
+      .select("task_type, content, order_index")
+      .eq("topic_id", input.sourceTopicId)
+      .order("order_index"),
+  ]);
+
+  const points = (pointsRes.data ?? []).map((p) => ({
+    title: p.title,
+    explanation: p.explanation,
+    example: p.example,
+  }));
+
+  if (points.length === 0) {
+    return { ok: false, error: "That topic has no grammar to copy." };
+  }
+
+  const tasks: GrammarDraftTask[] = (tasksRes.data ?? [])
+    .slice(0, MAX_GRAMMAR_TASKS)
+    .map((t) => ({ taskType: t.task_type, content: t.content }));
+
+  return { ok: true, points, tasks };
+}

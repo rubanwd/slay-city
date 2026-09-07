@@ -313,3 +313,58 @@ export async function clearVocabulary(topicId: string): Promise<VocabActionResul
   revalidateTopic(access.groupId, topicId);
   return { ok: true };
 }
+
+/* ── Reuse (copy another topic's vocabulary into this one's draft) ──────────── */
+
+export type CopyVocabularyResult =
+  | { ok: true; words: PublishWordInput[]; taskCount: number }
+  | { ok: false; error: string };
+
+export interface CopyVocabularyInput {
+  /** The topic being edited (target of the eventual publish). */
+  topicId: string;
+  /** The already-authored topic whose words are being reused. */
+  sourceTopicId: string;
+}
+
+/**
+ * Reads another topic's published vocabulary so the teacher can reuse it here.
+ * The same topic is often taught to several groups, and re-drafting it with AI
+ * every time costs time and image credits — copying reuses the exact words and
+ * their (already generated) images.
+ *
+ * Writes nothing: the words come back into the draft list like an AI draft, so
+ * the teacher can edit and only then publish. Both topics are ownership-gated,
+ * so a teacher can only ever copy from their own groups.
+ */
+export async function copyVocabularyFromTopic(
+  input: CopyVocabularyInput
+): Promise<CopyVocabularyResult> {
+  const supabase = await createClient();
+  const target = await requireTopicAccess(supabase, input.topicId);
+  if (!target.ok) return { ok: false, error: target.error };
+  const source = await requireTopicAccess(supabase, input.sourceTopicId);
+  if (!source.ok) return { ok: false, error: "That topic isn't yours to copy from." };
+
+  const [wordsRes, tasksRes] = await Promise.all([
+    supabase
+      .from("homework_vocab_words")
+      .select("word, transcription, translation, image_url, order_index")
+      .eq("topic_id", input.sourceTopicId)
+      .order("order_index"),
+    supabase.from("homework_vocab_tasks").select("id").eq("topic_id", input.sourceTopicId),
+  ]);
+
+  const words = (wordsRes.data ?? []).map((w) => ({
+    word: w.word,
+    transcription: w.transcription,
+    translation: w.translation,
+    imageUrl: w.image_url,
+  }));
+
+  if (words.length === 0) {
+    return { ok: false, error: "That topic has no vocabulary to copy." };
+  }
+
+  return { ok: true, words, taskCount: tasksRes.data?.length ?? 0 };
+}

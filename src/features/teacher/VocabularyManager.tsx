@@ -14,9 +14,12 @@ import {
   MAX_VOCAB_WORDS,
 } from "@/features/homework/vocabulary";
 
+import TopicContentImporter from "./TopicContentImporter";
+import type { TopicSource } from "./topicSources";
 import VocabWordEditor, { type DraftWord } from "./VocabWordEditor";
 import {
   clearVocabulary,
+  copyVocabularyFromTopic,
   generateVocabularyDraft,
   generateWordImage,
   publishVocabulary,
@@ -36,6 +39,11 @@ export interface VocabularyManagerProps {
   initialWords: VocabularyManagerInitialWord[];
   /** How many test tasks the published set currently has (0 if none). */
   initialTaskCount: number;
+  /**
+   * Other topics of this teacher that already have vocabulary, offered as a
+   * ready-made source so the same topic isn't re-drafted for every group.
+   */
+  reuseSources: TopicSource[];
 }
 
 let keySeq = 0;
@@ -128,6 +136,7 @@ export default function VocabularyManager({
   topicDescription,
   initialWords,
   initialTaskCount,
+  reuseSources,
 }: VocabularyManagerProps) {
   const toast = useAdminToast();
   const [words, setWords] = useState<DraftWord[]>(() => initialWords.map(toDraft));
@@ -160,6 +169,7 @@ export default function VocabularyManager({
   );
 
   const [generating, startGenerate] = useTransition();
+  const [importing, startImport] = useTransition();
   const [publishing, startPublish] = useTransition();
 
   const hasPublished = initialWords.length > 0;
@@ -283,6 +293,36 @@ export default function VocabularyManager({
     });
   }
 
+  /**
+   * Loads another topic's published words into this draft. Their images come
+   * along as storage URLs, so a reused topic needs no image generation at all —
+   * the teacher reviews the list and publishes.
+   */
+  function handleImport(sourceTopicId: string) {
+    startImport(async () => {
+      const result = await copyVocabularyFromTopic({ topicId, sourceTopicId });
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      const copied: DraftWord[] = result.words.map((w) => ({
+        key: nextKey(),
+        word: w.word,
+        transcription: w.transcription ?? "",
+        translation: w.translation ?? "",
+        imageUrl: w.imageUrl,
+        imageDataUrl: null,
+        imagePrompt: null,
+      }));
+      setWords(copied);
+      setTaskCount(
+        String(result.taskCount > 0 ? result.taskCount : defaultTestTaskCount(copied.length))
+      );
+      setTestSeed(0);
+      toast.success(`Copied ${copied.length} words. Review and publish.`);
+    });
+  }
+
   async function handleGenerateImage(word: DraftWord) {
     if (busyImages.has(word.key)) return;
     setImageBusy(word.key, true);
@@ -376,7 +416,7 @@ export default function VocabularyManager({
     });
   }
 
-  const busy = generating || publishing;
+  const busy = generating || importing || publishing;
 
   return (
     <div className="flex flex-col gap-4">
@@ -429,6 +469,15 @@ export default function VocabularyManager({
           {words.length > 0 ? "Regenerate Words with AI" : "Generate Words with AI"}
         </SlayButton>
       </div>
+
+      {/* Reuse — copy a topic already authored for another group. */}
+      <TopicContentImporter
+        sources={reuseSources}
+        kind="vocabulary"
+        disabled={busy}
+        loading={importing}
+        onImport={handleImport}
+      />
 
       {/* Word list */}
       {words.length > 0 && (
