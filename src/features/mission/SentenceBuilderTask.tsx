@@ -115,7 +115,7 @@ export default function SentenceBuilderTask({
         variant="green"
         size="lg"
         className="w-full"
-        onClick={onComplete}
+        onClick={() => onComplete()}
         disabled={!solved}
       >
         {actionLabel}

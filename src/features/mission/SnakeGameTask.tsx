@@ -321,7 +321,7 @@ export default function SnakeGameTask({
                 <>
                   <p className="text-3xl font-black text-lime-green">{word}</p>
                   <p className="text-base text-white/75">You collected every letter!</p>
-                  <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete}>
+                  <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()}>
                     {actionLabel}
                   </SlayButton>
                 </>

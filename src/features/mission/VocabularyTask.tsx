@@ -49,7 +49,7 @@ export default function VocabularyTask({
         )}
       </SlayCard>
 
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()}>
         {actionLabel}
       </SlayButton>
     </div>

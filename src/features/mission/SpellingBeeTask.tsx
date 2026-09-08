@@ -102,7 +102,7 @@ export default function SpellingBeeTask({
       )}
 
       {checked && isCorrect && (
-        <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete}>
+        <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()}>
           {actionLabel}
         </SlayButton>
       )}

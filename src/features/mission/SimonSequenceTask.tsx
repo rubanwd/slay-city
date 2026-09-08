@@ -135,7 +135,7 @@ export default function SimonSequenceTask({
         variant="green"
         size="lg"
         className="w-full"
-        onClick={onComplete}
+        onClick={() => onComplete()}
         disabled={phase !== "done"}
       >
         {actionLabel}

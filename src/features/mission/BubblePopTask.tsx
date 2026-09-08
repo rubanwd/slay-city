@@ -115,7 +115,7 @@ export default function BubblePopTask({
         variant="green"
         size="lg"
         className="w-full shrink-0"
-        onClick={onComplete}
+        onClick={() => onComplete()}
         disabled={!won}
       >
         {actionLabel}

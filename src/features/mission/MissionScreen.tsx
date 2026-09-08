@@ -8,7 +8,7 @@ import { SlayButton } from "@/components/ui";
 
 import { submitMissionCompletion } from "./actions";
 import HowToPlayButton from "./HowToPlayButton";
-import { clampTaskFraction, missionRewardFraction } from "./missionReward";
+import { missionRewardFraction, taskRewardFraction } from "./missionReward";
 import ProgressBar from "./ProgressBar";
 import TaskRunner from "./TaskRunner";
 import {
@@ -122,8 +122,11 @@ export default function MissionScreen({
     }
   };
 
-  const handleTaskComplete = (rewardFraction = 1) => {
-    rewardFractionRef.current *= clampTaskFraction(rewardFraction);
+  // `rewardFraction` is whatever the task reported — a real share only from a
+  // task that can end early; anything else (a click event from a task that
+  // wires `onComplete` straight to a button) counts as fully completed.
+  const handleTaskComplete = (rewardFraction?: unknown) => {
+    rewardFractionRef.current *= taskRewardFraction(rewardFraction);
     advance();
   };
 

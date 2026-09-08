@@ -132,7 +132,7 @@ export default function CategorySortTask({
         variant="green"
         size="lg"
         className="w-full"
-        onClick={onComplete}
+        onClick={() => onComplete()}
         disabled={!won}
       >
         {actionLabel}

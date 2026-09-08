@@ -90,7 +90,7 @@ export default function PictureRevealTask({
         </p>
       )}
 
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete} disabled={!answered}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()} disabled={!answered}>
         {actionLabel}
       </SlayButton>
     </div>

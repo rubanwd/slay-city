@@ -91,7 +91,7 @@ export default function HangmanTask({
           </p>
           {won && translation && <p className="text-small text-white/60">{translation}</p>}
           {won ? (
-            <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete}>
+            <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()}>
               {actionLabel}
             </SlayButton>
           ) : (
