@@ -104,11 +104,18 @@ export default function TaskRunner({
   onSkip,
   actionLabel,
 }: TaskRunnerProps) {
-  const rendered = renderTaskByType(taskType, content, onComplete, actionLabel);
+  // Guard the contract above: a task that cannot finish early types its
+  // `onComplete` as `() => void`, so nothing stops it being handed straight to
+  // a button and called with a click event. Only a real number may reach the
+  // caller as a fraction — anything else means the task was fully completed.
+  const complete = (rewardFraction?: unknown) =>
+    onComplete(typeof rewardFraction === "number" ? rewardFraction : undefined);
+
+  const rendered = renderTaskByType(taskType, content, complete, actionLabel);
   return (
     rendered ?? (
       <UnsupportedTask
-        onContinue={onSkip ?? onComplete}
+        onContinue={onSkip ?? complete}
         actionLabel={onSkip ? "Skip" : actionLabel}
       />
     )
@@ -272,7 +279,7 @@ function UnsupportedTask({
   return (
     <div className="flex flex-col items-center gap-6 text-center">
       <p className="text-white/60">This task type isn&apos;t available yet — skip ahead.</p>
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onContinue}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={() => onContinue()}>
         {actionLabel}
       </SlayButton>
     </div>

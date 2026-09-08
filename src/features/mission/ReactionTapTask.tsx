@@ -119,7 +119,7 @@ export default function ReactionTapTask({
         })}
       </div>
 
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete} disabled={!roundOver}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()} disabled={!roundOver}>
         {actionLabel}
       </SlayButton>
     </div>

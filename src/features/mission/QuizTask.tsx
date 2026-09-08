@@ -82,7 +82,7 @@ export default function QuizTask({
         variant="green"
         size="lg"
         className="w-full"
-        onClick={onComplete}
+        onClick={() => onComplete()}
         disabled={!answered}
       >
         {actionLabel}

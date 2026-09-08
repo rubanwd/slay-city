@@ -120,7 +120,7 @@ export default function LetterFillTask({
         </p>
       )}
 
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete} disabled={!isCorrect}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()} disabled={!isCorrect}>
         {actionLabel}
       </SlayButton>
     </div>

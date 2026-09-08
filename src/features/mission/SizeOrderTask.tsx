@@ -108,7 +108,7 @@ export default function SizeOrderTask({
 
       {solved && <p className="text-center font-bold text-lime-green">Perfect order! 🎉</p>}
 
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete} disabled={!solved}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()} disabled={!solved}>
         {actionLabel}
       </SlayButton>
     </div>

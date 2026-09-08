@@ -74,7 +74,7 @@ export default function DialogueChoiceTask({
         </div>
       )}
 
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete} disabled={!answered}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()} disabled={!answered}>
         {actionLabel}
       </SlayButton>
     </div>

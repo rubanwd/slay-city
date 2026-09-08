@@ -78,7 +78,7 @@ export default function SpotTheDifferenceTask({
 
       {found && <p className="text-center font-bold text-lime-green">Found it! 🎉</p>}
 
-      <SlayButton variant="green" size="lg" className="w-full" onClick={onComplete} disabled={!found}>
+      <SlayButton variant="green" size="lg" className="w-full" onClick={() => onComplete()} disabled={!found}>
         {actionLabel}
       </SlayButton>
     </div>

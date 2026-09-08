@@ -20,6 +20,19 @@ export function clampTaskFraction(value: number): number {
 }
 
 /**
+ * Normalises whatever a finished task reported as its share of the reward.
+ *
+ * Only tasks that can end early (the word search) report a number; every other
+ * task simply signals "done" and its `onComplete` may be wired straight to a
+ * button, in which case React hands it a click event instead of a fraction.
+ * Anything that isn't a real number therefore means *fully completed* — reading
+ * it as a share would silently zero out the whole mission's reward.
+ */
+export function taskRewardFraction(value: unknown): number {
+  return typeof value === "number" ? clampTaskFraction(value) : 1;
+}
+
+/**
  * The share of a mission's XP and coins a run has earned.
  *
  * Every task is worth an equal slice of the mission, so skipping one forfeits

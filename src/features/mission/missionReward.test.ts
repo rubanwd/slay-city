@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { clampTaskFraction, missionRewardFraction } from "./missionReward";
+import { clampTaskFraction, missionRewardFraction, taskRewardFraction } from "./missionReward";
 
 describe("clampTaskFraction", () => {
   it("passes through a share already in range", () => {
@@ -18,6 +18,26 @@ describe("clampTaskFraction", () => {
     expect(clampTaskFraction(NaN)).toBe(0);
     expect(clampTaskFraction(Infinity)).toBe(0);
     expect(clampTaskFraction(-Infinity)).toBe(0);
+  });
+});
+
+describe("taskRewardFraction", () => {
+  it("keeps a real share reported by a task that ended early", () => {
+    expect(taskRewardFraction(0.5)).toBe(0.5);
+    expect(taskRewardFraction(0)).toBe(0);
+    expect(taskRewardFraction(1.5)).toBe(1);
+  });
+
+  it("counts a task that reported nothing as fully completed", () => {
+    expect(taskRewardFraction(undefined)).toBe(1);
+  });
+
+  // The regression this guards: most tasks wire `onComplete` straight to a
+  // button, so React calls it with a click event. Read as a share, that zeroed
+  // out the whole mission's XP and coins.
+  it("counts a click event as fully completed, not as nothing earned", () => {
+    expect(taskRewardFraction({ type: "click", nativeEvent: {} })).toBe(1);
+    expect(taskRewardFraction("1")).toBe(1);
   });
 });
 

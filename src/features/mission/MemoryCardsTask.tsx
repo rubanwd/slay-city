@@ -119,7 +119,7 @@ export default function MemoryCardsTask({
         variant="green"
         size="lg"
         className="w-full"
-        onClick={onComplete}
+        onClick={() => onComplete()}
         disabled={!won}
       >
         {actionLabel}

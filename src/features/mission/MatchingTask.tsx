@@ -133,7 +133,7 @@ export default function MatchingTask({
         variant="green"
         size="lg"
         className="w-full"
-        onClick={onComplete}
+        onClick={() => onComplete()}
         disabled={!allMatched}
       >
         {actionLabel}
