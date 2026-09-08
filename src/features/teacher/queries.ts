@@ -1,6 +1,8 @@
 import type { createClient } from "@/lib/supabase/server";
 import { getParentProgressSummary } from "@/features/parent/queries";
 
+import { buildTopicSources, type TopicSource } from "./topicSources";
+
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 /** One topic's pass state for a given student. */
@@ -132,3 +134,53 @@ export async function getTeacherGroups(
   );
 }
 
+
+/**
+ * Every topic across this teacher's groups that already carries vocabulary or
+ * grammar, so the topic page can offer "copy from an existing topic" as a third
+ * authoring mode next to AI generation and manual entry. `excludeTopicId` is
+ * the topic being edited — it is never offered as a source for itself.
+ */
+export async function getReusableTopicSources(
+  supabase: SupabaseServerClient,
+  teacherId: string,
+  excludeTopicId?: string
+): Promise<TopicSource[]> {
+  const { data: groups } = await supabase
+    .from("teacher_groups")
+    .select("id, name")
+    .eq("teacher_id", teacherId);
+
+  if (!groups || groups.length === 0) return [];
+
+  const { data: topics } = await supabase
+    .from("homework_topics")
+    .select("id, group_id, title, order_index")
+    .in(
+      "group_id",
+      groups.map((g) => g.id)
+    )
+    .order("order_index", { ascending: true });
+
+  const topicRows = topics ?? [];
+  if (topicRows.length === 0) return [];
+
+  const topicIds = topicRows.map((t) => t.id);
+  const [wordsRes, pointsRes] = await Promise.all([
+    supabase.from("homework_vocab_words").select("topic_id").in("topic_id", topicIds),
+    supabase.from("homework_grammar_points").select("topic_id").in("topic_id", topicIds),
+  ]);
+
+  return buildTopicSources({
+    topics: topicRows.map((t) => ({
+      id: t.id,
+      groupId: t.group_id,
+      title: t.title,
+      orderIndex: t.order_index,
+    })),
+    groupNames: new Map(groups.map((g) => [g.id, g.name])),
+    vocabWordTopicIds: (wordsRes.data ?? []).map((r) => r.topic_id),
+    grammarPointTopicIds: (pointsRes.data ?? []).map((r) => r.topic_id),
+    excludeTopicId,
+  });
+}

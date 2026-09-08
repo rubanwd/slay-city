@@ -14,6 +14,8 @@ import VocabularyCompletions, {
 } from "@/features/teacher/VocabularyCompletions";
 import VocabularyManager from "@/features/teacher/VocabularyManager";
 import type { GrammarDraftTask } from "@/features/homework/grammar";
+import { getReusableTopicSources } from "@/features/teacher/queries";
+import { sourcesForKind } from "@/features/teacher/topicSources";
 import { requireTeacherPage } from "@/features/teacher/guard";
 
 interface TopicTasksPageProps {
@@ -107,6 +109,10 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
 
   const members = membersRes.data ?? [];
 
+  // Topics from this teacher's other groups that already carry content — the
+  // "copy from an existing topic" source list on both managers.
+  const reuseSources = await getReusableTopicSources(supabase, teacherId, topicId);
+
   const messages = await getTopicMessages(supabase, topicId);
   const unreadCount = (await getUnreadCounts(supabase)).get(topicId) ?? 0;
 
@@ -154,6 +160,7 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
             topicDescription={topic.description}
             initialWords={vocabWords}
             initialTaskCount={vocabTasksRes.data?.length ?? 0}
+            reuseSources={sourcesForKind(reuseSources, "vocabulary")}
           />
           <VocabularyCompletions rows={vocabRows} />
         </CollapsibleSection>
@@ -168,6 +175,7 @@ export default async function TopicTasksPage({ params }: TopicTasksPageProps) {
             topicDescription={topic.description}
             initialPoints={grammarPoints}
             initialTasks={grammarTasks}
+            reuseSources={sourcesForKind(reuseSources, "grammar")}
           />
           <GrammarCompletions rows={grammarRows} />
         </CollapsibleSection>

@@ -14,7 +14,14 @@ import {
 } from "@/features/homework/grammar";
 
 import GrammarPointEditor, { type DraftGrammarPoint } from "./GrammarPointEditor";
-import { clearGrammar, generateGrammarDraft, publishGrammar } from "./grammarActions";
+import {
+  clearGrammar,
+  copyGrammarFromTopic,
+  generateGrammarDraft,
+  publishGrammar,
+} from "./grammarActions";
+import TopicContentImporter from "./TopicContentImporter";
+import type { TopicSource } from "./topicSources";
 
 export interface GrammarManagerInitialPoint {
   title: string;
@@ -29,6 +36,11 @@ export interface GrammarManagerProps {
   initialPoints: GrammarManagerInitialPoint[];
   /** The test tasks the published set currently has, for the preview + baseline. */
   initialTasks: GrammarDraftTask[];
+  /**
+   * Other topics of this teacher that already have grammar, offered as a
+   * ready-made source so the same topic isn't re-drafted for every group.
+   */
+  reuseSources: TopicSource[];
 }
 
 let keySeq = 0;
@@ -71,6 +83,7 @@ export default function GrammarManager({
   topicDescription,
   initialPoints,
   initialTasks,
+  reuseSources,
 }: GrammarManagerProps) {
   const toast = useAdminToast();
   const [points, setPoints] = useState<DraftGrammarPoint[]>(() => initialPoints.map(toDraft));
@@ -87,9 +100,10 @@ export default function GrammarManager({
 
   const [generating, startGenerate] = useTransition();
   const [regenerating, startRegenerate] = useTransition();
+  const [importing, startImport] = useTransition();
   const [publishing, startPublish] = useTransition();
 
-  const busy = generating || regenerating || publishing;
+  const busy = generating || regenerating || importing || publishing;
   const hasPublished = initialPoints.length > 0;
 
   const pointCountValue = clampGrammarPointCount(Number(pointCount));
@@ -127,6 +141,33 @@ export default function GrammarManager({
       setTasks(result.tasks);
       setTaskCount(String(result.tasks.length || defaultGrammarTaskCount(result.points.length)));
       toast.success(`Drafted ${result.points.length} grammar points and ${result.tasks.length} test tasks.`);
+    });
+  }
+
+  /**
+   * Loads another topic's published grammar set into this draft — points and
+   * their test, since a grammar test can't be rebuilt from the points alone.
+   */
+  function handleImport(sourceTopicId: string) {
+    startImport(async () => {
+      const result = await copyGrammarFromTopic({ topicId, sourceTopicId });
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      setPoints(
+        result.points.map((p) => ({
+          key: nextKey(),
+          title: p.title,
+          explanation: p.explanation,
+          example: p.example ?? "",
+        }))
+      );
+      setTasks(result.tasks);
+      setTaskCount(String(result.tasks.length || defaultGrammarTaskCount(result.points.length)));
+      toast.success(
+        `Copied ${result.points.length} grammar points and ${result.tasks.length} test tasks. Review and publish.`
+      );
     });
   }
 
@@ -242,6 +283,15 @@ export default function GrammarManager({
           {points.length > 0 ? "Regenerate Grammar with AI" : "Generate Grammar with AI"}
         </SlayButton>
       </div>
+
+      {/* Reuse — copy a topic already authored for another group. */}
+      <TopicContentImporter
+        sources={reuseSources}
+        kind="grammar"
+        disabled={busy}
+        loading={importing}
+        onImport={handleImport}
+      />
 
       {/* Point list */}
       {points.length > 0 && (
