@@ -1,11 +1,8 @@
-import NavLink from "@/components/ui/NavLink";
-
 import AdminAddTeacherForm from "@/features/admin/AdminAddTeacherForm";
 import AdminCreateModal from "@/features/admin/AdminCreateModal";
 import AdminHeader from "@/features/admin/AdminHeader";
-import { revokeTeacher } from "@/features/admin/actions";
+import TeacherListItem from "@/features/admin/TeacherListItem";
 import { requireAdminPage } from "@/features/admin/guard";
-import { enterViewAsTeacher } from "@/features/teacher/viewAsActions";
 
 /**
  * Manage teacher accounts: promote an existing account to Teacher, revoke it
@@ -49,42 +46,12 @@ export default async function ManageTeachersPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {rows.map((row) => (
-              <li
+              <TeacherListItem
                 key={row.id}
-                className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 py-4"
-              >
-                <NavLink href={`/admin/teachers/${row.id}`} className="block">
-                  <span className="block break-words text-body-strong text-white">
-                    {row.username}
-                  </span>
-                </NavLink>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-small text-white/50">
-                    {groupCounts.get(row.id) ?? 0}{" "}
-                    {(groupCounts.get(row.id) ?? 0) === 1 ? "group" : "groups"}
-                  </span>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <form action={enterViewAsTeacher}>
-                      <input type="hidden" name="teacher_id" value={row.id} />
-                      <button
-                        type="submit"
-                        className="rounded-full border border-cyan/50 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-cyan transition-colors hover:bg-cyan/10"
-                      >
-                        View as Teacher
-                      </button>
-                    </form>
-                    <form action={revokeTeacher}>
-                      <input type="hidden" name="profile_id" value={row.id} />
-                      <button
-                        type="submit"
-                        className="rounded-full border border-neon-pink/40 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-neon-pink transition-colors hover:bg-neon-pink/10"
-                      >
-                        Revoke
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </li>
+                id={row.id}
+                username={row.username}
+                groupCount={groupCounts.get(row.id) ?? 0}
+              />
             ))}
           </ul>
         )}
