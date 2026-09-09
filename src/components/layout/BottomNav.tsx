@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 
 import { activeNavIndex, navItemsForRole, type NavIconName, type NavRole } from "./navigation";
 
+/* The clearance a page needs below this bar lives in `bottomNavClearance.ts` —
+   a Server Component cannot read a constant across the `"use client"` boundary. */
+
 /* ── Tab icons — small, single-purpose SVGs; not worth a shared icon lib. ──── */
 
 function MapIcon() {
@@ -63,17 +66,6 @@ const NAV_ICONS: Record<NavIconName, () => React.ReactElement> = {
   profile: ProfileIcon,
   dashboard: DashboardIcon,
 };
-
-/**
- * Bottom padding a page's scrollable content needs so the fixed nav — tab row
- * (~79px) plus the watermark strip (38px) — never covers it. Also adds the
- * device's own safe-area inset, since the nav bar grows by that same amount
- * (see its `pb-[env(safe-area-inset-bottom)]` below) and a flat 150px alone
- * falls short on phones with a home indicator, clipping the last row of
- * content. Kept here so the screens that render the bar stay in sync when
- * its height changes.
- */
-export const BOTTOM_NAV_CLEARANCE = "pb-[calc(150px+env(safe-area-inset-bottom))]";
 
 const WATERMARK_TEXT = "Slay School";
 
