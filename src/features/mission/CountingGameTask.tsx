@@ -44,13 +44,13 @@ export default function CountingGameTask({
       </div>
 
       <div className="grid grid-cols-4 gap-3">
-        {shuffledOptions.map((option) => {
+        {shuffledOptions.map((option, index) => {
           const isThisSelected = selected === option;
           const revealCorrect = answered && option === count;
           const revealWrong = answered && isThisSelected && option !== count;
           return (
             <button
-              key={option}
+              key={index}
               onClick={() => !answered && setSelected(option)}
               disabled={answered}
               className={[

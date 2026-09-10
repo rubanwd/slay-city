@@ -204,7 +204,10 @@ export function parseMatchingContent(content: Json): MatchingContent | null {
     const word = asString(raw.word);
     const match = asString(raw.match);
     if (!word || !match) return;
-    pairs.push({ id: asString(raw.id) ?? String(index), word, match });
+    // The id is the component's identity for a pair, and matching is finished
+    // when every id is resolved — two pairs sharing an authored id would make
+    // that impossible. Always number them here instead of trusting the content.
+    pairs.push({ id: String(index), word, match });
   });
   if (pairs.length === 0) return null;
 
@@ -341,7 +344,9 @@ export function parseMemoryCardsContent(content: Json): MemoryCardsContent | nul
     const word = asString(raw.word);
     const match = asString(raw.match);
     if (!word || !match) return;
-    pairs.push({ id: asString(raw.id) ?? String(index), word, match });
+    // Unique by construction — see `parseMatchingContent`; a duplicate id would
+    // leave the last pair unmatchable and the task unfinishable.
+    pairs.push({ id: String(index), word, match });
   });
   if (pairs.length < 2) return null;
 
@@ -376,9 +381,15 @@ export interface WordSearchContent {
 
 export function parseWordSearchContent(content: Json): WordSearchContent | null {
   if (!isRecord(content)) return null;
-  const words = asStringArray(content.words)
-    .map((w) => w.replace(/\s+/g, "").toUpperCase())
-    .filter((w) => w.length >= 2);
+  // Deduplicated: the board hides one copy of each word and the puzzle is won
+  // when every listed word is found, so a repeat could never be crossed off.
+  const words = [
+    ...new Set(
+      asStringArray(content.words)
+        .map((w) => w.replace(/\s+/g, "").toUpperCase())
+        .filter((w) => w.length >= 2)
+    ),
+  ];
   if (words.length === 0) return null;
   const longest = words.reduce((max, w) => Math.max(max, w.length), 0);
   // Keep the board compact: at most one row/column of padding beyond the longest
@@ -403,10 +414,23 @@ export interface CrosswordContent {
   entries: CrosswordEntry[];
 }
 
+/**
+ * Widest grid a crossword may span. The board renders one element per cell of
+ * its bounding box, so an entry authored at row 900 would render hundreds of
+ * thousands of them and lock the browser up — an entry reaching past this is
+ * dropped rather than laid out.
+ */
+const MAX_CROSSWORD_SPAN = 16;
+
 export function parseCrosswordContent(content: Json): CrosswordContent | null {
   if (!isRecord(content)) return null;
   const rawEntries = content.entries;
   if (!Array.isArray(rawEntries)) return null;
+
+  // Letters already claimed by an accepted entry, so a crossing that disagrees
+  // with them can be dropped: the grid keeps one letter per cell, and the
+  // student would have no way to satisfy both clues at once.
+  const claimed = new Map<string, string>();
 
   const entries: CrosswordEntry[] = [];
   rawEntries.forEach((raw) => {
@@ -416,8 +440,23 @@ export function parseCrosswordContent(content: Json): CrosswordContent | null {
     const row = asNumber(raw.row);
     const col = asNumber(raw.col);
     const direction: CrosswordDirection = raw.direction === "down" ? "down" : "across";
-    if (!answer || !clue || row === null || col === null || row < 0 || col < 0) return;
-    entries.push({ answer, clue, row: Math.round(row), col: Math.round(col), direction });
+    if (!answer || answer.length < 2 || !clue) return;
+    if (row === null || col === null || row < 0 || col < 0) return;
+
+    const r0 = Math.round(row);
+    const c0 = Math.round(col);
+    const endRow = r0 + (direction === "down" ? answer.length - 1 : 0);
+    const endCol = c0 + (direction === "across" ? answer.length - 1 : 0);
+    if (endRow >= MAX_CROSSWORD_SPAN || endCol >= MAX_CROSSWORD_SPAN) return;
+
+    const cells = answer.split("").map((letter, k) => ({
+      key: `${r0 + (direction === "down" ? k : 0)},${c0 + (direction === "across" ? k : 0)}`,
+      letter,
+    }));
+    if (cells.some((cell) => (claimed.get(cell.key) ?? cell.letter) !== cell.letter)) return;
+
+    cells.forEach((cell) => claimed.set(cell.key, cell.letter));
+    entries.push({ answer, clue, row: r0, col: c0, direction });
   });
   if (entries.length === 0) return null;
 
@@ -503,9 +542,28 @@ export function parseFillBlankContent(content: Json): FillBlankContent | null {
   return {
     sentence,
     answer,
-    options: asStringArray(content.options).map((o) => o.trim()).filter(Boolean),
+    options: withAnswer(asStringArray(content.options).map((o) => o.trim()).filter(Boolean), answer),
     translation: asString(content.translation),
   };
+}
+
+/**
+ * Guarantees a multiple-choice list can actually be answered.
+ *
+ * The task offers buttons whenever two or more options are authored, and only
+ * the option matching `answer` finishes it — so options that omit the answer
+ * (an easy mistake for authored or AI-drafted content) leave the student
+ * tapping Check → Try Again forever with no way out. Slot the answer in
+ * instead; its position is derived from its own text so it isn't always last.
+ */
+function withAnswer(options: string[], answer: string): string[] {
+  if (options.length < 2) return options;
+  const same = (a: string, b: string) =>
+    a.trim().toLowerCase().replace(/\s+/g, " ") === b.trim().toLowerCase().replace(/\s+/g, " ");
+  if (options.some((option) => same(option, answer))) return options;
+
+  const at = answer.length % (options.length + 1);
+  return [...options.slice(0, at), answer, ...options.slice(at)];
 }
 
 export interface SpellingBeeContent {
@@ -567,7 +625,7 @@ export function parseFlashcardsContent(content: Json): FlashcardsContent | null 
     const back = asString(raw.back);
     if (!front || !back) return;
     cards.push({
-      id: asString(raw.id) ?? String(index),
+      id: String(index),
       front,
       back,
       imageUrl: asString(raw.imageUrl ?? raw.image_url),
@@ -598,7 +656,9 @@ export function parseStorySequencingContent(content: Json): StorySequencingConte
     const text = asString(raw.text);
     if (!text) return;
     steps.push({
-      id: asString(raw.id) ?? String(index),
+      // The authored order *is* the answer, and the step id identifies its slot
+      // in it — duplicate ids would accept a wrong order (or reject a right one).
+      id: String(index),
       text,
       imageUrl: asString(raw.imageUrl ?? raw.image_url),
     });
@@ -854,7 +914,9 @@ export function parseSpotTheDifferenceContent(content: Json): SpotTheDifferenceC
   if (!isRecord(content)) return null;
   const emoji = asString(content.emoji);
   const oddEmoji = asString(content.oddEmoji ?? content.odd_emoji);
-  if (!emoji || !oddEmoji) return null;
+  // Identical emoji would make the odd one out impossible to see: there is
+  // nothing to spot, so the task is treated as unusable rather than unfair.
+  if (!emoji || !oddEmoji || emoji === oddEmoji) return null;
 
   const rawGridSize = asNumber(content.gridSize ?? content.grid_size) ?? 9;
   const gridSize = Math.min(30, Math.max(4, Math.round(rawGridSize)));

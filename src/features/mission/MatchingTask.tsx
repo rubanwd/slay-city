@@ -55,8 +55,12 @@ export default function MatchingTask({
   const handleMatchClick = (pair: MatchingPair) => {
     if (resolved.has(pair.id) || selectedWordId === null) return;
 
-    if (pair.id === selectedWordId) {
-      setResolved((prev) => new Set(prev).add(pair.id));
+    // Accepted by what the tile shows, not by which pair authored it: two words
+    // can share a translation (or a picture), and rejecting the twin of the
+    // right answer would read as a wrong answer for a correct match.
+    const selectedMatch = words.find((p) => p.id === selectedWordId)?.match;
+    if (pair.id === selectedWordId || pair.match === selectedMatch) {
+      setResolved((prev) => new Set(prev).add(selectedWordId));
       setSelectedWordId(null);
     } else {
       // Brief incorrect feedback, then reset the flash.

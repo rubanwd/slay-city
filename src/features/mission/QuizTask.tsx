@@ -47,7 +47,7 @@ export default function QuizTask({
 
           return (
             <button
-              key={option}
+              key={index}
               onClick={() => !answered && setSelected(index)}
               disabled={answered}
               className={[
