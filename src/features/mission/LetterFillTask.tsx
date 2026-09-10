@@ -6,6 +6,7 @@ import { SlayButton } from "@/components/ui";
 
 import { shuffle } from "./taskUtils";
 import type { LetterFillContent } from "./types";
+import { blankIndicesFor } from "./wordPuzzle";
 
 export interface LetterFillTaskProps {
   content: LetterFillContent;
@@ -16,12 +17,6 @@ export interface LetterFillTaskProps {
 interface BankLetter {
   id: number;
   char: string;
-}
-
-/** Every other letter is blanked, always leaving the first letter visible. */
-function blankIndicesFor(word: string): number[] {
-  const indices = word.split("").map((_, i) => i).filter((i) => i % 2 === 1);
-  return indices.length > 0 ? indices : [word.length - 1];
 }
 
 /**
@@ -63,23 +58,30 @@ export default function LetterFillTask({
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-1.5">
-        {built.map((char, i) => (
-          <div
-            key={i}
-            className={[
-              "flex h-12 w-10 items-center justify-center rounded-lg border text-body-strong font-black",
-              char === null
-                ? "border-dashed border-white/30 bg-white/[0.03] text-white/30"
-                : solved
-                  ? isCorrect
-                    ? "border-lime-green bg-lime-green/15 text-lime-green"
-                    : "border-neon-pink bg-neon-pink/15 text-neon-pink"
-                  : "border-cyan/60 bg-cyan/10 text-white",
-            ].join(" ")}
-          >
-            {char ?? ""}
-          </div>
-        ))}
+        {built.map((char, i) => {
+          // A space in a multi-word answer is never blanked (see `blankIndicesFor`)
+          // — it is drawn as the gap between the words, not as an empty tile.
+          if (char !== null && char.trim() === "") {
+            return <span key={i} aria-hidden="true" className="w-4" />;
+          }
+          return (
+            <div
+              key={i}
+              className={[
+                "flex h-12 w-10 items-center justify-center rounded-lg border text-body-strong font-black",
+                char === null
+                  ? "border-dashed border-white/30 bg-white/[0.03] text-white/30"
+                  : solved
+                    ? isCorrect
+                      ? "border-lime-green bg-lime-green/15 text-lime-green"
+                      : "border-neon-pink bg-neon-pink/15 text-neon-pink"
+                    : "border-cyan/60 bg-cyan/10 text-white",
+              ].join(" ")}
+            >
+              {char ?? ""}
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-1.5">

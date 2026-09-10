@@ -45,7 +45,7 @@ export default function AnalogyTask({
           const revealWrong = answered && isThisSelected && index !== correctIndex;
           return (
             <button
-              key={option}
+              key={index}
               onClick={() => !answered && setSelected(index)}
               disabled={answered}
               className={[

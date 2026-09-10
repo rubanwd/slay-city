@@ -19,8 +19,12 @@ const STAGES = ["😀", "😯", "😟", "😧", "😨", "😰", "💀"];
 
 /**
  * Classic hangman. The student reveals the word by guessing letters; six wrong
- * guesses ends the round and resets it. Non-letter characters (spaces) are shown
- * for free so multi-word answers still read clearly.
+ * guesses ends the round and resets it.
+ *
+ * Only A–Z can be guessed from the keyboard, so everything else in the answer —
+ * spaces, punctuation, digits, accented or non-Latin letters — is shown for
+ * free: a character the student cannot type must never sit in the word as a
+ * blank they have no way to fill.
  */
 export default function HangmanTask({
   content,
@@ -33,7 +37,8 @@ export default function HangmanTask({
   const [wrong, setWrong] = useState(0);
 
   const letters = word.split("");
-  const requiredLetters = new Set(letters.filter((c) => /[A-Z]/.test(c)));
+  const guessable = (char: string) => /[A-Z]/.test(char);
+  const requiredLetters = new Set(letters.filter(guessable));
   const won = [...requiredLetters].every((c) => guessed.has(c));
   const lost = wrong >= MAX_WRONG;
   const finished = won || lost;
@@ -62,7 +67,19 @@ export default function HangmanTask({
       {/* Word display */}
       <div className="flex flex-wrap items-end justify-center gap-1.5">
         {letters.map((char, index) => {
-          if (!/[A-Z]/.test(char)) return <span key={index} className="w-3" />;
+          if (char.trim() === "") return <span key={index} className="w-3" />;
+          if (!guessable(char)) {
+            // Shown for free — an apostrophe, digit or accented letter the A–Z
+            // keyboard below can't produce.
+            return (
+              <span
+                key={index}
+                className="flex h-11 w-8 items-end justify-center border-b-2 border-white/40 pb-1 text-h3 font-black text-white"
+              >
+                {char}
+              </span>
+            );
+          }
           const revealed = guessed.has(char) || lost;
           return (
             <span
