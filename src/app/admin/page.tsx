@@ -1,7 +1,6 @@
 import NavLink from "@/components/ui/NavLink";
 
 import AdminHeader from "@/features/admin/AdminHeader";
-import AdminSnakePlayground from "@/features/admin/AdminSnakePlayground";
 import { requireAdminPage } from "@/features/admin/guard";
 import { listAdminUsers } from "@/features/admin/userQueries";
 import { getUnreadFeedbackCount } from "@/features/feedback/queries";
@@ -144,8 +143,6 @@ export default async function AdminPage() {
           ))}
         </nav>
       </div>
-
-      <AdminSnakePlayground />
     </main>
   );
 }
