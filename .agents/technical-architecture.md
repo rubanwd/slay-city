@@ -13,7 +13,7 @@ Storage: Supabase Storage
 Server logic: mostly Next.js Server Actions ("use server" files in src/features/*/actions.ts)
             calling Postgres SECURITY DEFINER RPC functions; a Supabase Edge
             Function is used only for update-streak (see backend.md)
-AI: OpenRouter — google/gemini-2.5-flash-image for admin/teacher art generation,
+AI: OpenRouter — google/gemini-2.5-flash-image (flex tier) for admin/teacher art generation,
     google/gemini-2.5-flash for teacher homework content drafting (grammar/vocabulary).
     Not OpenAI.
 Dev/UI tooling: Storybook (component catalogue under src/components/ui, src/features/*)

@@ -19,15 +19,6 @@ import { buildVocabularyPrompt, buildWordImagePrompt } from "./vocabularyPrompt"
 /** Public storage bucket for content imagery (mirrors uploadContentImage). */
 const CONTENT_BUCKET = "content";
 
-/**
- * Image model for vocabulary flashcards, on OpenRouter (existing
- * `OPENROUTER_API_KEY`, no extra provider/key). Gemini's flash image model is
- * the sweet spot here: cheaper and faster in practice than gpt-5-image-mini
- * (which billed higher and was slow), and it renders clean kid-friendly
- * illustrations. The `vocab_image_cache` makes repeated words cost nothing.
- */
-const VOCAB_IMAGE_MODEL = "google/gemini-2.5-flash-image";
-
 const MAX_TASK_COUNT = 20;
 
 /** A word as submitted for publishing — image already uploaded to storage by the client. */
@@ -163,10 +154,13 @@ async function uploadWordImage(
  * `vocab_image_cache` first (unless `forceRegenerate`): a cache hit reuses an
  * already-generated image for free, which is the whole cost optimisation —
  * common vocabulary words are only ever generated once. On a miss it generates
- * via FLUX, uploads to shared storage, and records the URL in the cache for
- * every future topic that uses the word. Returns a public storage URL (not a
- * data URL), so the client sets it straight onto the word with no publish-time
- * upload.
+ * with the shared image model and provider tier from `openRouterImage.ts`
+ * (Gemini's flash image model on the half-price flex tier — cheaper and faster
+ * in practice than gpt-5-image-mini, which billed higher and was slow, and it
+ * renders clean kid-friendly illustrations), uploads to shared storage, and
+ * records the URL in the cache for every future topic that uses the word.
+ * Returns a public storage URL (not a data URL), so the client sets it straight
+ * onto the word with no publish-time upload.
  */
 export async function generateWordImage(input: GenerateImageInput): Promise<GenerateImageResult> {
   const supabase = await createClient();
@@ -188,10 +182,7 @@ export async function generateWordImage(input: GenerateImageInput): Promise<Gene
     if (cached?.image_url) return { ok: true, imageUrl: cached.image_url };
   }
 
-  const result = await requestOpenRouterImage(
-    buildWordImagePrompt(word, input.imagePrompt),
-    VOCAB_IMAGE_MODEL
-  );
+  const result = await requestOpenRouterImage(buildWordImagePrompt(word, input.imagePrompt));
   if (!result.ok) return { ok: false, error: result.error };
 
   const upload = await uploadWordImage(supabase, result.dataUrl);
