@@ -1,51 +1,94 @@
-# AGENTS-mobile.md — SLAY CITY Mobile Operating Manual
+# AGENTS.md — SLAY CITY Native Operating Manual
 
-The React Native counterpart of the root `AGENTS.md`. Everything in the root manual
-still applies — product loop, brand palette, database rules, security rules, the
-four-role system. This document adds what is specific to `apps/mobile`, and
-overrides the root manual only where it says so explicitly.
+The operating manual for `slay-city-native`.
+
+Everything in the web repository's `AGENTS.md` still applies — the product loop, the
+brand palette, the database rules, the security rules, the four-role system. That
+document is the product's constitution and this repository does not get to amend it.
+This one adds what is specific to the native app, and overrides it only where it says
+so explicitly.
+
+**A copy of the web repository's `AGENTS.md` lives at `reference/web/AGENTS.md`.**
+Read it. It is the snapshot, so check upstream before relying on any detail that
+could have changed.
 
 ## Development commands
 
 ```bash
-npm install                      # root — installs all workspaces
-npm run lint -w apps/mobile
-npm run type-check -w apps/mobile
-npm run test -w apps/mobile
-npx expo start                   # from apps/mobile
+npm install
+npm run lint
+npm run type-check
+npm run test
+npx expo start
 npx expo run:ios | run:android   # dev build on a device
 eas build --profile preview      # cloud build, no Mac required
+
+# Shared-logic drift against the live web app — see docs/SYNC.md
+git clone --depth 1 https://github.com/rubanwd/slay-city /tmp/upstream
+node scripts/check-upstream-drift.mjs --upstream /tmp/upstream
 ```
 
 ## Layer rules — enforced by lint, not by convention
 
 | Package | May import | Must never import |
 | --- | --- | --- |
-| `@slay/core` | TypeScript stdlib only | React, React Native, Next.js, `@supabase/*` |
-| `@slay/data` | `@slay/core`, `@supabase/supabase-js` types | React, React Native, Next.js |
-| `@slay/tokens` | nothing | everything |
-| `apps/mobile` | all packages, Expo | `next/*`, anything from `apps/web` |
+| `packages/core` | TypeScript stdlib only | React, React Native, Next.js, `@supabase/*` |
+| `packages/data` | `core`, `@supabase/supabase-js` types | React, React Native, Next.js |
+| `packages/tokens` | nothing | everything |
+| `src/`, `app/` | all packages, Expo | `next/*`, `reference/web/` |
+| `reference/web/` | — | never imported from, never edited, never updated |
 
-**If a piece of logic could be needed by the web app, it goes in `@slay/core`.**
+**If a piece of logic could be needed by the web app, it goes in `packages/core`.**
 Reward maths, unlock rules, validation, puzzle generation, i18n, streak logic — all
 core, never a screen. A screen renders and dispatches. It does not decide.
 
 ## Structure
 
 ```
-apps/mobile/
+slay-city-native/
 ├── app/                  # Expo Router — routes only, thin
 │   ├── _layout.tsx       # session, fonts, audio, splash, route guard
-│   ├── (auth)/ (student)/ (teacher)/ (parent)/
+│   └── (auth)/ (student)/ (teacher)/ (parent)/
 ├── src/
 │   ├── components/ui/    # design-system primitives
 │   ├── components/layout/
-│   ├── features/         # mirrors apps/web/src/features, screens only
+│   ├── features/         # mirrors the web's feature folders, screens only
 │   ├── animations/       # one hook per web keyframe, same name
 │   ├── hooks/
 │   └── lib/              # supabase client, secure storage, audio adapter
+├── packages/core|data|tokens/
+├── reference/web/        # frozen snapshot; deleted at the end of M5
 └── assets/               # fonts, icons, splash, sounds
 ```
+
+### Working with `reference/web/`
+
+It is the original implementation, in the same checkout as the file you are writing.
+Read it constantly — the diff between `reference/web/src/features/mission/QuizTask.tsx`
+and `src/features/mission/QuizTask.tsx` is exactly what a reviewer needs to see.
+
+Three rules, all absolute: never import from it, never edit it, never update it. It
+is a snapshot of one commit, recorded in `reference/SNAPSHOT.md`. Before porting any
+screen, check whether it changed upstream since then.
+
+## Shared logic is a tracked copy, not a fork
+
+`packages/core` duplicates ~6 000 lines that also live in `rubanwd/slay-city`. The
+web repository is upstream and authoritative.
+
+**Never edit a tracked file here to fix a shared bug.** Fix it upstream, then sync.
+A local edit to a tracked file is how two copies stop being copies — and how the
+phone starts paying different XP than the browser for the same mission.
+
+The manifest, the drift check and the resolution rules are in `docs/SYNC.md`.
+
+## Migrations belong upstream
+
+This repository has no `supabase/` directory and never runs `supabase db push`.
+Both apps share one Supabase project, and `rubanwd/slay-city` owns its migration
+timeline.
+
+Need a new RPC or Edge Function? Open a pull request against the web repository.
 
 Route files stay thin: resolve params, call a hook, render a feature component.
 No data fetching and no business logic inside `app/`.
@@ -121,26 +164,27 @@ screen and the tab bar.
 
 ## Definition of done
 
-Root manual items 1–10 still apply, plus:
+The web repository's Definition of Done items 1–10 still apply, plus:
 
-1. `npm run lint`, `type-check` and `test` pass for `apps/mobile`.
+1. `npm run lint`, `type-check` and `test` pass.
 2. Verified on a **physical iOS device and a physical Android device** — not only a
    simulator. Simulators lie about performance, keyboards, safe areas and haptics.
 3. Tested at 390 pt and at least one other width.
 4. No new raw hex colours; brand tokens only.
-5. No business logic added to `apps/mobile` that the web would also need.
-6. No secrets in the diff; if the package touches an API key, the built binary was
+5. No business logic added to `src/` that the web would also need — it belongs in `packages/core`.
+6. No tracked file in `packages/core` edited locally; the drift check passes.
+7. No secrets in the diff; if the package touches an API key, the built binary was
    grepped for it.
-7. Screenshots attached to the PR for any visual change.
-8. New timers use `useAppStateAwareInterval`.
-9. Accessibility labels on new interactive elements.
+8. Screenshots attached to the PR for any visual change.
+9. New timers use `useAppStateAwareInterval`.
+10. Accessibility labels on new interactive elements.
 
 ## What not to change without permission
 
 Everything in the root manual's list, plus:
 
-- The layer rules above — they are what keeps one product from becoming two.
+- The layer rules above, and the sync contract — together they are what keeps one product from becoming two.
 - The frozen `TaskProps` contract.
-- The decision that `apps/mobile` holds no secrets.
+- The decision that this repository holds no secrets and no `supabase/` directory.
 - The choice of Expo managed workflow. Ejecting to bare React Native is a one-way
   door that gives up EAS Build's Mac-free iOS builds.

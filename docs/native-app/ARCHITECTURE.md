@@ -2,44 +2,48 @@
 
 ## 1. Repository shape
 
-The web app must keep shipping throughout the migration, so the two apps live side
-by side in one npm-workspaces monorepo and share everything that is not a screen.
+The web app is in production and is not restructured. The native app gets its own
+repository, seeded with a snapshot of the current code. The reasoning is in
+[CONCEPT.md](CONCEPT.md) §1; this document covers the consequences.
 
 ```
-slay-city/
-├── apps/
-│   ├── web/                  # today's Next.js app, moved verbatim
-│   └── mobile/               # new Expo app
+slay-city-native/
+├── app/                      # Expo Router — routes only, thin
+│   ├── _layout.tsx           # session, fonts, audio, splash, route guard
+│   └── (auth)/ (student)/ (teacher)/ (parent)/
+├── src/
+│   ├── components/ui/        # design-system primitives
+│   ├── components/layout/
+│   ├── features/             # screens, mirroring the web's feature folders
+│   ├── animations/           # one hook per web CSS keyframe
+│   ├── hooks/
+│   └── lib/                  # supabase client, secure storage, audio adapter
 ├── packages/
-│   ├── core/                 # pure logic, domain types, i18n — no React, no platform
-│   ├── data/                 # Supabase queries + RPC wrappers, client injected
-│   └── tokens/               # brand palette, type scale, shared Tailwind preset
-├── supabase/                 # unchanged: migrations + Edge Functions
-├── docs/mobile/              # this planning set
-└── package.json              # workspaces root
+│   ├── core/                 # pure logic — tracked copy of upstream
+│   ├── data/                 # Supabase queries + RPC wrappers
+│   └── tokens/               # brand palette and type scale
+├── reference/web/            # frozen snapshot; deleted at the end of M5
+├── scripts/check-upstream-drift.mjs
+├── docs/
+└── assets/
 ```
-
-### Why a monorepo and not a second repository
-
-The mission reward maths, the map unlock rules, the word-puzzle generators, the
-streak logic and the i18n dictionaries are the product. Duplicating them into a
-second repo guarantees the two apps drift, and drift in reward logic means students
-get different XP on phone and web for the same mission. One source of truth, two
-renderers.
 
 ### Layer rules
 
 | Layer | May import | Must never import |
 | --- | --- | --- |
-| `packages/core` | nothing but TypeScript stdlib | React, React Native, Next.js, `@supabase/*` |
+| `packages/core` | nothing but the TypeScript stdlib | React, React Native, Next.js, `@supabase/*` |
 | `packages/data` | `core`, `@supabase/supabase-js` types | React, React Native, Next.js |
 | `packages/tokens` | nothing | everything |
-| `apps/web` | all packages, Next.js | `apps/mobile` |
-| `apps/mobile` | all packages, Expo | `apps/web`, `next/*` |
+| `src/`, `app/` | all packages, Expo | `reference/web/`, `next/*` |
+| `reference/web/` | — | it is never imported from, and never edited |
+
+Enforced by ESLint `no-restricted-imports`, not by convention. These rules are what
+keeps one product from quietly becoming two.
 
 `packages/data` never constructs a Supabase client. Every function takes one as its
-first argument, so the web passes its cookie-bound server client and the mobile app
-passes its SecureStore-bound client, with identical behaviour underneath.
+first argument, so the same code path can be driven by a SecureStore-bound client
+here and a cookie-bound one on the web:
 
 ```ts
 // packages/data/src/mission.ts
@@ -49,6 +53,27 @@ export async function completeMission(
   rewardFraction = 1,
 ): Promise<MissionCompletionResult> { /* … */ }
 ```
+
+### The shared-logic copy
+
+`packages/core` holds ~6 000 lines that the web app also has. It is a **tracked
+copy**, not a dependency: every file records its upstream path and content hash, and
+CI fails when upstream changes a tracked file.
+
+This is the cost of not restructuring a live product. The full contract — what is
+tracked, how drift is resolved, and the signals that say the arrangement has stopped
+paying for itself — is in [SYNC.md](SYNC.md). Read it before M0.
+
+### Supabase ownership
+
+One Supabase project serves both apps. `rubanwd/slay-city` owns `supabase/` and is
+the only repository that applies migrations; its CI already does so on every merge to
+`main`.
+
+This repository contains **no `supabase/` directory**. New RPCs and Edge Functions
+are opened as pull requests against the web repository. Two repositories writing to
+one migration timeline produce conflicting version numbers and a schema history
+nobody can reconstruct.
 
 ## 2. Mobile stack
 
@@ -127,9 +152,9 @@ become thin callers of the same functions, so there is one implementation, not t
 
 ### Category D — not ported
 
-`src/features/admin/**` (all of it, including `generateTaskImage.ts`,
+`src/features/admin/**` in the web app (all of it, including `generateTaskImage.ts`,
 `missionImageActions.ts`, `uploadContentImage.ts`, `ImageCropField.tsx` and its
-`react-easy-crop` dependency) stays in `apps/web` untouched.
+`react-easy-crop` dependency) stays in the web repository, untouched.
 
 ## 4. Authentication
 
@@ -195,7 +220,7 @@ Nunito ships as a bundled font asset loaded with `expo-font`, rather than fetche
 `src/styles/globals.css` defines `glow-pulse`, `logo-shimmer-sweep`, `loader-bob`,
 `loader-shadow`, `loader-dot`, `label-float`, `watermark-breathe` and
 `banner-drop`. Each becomes a Reanimated hook in
-`apps/mobile/src/animations/`, keeping the same name so the two platforms stay
+`src/animations/`, keeping the same name so the two platforms stay
 reviewable against each other.
 
 ## 6. Mission task types — the good news
@@ -213,7 +238,7 @@ A full interaction audit of all 32 `*Task.tsx` files found:
 
 This turns the mission port from bespoke gesture engineering into mostly mechanical
 JSX translation, and is the main reason the estimate in
-[03-roadmap.md](03-roadmap.md) is what it is.
+[03-roadmap.md](ROADMAP.md) is what it is.
 
 ## 7. Open decisions
 

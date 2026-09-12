@@ -51,25 +51,67 @@ rate 4+, and keep analytics — a smaller discovery loss than the compliance bur
 Google's Families requirements apply either way and must be answered honestly.
 `WP-7.5`.
 
-## R4 — The M0 workspace conversion breaks the live web app 🟠 high
+## R4 — Shared logic drifts between the two repositories 🟠 high, permanent
 
-`WP-0.1` touches every import path in a production application that students use
-today. A broken Vercel deploy here is a live outage, not a failing test.
+`packages/core` is a copy of ~6 000 lines that also live in `rubanwd/slay-city`.
+Fix a bug in `missionReward.ts` on the web, forget to copy it here, and the phone
+pays different XP for the same mission than the browser does. A child completes a
+mission, opens the web app, and the numbers disagree.
 
-**Mitigation:** one focused PR, nothing else in it. Verify on a Vercel preview before
-merging — map, a full mission, the teacher console and the admin console. Keep the
-previous deployment one click from rollback. Do not stack M1 work on the branch.
+This is the cost of not restructuring the live product, and it is permanent rather
+than one-off.
+
+**Mitigation:** [SYNC.md](SYNC.md). The web repository is upstream and authoritative;
+every tracked file records its upstream path and content hash; CI fails on drift,
+nightly and on every pull request. `WP-0.5` implements it and proves it with a test
+that deliberately introduces drift.
+
+**Watch the exit signals** in SYNC.md §5 — more than one drift resolution a week
+sustained for a month, more than ten adapted files, or any drift bug reaching a user.
+Any of them means publishing `packages/core` as a private npm package, which is a
+week of work and forecloses nothing.
+
+> Under a monorepo plan this slot held a different risk: a refactor of every import
+> path in the live product, taken up front. That risk is now **gone** — the web app
+> is not touched. The trade is a one-time outage risk for a permanent maintenance
+> cost, and it is the right trade while the app is in production and the port is
+> speculative.
+
+## R4b — Two repositories write migrations to one database 🔴 critical if mishandled
+
+Both apps share one Supabase project. If both repositories can apply migrations,
+version numbers collide and the schema history becomes unreconstructable.
+
+**Mitigation:** `rubanwd/slay-city` owns `supabase/` and is the only repository that
+applies migrations — [CONCEPT.md](CONCEPT.md) §4. This repository contains no
+`supabase/` directory at all, which makes the rule structural rather than a matter of
+discipline. New RPCs (`WP-2.3`) and Edge Functions (`WP-5.6`) are pull requests
+against the web repository.
+
+## R4c — The snapshot rots 🟢 low, but corrosive
+
+`reference/web/` is a frozen copy of the web app. The web app keeps shipping. Within
+weeks the snapshot is stale, and an agent porting a screen from it faithfully
+reproduces behaviour that no longer exists.
+
+**Mitigation:** the snapshot commit is recorded in `reference/SNAPSHOT.md` and the
+folder is never updated — a snapshot that drifts silently is worse than no snapshot.
+Before porting any screen, check whether it changed upstream since that commit. The
+folder is deleted at the end of M5, and nothing in the repository is allowed to
+import from it.
 
 ## R5 — Two front ends, forever 🟡 medium, permanent
 
 After launch, every student-facing feature is built twice. Shared logic is written
-once; the screens are not. Expect roughly **1.6× the effort** for new student-facing
-work, and no change at all for admin-only work.
+once and synced; the screens are not. Expect roughly **1.8× the effort** for new
+student-facing work — higher than the 1.6× a monorepo would cost, because the sync
+step is manual rather than structural. Admin-only work costs exactly what it costs
+now.
 
-**Mitigation:** this is the price of native, not a defect. Keep the layer rules in
-[01-architecture.md](01-architecture.md) §1 enforced by lint, so logic cannot leak
-into a screen and get duplicated. The more that lives in `packages/core`, the closer
-the multiplier gets to 1.
+**Mitigation:** this is the price of native plus the price of two repositories, not a
+defect. Keep the layer rules in [ARCHITECTURE.md](ARCHITECTURE.md) §1 enforced by
+lint, so logic cannot leak into a screen and get duplicated. The more that lives in
+`packages/core`, the closer the multiplier gets to 1.
 
 ## R6 — Store review latency 🟡 medium
 
@@ -107,9 +149,10 @@ pocket, and desyncs game state.
 A mobile binary is not a secret store. `OPENROUTER_API_KEY` shipped in an `.ipa` or
 `.aab` is extractable in minutes and bills to your account.
 
-**Mitigation:** the key never enters `apps/mobile`. AI generation goes through Edge
+**Mitigation:** the key never enters this repository. AI generation goes through Edge
 Functions (`OD-1`). `WP-5.6` includes an explicit acceptance check: grep the built
-binary for the key and for `openrouter.ai`.
+binary for the key and for `openrouter.ai`. The Edge Functions themselves land in the
+web repository, which owns `supabase/`.
 
 ## R10 — Text input on native 🟢 low, but noticeable
 

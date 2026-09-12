@@ -5,8 +5,8 @@ Where every part of the current codebase ends up. Four destinations:
 | Symbol | Destination | Meaning |
 | --- | --- | --- |
 | 🟢 | `packages/core` or `packages/data` | Moves as-is or near as-is. Shared by both apps. |
-| 🔵 | `apps/mobile` | Rewritten as React Native. Logic preserved, JSX replaced. |
-| ⚪ | `apps/web` only | Stays put. Not ported. |
+| 🔵 |  this repository | Rewritten as React Native. Logic preserved, JSX replaced. |
+| ⚪ | web repository only | Stays in `rubanwd/slay-city`. Not ported. |
 | 🔴 | Rewritten differently | The mechanism changes, not just the syntax. |
 
 ---
@@ -124,7 +124,7 @@ exist on a phone. **Audit RLS, then wrap.** See `WP-2.3`.
 `BottomNav.tsx` becomes an Expo Router `Tabs` layout per role group, using
 `navLabels.ts` from core for its labels.
 
-## 4. Shared components → `apps/mobile/src/components` 🔵
+## 4. Shared components → `src/components` 🔵
 
 | Component | Notes |
 | --- | --- |
@@ -146,9 +146,9 @@ exist on a phone. **Audit RLS, then wrap.** See `WP-2.3`.
 | `InstallPrompt.tsx`, `ServiceWorkerRegistration.tsx`, `renderInstallTemplate.tsx` | ⚪ deleted — PWA-only |
 | `MediaGuard.tsx` + `lib/mediaGuard.ts` | keep logic in core, re-front for `expo-image` |
 | `wardrobe/WardrobeGrid.tsx` | `FlatList` |
-| `*.stories.tsx` (9 files) | ⚪ Storybook stays web-only |
+| `*.stories.tsx` (9 files) | ⚪ Storybook stays in the web repository |
 
-## 5. Feature screens → `apps/mobile/src/features` 🔵
+## 5. Feature screens → `src/features` 🔵
 
 | Feature | Files | Notes |
 | --- | --- | --- |
@@ -175,7 +175,7 @@ exist on a phone. **Audit RLS, then wrap.** See `WP-2.3`.
 | `lib/audioContext.ts` (Web Audio) | `expo-audio` player behind an `AudioPlayer` interface in core |
 | `lib/sfx.ts` | split: sequencing → core, playback → platform adapter |
 | `lib/hiss.ts` | sequencing already pure → core; playback via adapter |
-| `lib/supabase/client.ts`, `server.ts` | `apps/mobile/src/lib/supabase.ts` with SecureStore adapter |
+| `lib/supabase/client.ts`, `server.ts` | `src/lib/supabase.ts` with SecureStore adapter |
 | `localStorage` / `sessionStorage` (2 files) | `expo-secure-store` for credentials, `AsyncStorage` for preferences |
 | `slay_locale` cookie | SecureStore |
 | `VIEW_AS_TEACHER_COOKIE` | React context, session-scoped |
@@ -213,11 +213,30 @@ keyboard handler is dropped.
 
 ## 8. Infrastructure
 
+Split by repository, because the web app is not restructured.
+
+### `slay-city-native` (new)
+
+| Concern | Setup |
+| --- | --- |
+| CI | lint, type-check, test, **upstream drift check**; EAS build on tag |
+| Tests | Vitest with a React Native preset, or `jest-expo` |
+| Builds | EAS Build + EAS Submit; EAS Update for OTA |
+| Excluded from all of the above | `reference/web/` |
+| Not present at all | `supabase/`, `.storybook/`, Vercel config |
+
+### `rubanwd/slay-city` (live — changes are pull requests, reviewed as such)
+
 | Concern | Change |
 | --- | --- |
-| `.github/workflows/ci.yml` | matrix over workspaces; add mobile type-check, lint, test, EAS build on tag |
-| Vercel | root directory → `apps/web` |
-| `vitest.config.ts` | project per workspace; mobile uses `jest-expo` or Vitest + RN preset |
-| `.storybook/` | stays in `apps/web` |
-| Supabase | unchanged schema; +3 Edge Functions; redirect allow-list gains `slaycity://` |
+| `supabase/migrations/` | new `SECURITY DEFINER` RPCs from `WP-2.3` |
+| `supabase/functions/` | `draft-vocabulary`, `draft-grammar`, `generate-image` |
+| Server Actions | become thin callers of those Edge Functions |
 | Secrets | `OPENROUTER_API_KEY` moves Vercel → Supabase Secrets |
+| Everything else | **unchanged** — same structure, same CI, same deploys |
+
+### Supabase (shared)
+
+Schema unchanged. Redirect allow-list gains `slaycity://auth/callback`
+**alongside** the existing web URLs — adding, never replacing. Removing a web URL
+breaks password reset in production silently.

@@ -1,5 +1,5 @@
 {
-  "project": "SLAY CITY — Expo / React Native migration",
+  "project": "SLAY CITY Native — separate-repository Expo / React Native build",
   "scope": {
     "in": [
       "student",
@@ -12,8 +12,9 @@
     ]
   },
   "totals": {
-    "engineering_days": 55.5,
-    "calendar_weeks": "12-14"
+    "engineering_days": 54.5,
+    "calendar_weeks": "12-14",
+    "work_packages": 54
   },
   "open_decisions": [
     {
@@ -79,9 +80,9 @@
   "phases": [
     {
       "id": "M0",
-      "name": "Foundations",
-      "days": 5,
-      "exit": "Web still green on Vercel; packages extracted"
+      "name": "Foundations — new repo, snapshot, shared packages",
+      "days": 4,
+      "exit": "Drift check green, Expo app builds, zero commits to the web repo"
     },
     {
       "id": "M1",
@@ -136,8 +137,8 @@
     {
       "id": "WP-0.1",
       "phase": "M0",
-      "title": "Workspace skeleton, git mv to apps/web",
-      "estimate_days": 2,
+      "title": "Repository bootstrap, Expo scaffold, frozen reference/web snapshot",
+      "estimate_days": 0.5,
       "depends_on": [],
       "owner": "agent",
       "parallelisable": false
@@ -145,7 +146,7 @@
     {
       "id": "WP-0.2",
       "phase": "M0",
-      "title": "packages/core — extract pure logic",
+      "title": "packages/core — copy pure logic, write .upstream.json manifest",
       "estimate_days": 1,
       "depends_on": [
         "WP-0.1"
@@ -156,7 +157,7 @@
     {
       "id": "WP-0.3",
       "phase": "M0",
-      "title": "packages/data — extract queries, inject client",
+      "title": "packages/data — queries and RPC wrappers, client injected",
       "estimate_days": 1,
       "depends_on": [
         "WP-0.2"
@@ -178,10 +179,10 @@
     {
       "id": "WP-0.5",
       "phase": "M0",
-      "title": "CI matrix and Vercel root directory",
-      "estimate_days": 0.5,
+      "title": "Drift contract — check-upstream-drift.mjs, CI job, nightly",
+      "estimate_days": 1,
       "depends_on": [
-        "WP-0.1"
+        "WP-0.2"
       ],
       "owner": "agent",
       "parallelisable": false
@@ -281,7 +282,8 @@
       "estimate_days": 1.5,
       "depends_on": [],
       "owner": "agent+review",
-      "parallelisable": false
+      "parallelisable": false,
+      "lands_in": "rubanwd/slay-city"
     },
     {
       "id": "WP-2.4",
@@ -536,7 +538,8 @@
         "WP-5.4"
       ],
       "owner": "agent",
-      "parallelisable": false
+      "parallelisable": false,
+      "lands_in": "rubanwd/slay-city"
     },
     {
       "id": "WP-5.7",
@@ -724,6 +727,33 @@
       ],
       "owner": "human+agent",
       "parallelisable": false
+    }
+  ],
+  "repositories": {
+    "upstream": {
+      "name": "rubanwd/slay-city",
+      "role": "live web app; owns supabase/ and the migration timeline; unchanged by this project except for the cross-repo PRs below"
+    },
+    "native": {
+      "name": "rubanwd/slay-city-native",
+      "role": "new Expo app; no supabase/ directory; packages/core is a tracked copy of upstream logic"
+    }
+  },
+  "cross_repo_work": [
+    {
+      "id": "WP-2.3",
+      "lands_in": "rubanwd/slay-city",
+      "what": "SECURITY DEFINER RPCs for teacher writes"
+    },
+    {
+      "id": "WP-5.6",
+      "lands_in": "rubanwd/slay-city",
+      "what": "draft-vocabulary and draft-grammar Edge Functions"
+    },
+    {
+      "id": "WP-2.4",
+      "lands_in": "Supabase dashboard",
+      "what": "redirect allow-list gains slaycity:// alongside the web URLs"
     }
   ]
 }

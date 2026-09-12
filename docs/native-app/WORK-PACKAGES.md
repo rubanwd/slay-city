@@ -20,71 +20,86 @@ its dependencies, and acceptance criteria written as checks that either pass or 
 
 # M0 — Foundations
 
-### WP-0.1 · Workspace skeleton
-`2d` · deps: none · **highest blast radius in the project**
+### WP-0.1 · Repository bootstrap and snapshot
+`0.5d` · deps: none
 
-Convert to npm workspaces. `git mv` the existing app to `apps/web/` preserving
-history. Root `package.json` declares `apps/*` and `packages/*`. Update
-`tsconfig.json` paths, `eslint.config.mjs`, `vitest.config.ts`, `.prettierrc`,
-`tailwind.config.ts`, `next.config.ts`, `.storybook/`, and the `scripts/` entry
-points.
+Create `slay-city-native`. Expo + TypeScript + Expo Router + NativeWind v4, CI
+skeleton, and `reference/web/` — a frozen copy of `rubanwd/slay-city` at the commit
+the port starts from.
 
-- `AC1` `npm install` at the root resolves all workspaces.
-- `AC2` `npm run lint|type-check|test|build` pass from the root.
-- `AC3` `git log --follow` still shows history for a sample moved file.
-- `AC4` Vercel project root directory is `apps/web`; a preview deploy renders the map, a mission and the teacher console.
-- `AC5` `supabase/` is untouched.
+- `AC1` `reference/web/` is excluded from `tsconfig.json`, ESLint, the test run and
+  the Metro bundler. Nothing in `src/` or `packages/` imports from it.
+- `AC2` The snapshot commit SHA is recorded in `reference/SNAPSHOT.md`, with the date
+  and the note that it is never updated.
+- `AC3` `npx expo start` runs and the blank app opens on a physical device.
+- `AC4` **`rubanwd/slay-city` has zero commits from this package.**
+- `AC5` `.gitignore` covers `.expo/`, `node_modules/`, EAS build artefacts and
+  `upstream/` (the drift-check checkout).
 
 ### WP-0.2 · `packages/core`
 `1d` · deps: WP-0.1
 
-Move every module in [migration map §1](02-migration-map.md) with its tests.
+Copy every module listed in [MIGRATION-MAP.md](MIGRATION-MAP.md) §1, with its tests,
+from `reference/web/`. Write `packages/core/.upstream.json` per [SYNC.md](SYNC.md) §3.
 
-- `AC1` No file under `packages/core` imports `react`, `react-dom`, `react-native`, `next/*` or `@supabase/*`. Enforced by an ESLint `no-restricted-imports` rule, not by inspection.
-- `AC2` All moved tests pass unchanged.
-- `AC3` `apps/web` imports these from `@slay/core`; no duplicate copy remains under `apps/web/src`.
-- `AC4` Coverage on `packages/core` is no lower than before the move.
+- `AC1` No file under `packages/core` imports `react`, `react-dom`, `react-native`,
+  `next/*` or `@supabase/*`. Enforced by an ESLint `no-restricted-imports` rule, not
+  by inspection.
+- `AC2` All copied tests pass unchanged.
+- `AC3` Every file has a manifest entry with its upstream path and content hash.
+- `AC4` Files that could not be copied verbatim are marked `adapted: true` with a
+  note saying what changed and why. **Target: at most two.**
+- `AC5` Test coverage on `packages/core` is no lower than the web app's on the same
+  modules.
 
 ### WP-0.3 · `packages/data`
 `1d` · deps: WP-0.2
 
-Move the `queries.ts` files and the Category A action bodies. Every exported
-function takes `db: SupabaseClient<Database>` first.
+Port the `queries.ts` files and the Category A action bodies. Every exported function
+takes `db: SupabaseClient<Database>` first.
 
 - `AC1` No module constructs a Supabase client.
 - `AC2` No `"use server"`, no `next/cache`, no `next/headers` anywhere in the package.
-- `AC3` Each of the 18 Category A RPCs has exactly one wrapper, named as in the current action.
-- `AC4` The web's action files are thin callers; their exported signatures and return types are unchanged.
-- `AC5` Manual check: complete a mission on the web preview, confirm XP and coins are granted exactly once.
+- `AC3` Each of the 18 Category A RPCs has exactly one wrapper, named as in the web
+  app's action so the two remain greppable against each other.
+- `AC4` Not tracked in the sync manifest — signatures differ by design. Recorded as
+  such in [SYNC.md](SYNC.md) §6.
 
 ### WP-0.4 · `packages/tokens`
 `0.5d` · deps: WP-0.1
 
-- `AC1` The six locked brand colours are declared once, as TypeScript constants.
-- `AC2` `apps/web/tailwind.config.ts` consumes the shared preset; the rendered CSS variables are unchanged.
-- `AC3` The full `--fs-*`, `--lh-*`, `--ls-*` scale from `typography.css` is represented numerically.
+- `AC1` The six locked brand colours are declared once as TypeScript constants, with
+  values matching `src/styles/theme.css` exactly.
+- `AC2` The full `--fs-*`, `--lh-*`, `--ls-*` scale from `typography.css` is
+  represented numerically.
+- `AC3` A NativeWind preset consumes them; a brand-token class renders the correct
+  colour on both platforms.
 
-### WP-0.5 · CI and deployment
-`0.5d` · deps: WP-0.1
+### WP-0.5 · Drift contract
+`1d` · deps: WP-0.2
 
-- `AC1` `.github/workflows/ci.yml` runs lint, type-check, test and build per workspace.
-- `AC2` The `migrate` job still applies pending migrations on merge to `main`, unchanged.
-- `AC3` CI is green on the branch.
-
----
+- `AC1` `scripts/check-upstream-drift.mjs` exits 0 in sync, 1 on drift, 2 on a
+  manifest or path error.
+- `AC2` Its drift output names every affected file, its upstream path, and whether it
+  is adapted.
+- `AC3` A CI job checks out `rubanwd/slay-city` and runs it on every pull request and
+  nightly.
+- `AC4` Proven by test: change a file in an upstream checkout, confirm CI fails and
+  names it.
+- `AC5` [SYNC.md](SYNC.md) is committed and linked from the repository README.
 
 # M1 — Mobile shell
 
 ### WP-1.1 · Expo scaffold
 `1d` · deps: WP-0.4
 
-Expo + TypeScript + Expo Router + NativeWind v4 in `apps/mobile`, with path aliases
+Expo + TypeScript + Expo Router + NativeWind v4 in this repository, with path aliases
 to `@slay/core`, `@slay/data`, `@slay/tokens`.
 
 - `AC1` `npx expo start` runs; the app opens in Expo Go on a physical iOS and a physical Android device.
 - `AC2` A NativeWind class using a brand token renders the correct colour on both platforms.
 - `AC3` Importing from `@slay/core` inside a screen type-checks and runs.
-- `AC4` Metro resolves the workspace packages without symlink errors.
+- `AC4` Metro resolves `packages/*` without symlink errors, and does not walk `reference/web/`.
 
 ### WP-1.2 · Typography
 `0.5d` · deps: WP-1.1
@@ -115,7 +130,7 @@ to `@slay/core`, `@slay/data`, `@slay/tokens`.
 Route groups `(auth)`, `(student)`, `(teacher)`, `(parent)` with placeholders and
 per-role tab layouts.
 
-- `AC1` Every route in [migration map §3](02-migration-map.md) marked 🔵 has a file.
+- `AC1` Every route in [migration map §3](MIGRATION-MAP.md) marked 🔵 has a file.
 - `AC2` Tab labels come from `navLabels.ts` in core.
 - `AC3` Android hardware back behaves correctly at every level.
 
@@ -141,7 +156,7 @@ per-role tab layouts.
 - `AC1` Login, register, forgot-password and reset-password all work against the live project. `AC2` Error copy matches the web's. `AC3` Keyboard never covers the active field. `AC4` Password fields use secure entry and no autocorrect.
 
 ### WP-2.3 · Teacher/parent RLS audit 🔴
-`1.5d` · deps: none — **start in M0, gates all of M5**
+`1.5d` · deps: none — **start in M0, gates all of M5** · **lands as a PR against `rubanwd/slay-city`**
 
 For each of the 32 direct table writes in migration map §2 Category B, determine
 whether RLS alone authorises it. Where it does not, add a `SECURITY DEFINER` RPC
@@ -151,7 +166,7 @@ that re-checks the caller's role in SQL.
 - `AC2` Every `NEEDS RPC` has a migration adding the function, with `search_path` pinned.
 - `AC3` A negative test proves a `student`-role JWT cannot perform each teacher-only write — via `as_level`-style direct API calls, not through the UI.
 - `AC4` A teacher cannot write to a group they do not own.
-- `AC5` The web's behaviour is unchanged; its actions now call the new RPCs.
+- `AC5` The web's behaviour is unchanged; its actions now call the new RPCs. This is a pull request against the live product and is reviewed as one.
 - `AC6` No RLS policy was weakened or disabled anywhere in the diff.
 
 > If this package finds an existing hole in the *web* app, stop and report it before
@@ -238,7 +253,7 @@ that re-checks the caller's role in SQL.
 | `WP-5.3` | `VocabularyManager` | 2d | The 632-LOC component's full feature set, including per-word images from Storage; images optional, per the existing behaviour; long lists virtualised |
 | `WP-5.4` | `GrammarManager` | 1d | Full feature set of the 383-LOC component |
 | `WP-5.5` | Q&A messaging | 1d | `get_topic_messages`; unread counts correct; a teacher cannot post as another teacher (negative test) |
-| `WP-5.6` | AI drafting | 1d | Calls `draft-vocabulary` / `draft-grammar` Edge Functions; **no OpenRouter key in the bundle** — verified by grepping the built binary; failures degrade to manual authoring. *Skipped under OD-1(b).* |
+| `WP-5.6` | AI drafting | 1d | Edge Functions land upstream in `rubanwd/slay-city`; this repo only calls them.  **no OpenRouter key in the bundle** — verified by grepping the built binary; failures degrade to manual authoring. *Skipped under OD-1(b).* |
 | `WP-5.7` | View-as-student | 0.5d | Works without cookies; clearly indicated on screen; cannot be entered by a non-teacher; exiting restores the teacher view |
 | `WP-5.8` | `ParentDashboard` | 1.5d | Progress, streaks, study time and homework summary match the web for the same student; readable at 390 pt without horizontal scrolling |
 | `WP-5.9` | Parent profile & linking | 1d | `link_student_by_email` works; a parent sees only linked students; the parent console is fully translated, per `AGENTS.md` |
@@ -279,4 +294,4 @@ that re-checks the caller's role in SQL.
 `WP-8.4` staged rollout · `WP-8.5` OTA and crash-monitoring workflow.
 
 Expect at least one rejection. Budget for it rather than being surprised by it —
-see [05-risks-and-compliance.md](05-risks-and-compliance.md).
+see [05-risks-and-compliance.md](RISKS.md).
