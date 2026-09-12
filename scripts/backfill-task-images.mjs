@@ -30,6 +30,10 @@
  *   --delay MS         Pause between generations (default 600).
  *   --force            Ignore the cache and regenerate every slot.
  *   --model NAME       Override the OpenRouter image model.
+ *   --provider SLUG    Override the OpenRouter provider endpoint ("" = default
+ *                      routing). Defaults to Google AI Studio's flex tier, which
+ *                      serves the same model at half price on a best-effort
+ *                      queue — the right trade for an unattended bulk run.
  */
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
@@ -62,6 +66,7 @@ const ONLY = flagValue("--only", "")
   .map((s) => s.trim())
   .filter(Boolean);
 const MODEL = flagValue("--model", "google/gemini-2.5-flash-image");
+const PROVIDER = flagValue("--provider", "google-ai-studio/flex").trim();
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const REQUEST_TIMEOUT_MS = 90_000;
 
@@ -125,7 +130,12 @@ async function requestOpenRouterImage(prompt) {
       "Content-Type": "application/json",
       "X-Title": "SLAY CITY",
     },
-    body: JSON.stringify({ model: MODEL, modalities: ["image", "text"], messages: [{ role: "user", content: prompt }] }),
+    body: JSON.stringify({
+      model: MODEL,
+      modalities: ["image", "text"],
+      messages: [{ role: "user", content: prompt }],
+      ...(PROVIDER ? { provider: { order: [PROVIDER], allow_fallbacks: true } } : {}),
+    }),
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   const body = await res.json().catch(() => ({}));
@@ -256,6 +266,7 @@ async function main() {
     `SLAY CITY — task image backfill${DRY_RUN ? " (DRY RUN)" : ""}\n` +
       `  types:  ${types.join(", ")}\n` +
       `  model:  ${MODEL}\n` +
+      `  tier:   ${PROVIDER || "default routing"}\n` +
       `  cache:  task_image_cache (reuse ${FORCE ? "OFF (--force)" : "ON"})\n`
   );
 

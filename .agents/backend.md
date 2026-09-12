@@ -95,7 +95,7 @@ updateStreak                     — Supabase Edge Function
 
 # Next.js Server Actions calling OpenRouter (not Postgres RPCs)
 generateLocationIcon / generateMapBackground / generateTaskImage — image generation
-  (google/gemini-2.5-flash-image), requireAdmin-gated
+  (google/gemini-2.5-flash-image, flex tier), requireAdmin-gated
 Teacher grammar/vocabulary drafting (grammarPrompt.ts / vocabularyPrompt.ts, via
   openRouterChat.ts) — text/JSON generation (google/gemini-2.5-flash), requireTeacher-gated
 ```

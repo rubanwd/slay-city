@@ -62,7 +62,8 @@ API rules:
 * All API responses must be typed.
 * All important actions must be validated server-side.
 * The client must not directly modify XP, coins, streaks, or unlocked locations.
-* OpenRouter API calls (image generation via `google/gemini-2.5-flash-image`, and text
+* OpenRouter API calls (image generation via `google/gemini-2.5-flash-image` on the
+  half-price `google-ai-studio/flex` tier, and text
   drafting via `google/gemini-2.5-flash` for teacher homework content) must happen only
   inside Next.js Server Actions, never in the browser.
 * Admin APIs must be role-protected (`requireAdmin`); teacher APIs via `requireTeacher`
